@@ -16,6 +16,7 @@ import wglPanZoom from './wglPanZoom';
 
 import createScreenProgram from './programs/screenProgram';
 import createDrawParticlesProgram from './programs/drawParticlesProgram';
+import createDrawParticlesProgram_WAS from './programs/drawParticlesProgram_WAS';
 import createCursorUpdater from './utils/cursorUpdater';
 import createVectorFieldEditorState from './editor/vectorFieldState';
 import createInputsModel from './createInputsModel';
@@ -116,8 +117,10 @@ export default function initScene(gl) {
   // screen rendering;
   var screenProgram = createScreenProgram(ctx);
   var drawProgram = createDrawParticlesProgram(ctx);
+  var drawProgram_WAS = createDrawParticlesProgram_WAS(ctx);
   var cursorUpdater = createCursorUpdater(ctx);
   var vectorFieldEditorState = createVectorFieldEditorState(drawProgram);
+  var vectorFieldEditorState_WAS = createVectorFieldEditorState(drawProgram_WAS);
 
   // particles
   updateParticlesCount(particleCount);
@@ -149,6 +152,7 @@ export default function initScene(gl) {
     getColorMode,
 
     vectorFieldEditorState,
+    vectorFieldEditorState_WAS,
 
     inputsModel,
 
@@ -216,6 +220,7 @@ export default function initScene(gl) {
     appState.setColorMode(mode);
     ctx.colorMode = appState.getColorMode();
     drawProgram.updateColorMode(mode);
+    drawProgram_WAS.updateColorMode(mode);
   }
 
   function getColorMode() {
@@ -313,6 +318,7 @@ export default function initScene(gl) {
       window.removeEventListener('resize', onResize, true);
       cursorUpdater.dispose();
       vectorFieldEditorState.dispose();
+      vectorFieldEditorState_WAS.dispose();
   }
 
   function nextFrame() {
@@ -341,14 +347,18 @@ export default function initScene(gl) {
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
     drawProgram.drawParticles();
+    drawProgram_WAS.drawParticles();
     screenProgram.renderCurrentScreen();
     drawProgram.updateParticlesPositions();
+    drawProgram_WAS.updateParticlesPositions();
+    // console.log("hello")
   }
 
   function updateParticlesCount(numParticles) {
     // we create a square texture where each pixel will hold a particle position encoded as RGBA
     ctx.particleStateResolution = Math.ceil(Math.sqrt(numParticles));
     drawProgram.updateParticlesCount();
+    drawProgram_WAS.updateParticlesCount();
   }
 
   function initPanzoom() {

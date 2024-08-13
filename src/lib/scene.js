@@ -346,7 +346,7 @@ export default function initScene(gl) {
 
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
-    drawProgram.drawParticles();
+    // drawProgram.drawParticles();
     drawProgram_WAS.drawParticles();
     screenProgram.renderCurrentScreen();
     drawProgram.updateParticlesPositions();

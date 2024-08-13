@@ -39,12 +39,13 @@ void main() {
   getFragmentShader() {
     var nodes = [
       this.readStoredPosition,
-      this.dropParticles,
+      // this.dropParticles,
       this.udfVelocity,
       this.integratePositions, {
         getMainBody() {
           return `
-  vec2 newPos = pos + velocity;
+  // vec2 newPos = pos + velocity;
+  vec2 newPos = pos;
   `
         }
       },

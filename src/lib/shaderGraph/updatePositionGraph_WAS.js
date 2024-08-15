@@ -46,6 +46,7 @@ void main() {
           return `
   // vec2 newPos = pos + velocity;
   vec2 newPos = pos;
+  // vec2 newPos = v_tex_pos; // WORKS!
   `
         }
       },

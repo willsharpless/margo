@@ -40,10 +40,7 @@ ${decodeFloatRGBA}
 ${methods.join('\n')}
 
 void main() {
-
-  // float dx = ctx.bbox.maxX - ctx.bbox.minX;
   vec2 du = (u_max - u_min);
-
   vec2 txPos = vec2(
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
         abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y);
@@ -53,7 +50,7 @@ ${main.join('\n')}
 
   // vec2 du = (u_max - u_min);
   v_particle_pos = (v_particle_pos - u_min)/du;
-  
+
   float circ_val = abs((txPos.x * txPos.x) + (txPos.y * txPos.y) - 0.1);
   if (circ_val > 0.1) { gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.); } else {}
 }`

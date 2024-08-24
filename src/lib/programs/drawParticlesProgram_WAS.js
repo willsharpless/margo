@@ -114,9 +114,17 @@ export default function drawParticlesProgram_WAS(ctx) {
     var bbox = ctx.bbox;
     gl.uniform2f(program.u_min, bbox.minX, bbox.minY);
     gl.uniform2f(program.u_max, bbox.maxX, bbox.maxY);
+
+    var bc = ctx.bc;
+    gl.uniform1f(program.bc_cx, bc.cx)
+    gl.uniform1f(program.bc_cy, bc.cy)
+    gl.uniform1f(program.bc_qx, bc.qx)
+    gl.uniform1f(program.bc_qy, bc.qy)
+    gl.uniform1f(program.bc_shape, bc.shape) // TODO: Make string
   
     var cursor = ctx.cursor;
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
     gl.drawArrays(gl.POINTS, 0, numParticles); 
+    // TODO: draw triangles between the points (shade)
   }
 }

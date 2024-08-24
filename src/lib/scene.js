@@ -49,6 +49,9 @@ export default function initScene(gl) {
     y: 0
   };
 
+  // Boundary Condition, i.e. Target
+  var bc = appState.getBC() || {};
+
   // How many particles do we want?
   var particleCount = appState.getParticleCount();
 
@@ -61,6 +64,7 @@ export default function initScene(gl) {
   var ctx = {
     gl,
     bbox,
+    bc,
     canvasRect,
 
     inputs: null,
@@ -164,6 +168,11 @@ export default function initScene(gl) {
     getBoundingBox() {
       // again, we trust. Maybe to much?
       return ctx.bbox;
+    },
+
+    getBoundaryConditionBox() {
+      // not sure if needed, but making to have
+      return ctx.bc;
     }
   }
 
@@ -346,7 +355,7 @@ export default function initScene(gl) {
 
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
-    // drawProgram.drawParticles();
+    drawProgram.drawParticles();
     drawProgram_WAS.drawParticles();
     screenProgram.renderCurrentScreen();
     drawProgram.updateParticlesPositions();

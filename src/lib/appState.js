@@ -27,11 +27,13 @@ var defaultVectorField = wrapVectorField(`v.x = 0.1 * p.y;
 var pendingSave;
 var defaults = {
   timeStep: 0.01,
-  dropProbability: 0.009,
-  particleCount: 10000,
-  fadeout: .998,
+  dropProbability: 0.0003,
+  particleCount: 500000,
+  fadeout: .999,
   colorMode: ColorModes.UNIFORM
 }
+// TODO: slowly populate the particles into the screen (instead of all at once)
+// idea: random percentage (if state) based on frame var in vertex shader
 
 let settingsPanel = {
   // collapsed: isSmallScreen(),
@@ -43,6 +45,9 @@ export default {
   saveBBox,
   getBBox,
   makeBBox,
+
+  getBC, // TODO: make/save fns for editor
+
   getQS() { return qs; },
   saveCode,
   getCode,
@@ -134,6 +139,22 @@ function setDropProbability(dropProbability) {
   if (!defined(dropProbability)) return;
   clamp(dropProbability, 0, 1);
   qs.set({dp: dropProbability})
+}
+
+function getBC() {
+  // return {
+  //   minX: -1.,
+  //   maxX: 1.,
+  //   minY: -1.,
+  //   maxY: 1.,
+  // };
+  return {
+    cx: 0.,
+    cy: 0.,
+    qx: 1.,
+    qy: 1.,
+    shape: 0.,
+  };
 }
 
 function getBBox() {

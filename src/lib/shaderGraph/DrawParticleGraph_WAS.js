@@ -32,6 +32,12 @@ uniform float u_particles_res;
 uniform vec2 u_min;
 uniform vec2 u_max;
 
+uniform float bc_cx;
+uniform float bc_cy;
+uniform float bc_qx;
+uniform float bc_qy;
+uniform float bc_shape;
+
 ${decodePositions.getVariables() || ''}
 ${colorParts.getVariables()}
 
@@ -41,18 +47,32 @@ ${methods.join('\n')}
 
 void main() {
   vec2 du = (u_max - u_min);
-  vec2 txPos = vec2(
+  vec2 X = vec2( // SAME AS txPos
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
         abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y);
-  gl_PointSize = 1.0;
+  gl_PointSize = 3.0;
 
 ${main.join('\n')}
 
   // vec2 du = (u_max - u_min);
   v_particle_pos = (v_particle_pos - u_min)/du;
 
-  float circ_val = abs((txPos.x * txPos.x) + (txPos.y * txPos.y) - 0.1);
-  if (circ_val > 0.1) { gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.); } else {}
+  // float circ_val = (X.x * X.x) + (X.y * X.y) - 1.;
+  // float bc_val = max
+
+  // TODO: make bc_shape string
+  float bc_val;
+  if (bc_shape != 0.) { // circle
+    bc_val = 0.5 * ((X.x - bc_cx)*(X.x - bc_cx)/bc_qx + (X.y - bc_cy)*(X.y - bc_cy)/bc_qy - 1.);
+  } else { // square
+    bc_val = 0.5 * (max(abs(X.x - bc_cx)/bc_qx, abs(X.y - bc_cy)/bc_qy) - 1.);
+  }
+
+  if (abs(bc_val) > 0.01) { 
+    // nothing
+  } else {
+    gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
+  }
 }`
   }
 }
@@ -85,10 +105,10 @@ uniform sampler2D u_particles_y;
   function getMain() {
     return `
   // vec2 v_particle_pos = vec2(
-  //   decodeFloatRGBA(texture2D(u_particles_x, txPos)),
-  //   decodeFloatRGBA(texture2D(u_particles_y, txPos))
+  //   decodeFloatRGBA(texture2D(u_particles_x, X)),
+  //   decodeFloatRGBA(texture2D(u_particles_y, X))
   // );
-  vec2 v_particle_pos = txPos;
+  vec2 v_particle_pos = X;
 `
   }
 }

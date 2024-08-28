@@ -29,7 +29,8 @@ export default function drawParticlesProgram_WAS(ctx) {
     updateParticlesPositions,
     drawParticles,
     updateCode,
-    updateColorMode
+    updateColorMode,
+    convertCursor2bcParams
   }
 
   function initPrograms() {
@@ -97,6 +98,34 @@ export default function drawParticlesProgram_WAS(ctx) {
     updatePositionProgram.updateParticlesCount(particleStateX, particleStateY);
   }
 
+  function convertCursor2bcParams() {
+    var cursor = ctx.cursor;
+
+    // Corner Drawing Method
+    // var w = Math.abs(cursor.clickX - cursor.hoverX);
+    // var h = Math.abs(cursor.clickY - cursor.hoverY); 
+
+    // ctx.bc.cx = Math.min(cursor.clickX, cursor.hoverX) + 0.5 * w;
+    // ctx.bc.cy = Math.min(cursor.clickY, cursor.hoverY) + 0.5 * h;
+
+    // Radial Drawing Method
+    ctx.bc.cx = cursor.clickX
+    ctx.bc.cy = cursor.clickY
+
+    var w = 2 * Math.abs(ctx.bc.cx - cursor.hoverX);
+    var h = 2 * Math.abs(ctx.bc.cy - cursor.hoverY);
+
+    if (ctx.bc.shape == 1) { // square
+      ctx.bc.qx = 0.5 * w;
+      ctx.bc.qy = 0.5 * h;
+    } else if (ctx.bc.shape == 2) { // circle
+      ctx.bc.qx = 2 * Math.pow(0.5 * w, 2);
+      ctx.bc.qy = 2 * Math.pow(0.5 * h, 2); // 2x for better UX
+    } else {
+      console.log(ctx.bc.shape, " not possible yet!")
+    }
+  }
+
   function drawParticles() {
     if (!currentVectorField) return;
 
@@ -120,7 +149,7 @@ export default function drawParticlesProgram_WAS(ctx) {
     gl.uniform1f(program.bc_cy, bc.cy)
     gl.uniform1f(program.bc_qx, bc.qx)
     gl.uniform1f(program.bc_qy, bc.qy)
-    gl.uniform1f(program.bc_shape, bc.shape) // TODO: Make string
+    gl.uniform1i(program.bc_shape, bc.shape) // TODO: Make string
   
     var cursor = ctx.cursor;
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);

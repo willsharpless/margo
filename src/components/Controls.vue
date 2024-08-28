@@ -34,14 +34,24 @@ export default {
   data() {
     return {
         paused: false,
+        bcDrawing: false,
+        field: false,
         settingsPanel: appState.settingsPanel
     }
   },
 
   methods: {
     onKeyDown(e) {
-      if (e.which === 32 && e.target === document.body) { // SPACEBAR
+      if (e.which === 32 && e.target === document.body) { // SPACEBAR for pause
         this.togglePaused();
+        e.preventDefault();
+      }
+      if (e.which === 87) { // w for bc drawing
+        this.toggleBCDrawing();
+        e.preventDefault();
+      }
+      if (e.which === 70) { // f for field
+        this.toggleField();
         e.preventDefault();
       }
     },
@@ -51,6 +61,14 @@ export default {
     togglePaused() {
       this.paused = !this.paused;
       window.scene.setPaused(this.paused);
+    },
+    toggleBCDrawing() {
+      this.bcDrawing = !this.bcDrawing;
+      window.scene.setBCDrawingMode(this.bcDrawing);
+    },
+    toggleField() {
+      this.field = !this.field;
+      window.scene.setFieldMode(this.field);
     },
     toggleSettings() {
       this.settingsPanel.collapsed = !this.settingsPanel.collapsed;

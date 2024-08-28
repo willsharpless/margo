@@ -153,7 +153,7 @@ function getBC() {
     cy: 0.,
     qx: 1.,
     qy: 1.,
-    shape: 0.,
+    shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
   };
 }
 

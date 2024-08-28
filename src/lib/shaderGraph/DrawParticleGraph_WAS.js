@@ -36,7 +36,7 @@ uniform float bc_cx;
 uniform float bc_cy;
 uniform float bc_qx;
 uniform float bc_qy;
-uniform float bc_shape;
+uniform int bc_shape;
 
 ${decodePositions.getVariables() || ''}
 ${colorParts.getVariables()}
@@ -50,7 +50,7 @@ void main() {
   vec2 X = vec2( // SAME AS txPos
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
         abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y);
-  gl_PointSize = 3.0;
+  gl_PointSize = 2.0;
 
 ${main.join('\n')}
 
@@ -62,13 +62,15 @@ ${main.join('\n')}
 
   // TODO: make bc_shape string
   float bc_val;
-  if (bc_shape != 0.) { // circle
-    bc_val = 0.5 * ((X.x - bc_cx)*(X.x - bc_cx)/bc_qx + (X.y - bc_cy)*(X.y - bc_cy)/bc_qy - 1.);
-  } else { // square
+  if (bc_shape == 1) { // square
     bc_val = 0.5 * (max(abs(X.x - bc_cx)/bc_qx, abs(X.y - bc_cy)/bc_qy) - 1.);
+  } else if (bc_shape == 2) { // circle
+    bc_val = 0.5 * ((X.x - bc_cx)*(X.x - bc_cx)/bc_qx + (X.y - bc_cy)*(X.y - bc_cy)/bc_qy - 1.);
+  } else {
+    // not implemented yet
   }
 
-  if (abs(bc_val) > 0.01) { 
+  if ((abs(bc_val) > 0.01 && bc_shape == 1) || (abs(bc_val) > 0.015 && bc_shape == 2)) { 
     // nothing
   } else {
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);

@@ -51,6 +51,9 @@ export default function initScene(gl) {
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
+  var bc_drawing_mode = false;
+
+  var field_mode = false;
 
   // How many particles do we want?
   var particleCount = appState.getParticleCount();
@@ -65,6 +68,8 @@ export default function initScene(gl) {
     gl,
     bbox,
     bc,
+    bc_drawing_mode,
+    field_mode,
     canvasRect,
 
     inputs: null,
@@ -139,6 +144,8 @@ export default function initScene(gl) {
     applyBoundingBox,
 
     setPaused,
+    setBCDrawingMode,
+    setFieldMode,
 
     getParticlesCount,
     setParticlesCount,
@@ -254,6 +261,16 @@ export default function initScene(gl) {
     nextFrame();
   }
 
+  function setBCDrawingMode(shouldBCDrawingMode) {
+    ctx.bc_drawing_mode = shouldBCDrawingMode;
+    // nextFrame(); // do I need this?
+  }
+
+  function setFieldMode(shouldFieldMode) {
+    ctx.field_mode = shouldFieldMode;
+    // nextFrame(); // do I need this?
+  }
+
   // Main screen fade out configuration
   function setFadeOutSpeed(x) {
     var f = parseFloat(x);
@@ -298,11 +315,13 @@ export default function initScene(gl) {
   }
 
   function onResize() {
-    setWidthHeight(window.innerWidth, window.innerHeight);
+    if (!ctx.bc_drawing_mode) {
+      setWidthHeight(window.innerWidth, window.innerHeight);
 
-    screenProgram.updateScreenTextures();
+      screenProgram.updateScreenTextures();
 
-    updateBoundingBox(currentPanZoomTransform);
+      updateBoundingBox(currentPanZoomTransform);
+    }
   }
 
   function setWidthHeight(w, h) {
@@ -355,12 +374,35 @@ export default function initScene(gl) {
 
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
-    drawProgram.drawParticles();
-    drawProgram_WAS.drawParticles();
+    // TODO WAS: make seperate fade out speed for bc texture (value texture ok)
+
+    if (ctx.field_mode) {
+      drawProgram.drawParticles();
+    }
+
+    if (ctx.bc_drawing_mode) {
+      drawProgram_WAS.convertCursor2bcParams();
+      drawProgram_WAS.drawParticles();
+    }
+    // else {
+    //   drawProgram.drawParticles();
+    // }
+
     screenProgram.renderCurrentScreen();
-    drawProgram.updateParticlesPositions();
-    drawProgram_WAS.updateParticlesPositions();
-    // console.log("hello")
+
+    if (ctx.field_mode) {
+      drawProgram.updateParticlesPositions();
+    }
+    if (ctx.bc_drawing_mode) {
+      drawProgram_WAS.updateParticlesPositions(); // actual bc texture will not need this
+    }
+    // else {
+    //   drawProgram.updateParticlesPositions();
+    // }
+
+    // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles?
+    // TODO WAS: if ctx.bc_drawing_mode done, start value evolution (and reverse particle flow?)
+    // note, particle slowing and reversing could be done by decaying or making negative the field!
   }
 
   function updateParticlesCount(numParticles) {

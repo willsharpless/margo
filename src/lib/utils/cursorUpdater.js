@@ -13,7 +13,8 @@ export default function createCursorUpdater(ctx) {
   window.addEventListener('mousemove', onMouseMove, true);
   window.addEventListener('mousedown', onMouseClick, true);
   window.addEventListener('touchstart', onTouchStart, true);
-  window.addEventListener('touchmove', onTouchMove, true);
+  window.addEventListener('mousedown', onMouseClick, true);
+  // window.addEventListener('keydown', onKeyDown, true);
 
   return {
     dispose
@@ -24,6 +25,7 @@ export default function createCursorUpdater(ctx) {
     window.removeEventListener('mousedown', onMouseClick, true);
     window.removeEventListener('touchstart', onTouchStart, true);
     window.removeEventListener('touchmove', onTouchMove, true);
+    // window.removeEventListener('keydown', onKeyDown, true);
   }
 
   function onTouchStart(e) {
@@ -43,6 +45,18 @@ export default function createCursorUpdater(ctx) {
   function onMouseMove(e) { setHover(e.clientX, e.clientY); }
 
   function onMouseClick(e) { setClick(e.clientX, e.clientY); }
+
+  // function onKeyDown(e) {
+  //   // if (e.which === 30 && e.target === document.body) { // FIXME: check target is correct
+  //   if (e.shiftKey) {
+  //     ctx.bc_drawing_mode = true;
+  //     // console.log("shift key pressed")
+
+  //     // TODO: convert ctx.cursor.clickX/Y and ctx.cursor.hoverX/Y into bc.params;
+
+  //     // e.preventDefault(); // do I need this here?
+  //   }
+  // }
 
   function setHover(clientX, clientY) {
     ctx.cursor.hoverX = getSceneXFromClientX(clientX);

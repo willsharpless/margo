@@ -52,6 +52,7 @@ export default function initScene(gl) {
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
+  var drawing_click_sum = 0;
 
   var field_mode = false;
 
@@ -67,10 +68,12 @@ export default function initScene(gl) {
   var ctx = {
     gl,
     bbox,
-    bc,
-    bc_drawing_mode,
     field_mode,
     canvasRect,
+
+    bc,
+    bc_drawing_mode,
+    drawing_click_sum,
 
     inputs: null,
 
@@ -262,6 +265,8 @@ export default function initScene(gl) {
   }
 
   function setBCDrawingMode(shouldBCDrawingMode) {
+    ctx.cursor.clickX = 0.;
+    ctx.cursor.clickY = 0.;
     ctx.bc_drawing_mode = shouldBCDrawingMode;
     // nextFrame(); // do I need this?
   }
@@ -380,8 +385,10 @@ export default function initScene(gl) {
       drawProgram.drawParticles();
     }
 
-    if (ctx.bc_drawing_mode) {
-      drawProgram_WAS.convertCursor2bcParams();
+    if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
+      if (ctx.drawing_click_sum % 3 == 1) {
+        drawProgram_WAS.convertCursor2bcParams();
+      }
       drawProgram_WAS.drawParticles();
     }
     // else {
@@ -393,7 +400,7 @@ export default function initScene(gl) {
     if (ctx.field_mode) {
       drawProgram.updateParticlesPositions();
     }
-    if (ctx.bc_drawing_mode) {
+    if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
       drawProgram_WAS.updateParticlesPositions(); // actual bc texture will not need this
     }
     // else {

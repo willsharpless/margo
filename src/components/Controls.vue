@@ -54,6 +54,28 @@ export default {
         this.toggleField();
         e.preventDefault();
       }
+      if (e.which === 13) { // Enter for BC Drawing Transfer
+        this.toggleField();
+        e.preventDefault();
+      }
+
+      // TODO: Make toggles for all these
+      if (e.which === 49) { // 1 for square drawing
+        this.toggleField();
+        e.preventDefault();
+      }
+      if (e.which === 50) { // 2 for circle drawing
+        this.toggleField();
+        e.preventDefault();
+      }
+      if (e.which === 82) { // r for reach/min drawing
+        this.toggleField();
+        e.preventDefault();
+      }
+      if (e.which === 65) { // a for avoid/max drawing
+        this.toggleField();
+        e.preventDefault();
+      }
     },
     generateNewFunction() {
       window.scene.vectorFieldEditorState.setCode(wrapVectorField(generateFunction()));

@@ -13,7 +13,7 @@ export default function createCursorUpdater(ctx) {
   window.addEventListener('mousemove', onMouseMove, true);
   window.addEventListener('mousedown', onMouseClick, true);
   window.addEventListener('touchstart', onTouchStart, true);
-  window.addEventListener('mousedown', onMouseClick, true);
+  // window.addEventListener('click', onMouseClick2, true); // FIXME WAS, would like to drag screen around without obejct dissapearing
   // window.addEventListener('keydown', onKeyDown, true);
 
   return {
@@ -25,6 +25,7 @@ export default function createCursorUpdater(ctx) {
     window.removeEventListener('mousedown', onMouseClick, true);
     window.removeEventListener('touchstart', onTouchStart, true);
     window.removeEventListener('touchmove', onTouchMove, true);
+    // window.removeEventListener('click', onMouseClick2, true); // FIXME WAS
     // window.removeEventListener('keydown', onKeyDown, true);
   }
 
@@ -46,17 +47,7 @@ export default function createCursorUpdater(ctx) {
 
   function onMouseClick(e) { setClick(e.clientX, e.clientY); }
 
-  // function onKeyDown(e) {
-  //   // if (e.which === 30 && e.target === document.body) { // FIXME: check target is correct
-  //   if (e.shiftKey) {
-  //     ctx.bc_drawing_mode = true;
-  //     // console.log("shift key pressed")
-
-  //     // TODO: convert ctx.cursor.clickX/Y and ctx.cursor.hoverX/Y into bc.params;
-
-  //     // e.preventDefault(); // do I need this here?
-  //   }
-  // }
+  function onMouseClick2(e) { setClick2(e.clientX, e.clientY); }
 
   function setHover(clientX, clientY) {
     ctx.cursor.hoverX = getSceneXFromClientX(clientX);
@@ -64,7 +55,14 @@ export default function createCursorUpdater(ctx) {
   }
 
   function setClick(clientX, clientY) {
-    ctx.drawing_click_sum += 1;
+    if (ctx.bc_drawing_mode) {
+      ctx.drawing_click_sum += 1;
+    }
+    ctx.cursor.clickX = getSceneXFromClientX(clientX);
+    ctx.cursor.clickY = getSceneYFromClientY(clientY);
+  }
+
+  function setClick2(clientX, clientY) { // FIXME WAS, would like to drag screen around without obejct dissapearing
     ctx.cursor.clickX = getSceneXFromClientX(clientX);
     ctx.cursor.clickY = getSceneYFromClientY(clientY);
   }

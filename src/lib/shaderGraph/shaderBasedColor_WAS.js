@@ -2,9 +2,10 @@ import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 import ColorModes from '../programs/colorModes';
 
-export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode) {
+export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode, color) {
   var udf = new UserDefinedVelocityFunction(vfCode);
   var integrate = new RungeKuttaIntegrator();
+  const [r, g, b, a] = color;
 
   return {
     getVariables,
@@ -41,7 +42,8 @@ ${getColorFunctionBody()}
     if (colorMode === ColorModes.UNIFORM) {
       return `
 vec4 get_color(vec2 p) {
-  return vec4(0.949, 0.768, 0.306, 1.);
+  return vec4(${r}, ${g}, ${b}, ${a});
+  // return vec4(0.949, 0.768, 0.306, 1.);
 }
 `
     }

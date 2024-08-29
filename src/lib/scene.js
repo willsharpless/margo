@@ -52,6 +52,9 @@ export default function initScene(gl) {
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
+  // var bc_color = [0.949, 0.768, 0.306, 1.0];
+  var bc_color = [1., 1., 1., 1.];
+  var thresh = 0.01; // TODO: make all these editable params^^
   var drawing_click_sum = 0;
 
   var field_mode = false;
@@ -74,6 +77,7 @@ export default function initScene(gl) {
     bc,
     bc_drawing_mode,
     drawing_click_sum,
+    thresh,
 
     inputs: null,
 
@@ -129,7 +133,7 @@ export default function initScene(gl) {
   // screen rendering;
   var screenProgram = createScreenProgram(ctx);
   var drawProgram = createDrawParticlesProgram(ctx);
-  var drawProgram_WAS = createDrawParticlesProgram_WAS(ctx);
+  var drawProgram_WAS = createDrawParticlesProgram_WAS(ctx, 1, bc_color);
   var cursorUpdater = createCursorUpdater(ctx);
   var vectorFieldEditorState = createVectorFieldEditorState(drawProgram);
   var vectorFieldEditorState_WAS = createVectorFieldEditorState(drawProgram_WAS);

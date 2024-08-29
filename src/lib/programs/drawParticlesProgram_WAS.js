@@ -10,8 +10,10 @@ import createAudioProgram from './audioProgram';
  * and initiates drawing them on screen.
  * 
  * @param {Object} ctx rendering context. Holds WebGL state
+ * @param {Int} texture_type gives the type: 1 = bc texture (no tex enc/dec), 2 = value texture
+ * @param {Float32Array} color gives the color fo the texture
  */
-export default function drawParticlesProgram_WAS(ctx) {
+export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
   var gl = ctx.gl;
 
   var particleStateResolution, particleIndexBuffer;
@@ -47,7 +49,7 @@ export default function drawParticlesProgram_WAS(ctx) {
     if (drawProgram) drawProgram.unload();
 
     const drawGraph = new DrawParticleGraph_WAS(ctx);
-    const vertexShaderCode = drawGraph.getVertexShader(currentVectorField);
+    const vertexShaderCode = drawGraph.getVertexShader(currentVectorField, color);
     drawProgram = util.createProgram(gl, vertexShaderCode, drawGraph.getFragmentShader());
   }
 
@@ -76,7 +78,7 @@ export default function drawParticlesProgram_WAS(ctx) {
   }
 
   function updateParticlesCount() {
-    particleStateResolution = ctx.particleStateResolution;
+    particleStateResolution = ctx.particleStateResolution; // TODO: make second res for bc/vals
     numParticles = particleStateResolution * particleStateResolution;
     var particleIndices = new Float32Array(numParticles);
     var particleStateX = new Uint8Array(numParticles * 4);
@@ -102,18 +104,16 @@ export default function drawParticlesProgram_WAS(ctx) {
     var cursor = ctx.cursor;
 
     // Corner Drawing Method
-    // var w = Math.abs(cursor.clickX - cursor.hoverX);
-    // var h = Math.abs(cursor.clickY - cursor.hoverY); 
-
-    // ctx.bc.cx = Math.min(cursor.clickX, cursor.hoverX) + 0.5 * w;
-    // ctx.bc.cy = Math.min(cursor.clickY, cursor.hoverY) + 0.5 * h;
+    var w = Math.abs(cursor.clickX - cursor.hoverX);
+    var h = Math.abs(cursor.clickY - cursor.hoverY); 
+    ctx.bc.cx = Math.min(cursor.clickX, cursor.hoverX) + 0.5 * w;
+    ctx.bc.cy = Math.min(cursor.clickY, cursor.hoverY) + 0.5 * h;
 
     // Radial Drawing Method
-    ctx.bc.cx = cursor.clickX
-    ctx.bc.cy = cursor.clickY
-
-    var w = 2 * Math.abs(ctx.bc.cx - cursor.hoverX);
-    var h = 2 * Math.abs(ctx.bc.cy - cursor.hoverY);
+    // ctx.bc.cx = cursor.clickX
+    // ctx.bc.cy = cursor.clickY
+    // var w = 2 * Math.abs(ctx.bc.cx - cursor.hoverX);
+    // var h = 2 * Math.abs(ctx.bc.cy - cursor.hoverY);
 
     if (ctx.bc.shape == 1) { // square
       ctx.bc.qx = 0.5 * w;
@@ -144,13 +144,29 @@ export default function drawParticlesProgram_WAS(ctx) {
     gl.uniform2f(program.u_min, bbox.minX, bbox.minY);
     gl.uniform2f(program.u_max, bbox.maxX, bbox.maxY);
 
-    var bc = ctx.bc;
-    gl.uniform1f(program.bc_cx, bc.cx)
-    gl.uniform1f(program.bc_cy, bc.cy)
-    gl.uniform1f(program.bc_qx, bc.qx)
-    gl.uniform1f(program.bc_qy, bc.qy)
-    gl.uniform1i(program.bc_shape, bc.shape) // TODO: Make string
-  
+    // gl.uniform1i(program.texture_type, 0);
+    gl.uniform1i(program.texture_type, texture_type);
+    gl.uniform1f(program.thresh, ctx.thresh);
+    
+    if (texture_type == 1) { // Boundary Condition Texture (value defined by implicit location)
+
+      var bc = ctx.bc;
+      gl.uniform1f(program.bc_cx, bc.cx);
+      gl.uniform1f(program.bc_cy, bc.cy);
+      gl.uniform1f(program.bc_qx, bc.qx);
+      gl.uniform1f(program.bc_qy, bc.qy);
+      gl.uniform1i(program.bc_shape, bc.shape); // TODO: Make string  
+
+    } else if (texture_type == 2) { // Value Texture (value encoded in texture RGBA data)
+
+      // TODO: bind things?
+    
+    } else {
+
+      // TODO
+
+    }
+
     var cursor = ctx.cursor;
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
     gl.drawArrays(gl.POINTS, 0, numParticles); 

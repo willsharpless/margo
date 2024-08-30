@@ -14,7 +14,8 @@ export default function makeScreenProgram(ctx) {
 
   // TODO: Allow customization? Last time I tried, I didn't like it too much.
   // It was very easy to screw up the design, and the tool looked ugly :-/
-  let backgroundColor = { r: 19/255, g: 41/255, b: 79/255, a: 1 };
+  // let backgroundColor = { r: 19/255, g: 41/255, b: 79/255, a: 1 }; // deep gray blue (og)
+  let backgroundColor = { r: 12/255, g: 16/255, b: 18/255, a: 1 }; // charcoal dark
 
   updateScreenTextures();
   var screenProgram = glUtils.createProgram(gl, getScreenVertexShader(), getScreenFragmentShader());
@@ -45,7 +46,7 @@ export default function makeScreenProgram(ctx) {
     } else {
       drawTexture(backgroundTexture, ctx.fadeOpacity, NO_TRANSFORM)
     }
-  }
+  } // TODO WAS: is there a way to change this system so that the bc drawing is not faded but erased?
 
   function renderCurrentScreen() {
     glUtils.bindFramebuffer(gl, null);

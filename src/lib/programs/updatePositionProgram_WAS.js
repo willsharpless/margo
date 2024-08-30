@@ -9,7 +9,7 @@ import bus from '../bus';
 
 const particlePositionShaderCodeBuilder = new UpdatePositionGraph_WAS();
 
-export default function updatePositionProgram_WAS(ctx) {
+export default function updatePositionProgram_WAS(ctx, texture_type) {
   var gl = ctx.gl;
   var readTextures, writeTextures;
   var particleStateResolution;
@@ -33,7 +33,7 @@ export default function updatePositionProgram_WAS(ctx) {
 
   function updateCode(vectorField) {
     particlePositionShaderCodeBuilder.setCustomVectorField(vectorField);
-    let fragment = particlePositionShaderCodeBuilder.getFragmentShader();
+    let fragment = particlePositionShaderCodeBuilder.getFragmentShader(texture_type);
     let vertex = particlePositionShaderCodeBuilder.getVertexShader();
 
     let newProgram = util.createProgram(gl, vertex, fragment);

@@ -1,5 +1,5 @@
 import BaseShaderNode from './BaseShaderNode';
-import TexturePositionNode_WAS from './TexturePositionNode_WAS';
+import TexturePositionNode from './TexturePositionNode';
 import renderNodes from './renderNodes';
 import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
 import PanzoomTransform from './PanzoomTransform';
@@ -7,15 +7,22 @@ import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 
 export default class UpdatePositionGraph_WAS {
   constructor(options) {
-    this.readStoredPosition = new TexturePositionNode_WAS(/* isDecode = */ true);
+    // Field Texture
+    this.readStoredPosition = new TexturePositionNode(/* isDecode = */ true);
     this.udfVelocity = new UserDefinedVelocityFunction();
     this.integratePositions = new RungeKuttaIntegrator();
     this.dropParticles = new RandomParticleDropper();
-    this.writeComputedPosition = new TexturePositionNode_WAS(/* isDecode = */ false);
+    this.writeComputedPosition = new TexturePositionNode(/* isDecode = */ false);
     this.panZoomDecode = new PanzoomTransform({decode: true});
     this.panZoomEncode = new PanzoomTransform({decode: false});
-
     this.colorMode = options && options.colorMode;
+
+    // Value Texture
+    // this.readStoredPosition = new TexturePositionNode(/* isDecode = */ true); // TextureValueNode
+    // this.udfVelocity = new UserDefinedVelocityFunction(); // user defined Hamiltonian!
+    // this.integratePositions = new RungeKuttaIntegrator(); // WENO + TVD-RK #fun
+    // this.writeComputedPosition = new TexturePositionNode(/* isDecode = */ false); // TextureValueNode
+    // this.colorMode = options && options.colorMode;
   }
 
   setCustomVectorField(velocityCode) {
@@ -29,6 +36,7 @@ attribute vec2 a_pos;
 varying vec2 v_tex_pos;
 uniform vec2 u_min;
 uniform vec2 u_max;
+// uniform int texture_type;
 
 void main() {
     v_tex_pos = a_pos;
@@ -36,22 +44,51 @@ void main() {
 }`
   }
 
-  getFragmentShader() {
-    var nodes = [
-      this.readStoredPosition,
-      // this.dropParticles,
-      this.udfVelocity,
-      this.integratePositions, {
-        getMainBody() {
-          return `
-  // vec2 newPos = pos + velocity;
-  vec2 newPos = pos;
-  // vec2 newPos = v_tex_pos; // WORKS!
-  `
-        }
-      },
-      this.writeComputedPosition
-    ];
+  getFragmentShader(texture_type) {
+    if (texture_type == 0) { // Field
+      var nodes = [
+        this.readStoredPosition,
+        this.dropParticles,
+        this.udfVelocity,
+        this.integratePositions, {
+          getMainBody() {
+            return `
+            vec2 newPos = pos + velocity;
+            `
+          }
+        },
+        this.writeComputedPosition
+      ];
+    } else if (texture_type == 1) { // Boundary Condition (doesn't matter!)
+      var nodes = [
+        // this.readStoredPosition,
+        // this.dropParticles,
+        // this.udfVelocity,
+        // this.integratePositions, {
+        //   getMainBody() {
+        //     return `
+        //     vec2 newPos = pos;
+        //     `
+        //   }
+        // },
+        // this.writeComputedPosition
+      ];
+    } else if (texture_type == 2) { // Value
+      // TODO: Value Propagation Nodes!
+      var nodes = [
+        this.readStoredPosition,
+        this.dropParticles,
+        this.udfVelocity,
+        this.integratePositions, {
+          getMainBody() {
+            return `
+            vec2 newPos = pos + velocity;
+            `
+          }
+        },
+        this.writeComputedPosition
+      ];
+    }
     return renderNodes(nodes);
   }
 }

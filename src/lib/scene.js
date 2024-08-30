@@ -49,11 +49,14 @@ export default function initScene(gl) {
     y: 0
   };
 
+  // Field Color
+  var field_color = [1., 1., 1., 1.];
+
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
-  // var bc_color = [0.949, 0.768, 0.306, 1.0];
-  var bc_color = [1., 1., 1., 1.];
+  var bc_color = [0.949, 0.768, 0.306, 1.0];
+  // var bc_color = [1., 1., 1., 1.];
   var thresh = 0.01; // TODO: make all these editable params^^
   var drawing_click_sum = 0;
 
@@ -132,11 +135,12 @@ export default function initScene(gl) {
 
   // screen rendering;
   var screenProgram = createScreenProgram(ctx);
-  var drawProgram = createDrawParticlesProgram(ctx);
-  var drawProgram_WAS = createDrawParticlesProgram_WAS(ctx, 1, bc_color);
+  // var drawProgram = createDrawParticlesProgram_WAS(ctx, 0, );
+  var drawProgramField = createDrawParticlesProgram_WAS(ctx, 0, field_color);
+  var drawProgramBC = createDrawParticlesProgram_WAS(ctx, 1, bc_color); // Boundary Condition Program
   var cursorUpdater = createCursorUpdater(ctx);
-  var vectorFieldEditorState = createVectorFieldEditorState(drawProgram);
-  var vectorFieldEditorState_WAS = createVectorFieldEditorState(drawProgram_WAS);
+  var vectorFieldEditorState = createVectorFieldEditorState(drawProgramField);
+  var vectorFieldEditorStateBC = createVectorFieldEditorState(drawProgramBC);
 
   // particles
   updateParticlesCount(particleCount);
@@ -170,7 +174,7 @@ export default function initScene(gl) {
     getColorMode,
 
     vectorFieldEditorState,
-    vectorFieldEditorState_WAS,
+    vectorFieldEditorStateBC,
 
     inputsModel,
 
@@ -242,8 +246,8 @@ export default function initScene(gl) {
     var mode = parseInt(x, 10);
     appState.setColorMode(mode);
     ctx.colorMode = appState.getColorMode();
-    drawProgram.updateColorMode(mode);
-    drawProgram_WAS.updateColorMode(mode);
+    drawProgramField.updateColorMode(mode);
+    drawProgramBC.updateColorMode(mode);
   }
 
   function getColorMode() {
@@ -355,7 +359,7 @@ export default function initScene(gl) {
       window.removeEventListener('resize', onResize, true);
       cursorUpdater.dispose();
       vectorFieldEditorState.dispose();
-      vectorFieldEditorState_WAS.dispose();
+      vectorFieldEditorStateBC.dispose();
   }
 
   function nextFrame() {
@@ -383,33 +387,28 @@ export default function initScene(gl) {
 
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
-    // TODO WAS: make seperate fade out speed for bc texture (value texture ok)
 
     if (ctx.field_mode) {
-      drawProgram.drawParticles();
+      drawProgramField.drawParticles();
     }
 
+    // Boundary Condition Drawing
     if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
-      if (ctx.drawing_click_sum % 3 == 1) {
-        drawProgram_WAS.convertCursor2bcParams();
+      if (ctx.drawing_click_sum % 3 == 1) { // bc dynamic only after first click
+        drawProgramBC.convertCursor2bcParams();
       }
-      drawProgram_WAS.drawParticles();
+      drawProgramBC.drawParticles(); // bc stays after second
     }
-    // else {
-    //   drawProgram.drawParticles();
-    // }
 
+    // TODO WAS: is there a way to make a seperate fade out rate for bc? (value texture ok)
     screenProgram.renderCurrentScreen();
 
     if (ctx.field_mode) {
-      drawProgram.updateParticlesPositions();
+      drawProgramField.updateParticlesPositions();
     }
     if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
-      drawProgram_WAS.updateParticlesPositions(); // actual bc texture will not need this
+      // drawProgramBC.updateParticlesPositions();
     }
-    // else {
-    //   drawProgram.updateParticlesPositions();
-    // }
 
     // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles?
     // TODO WAS: if ctx.bc_drawing_mode done, start value evolution (and reverse particle flow?)
@@ -419,8 +418,9 @@ export default function initScene(gl) {
   function updateParticlesCount(numParticles) {
     // we create a square texture where each pixel will hold a particle position encoded as RGBA
     ctx.particleStateResolution = Math.ceil(Math.sqrt(numParticles));
-    drawProgram.updateParticlesCount();
-    drawProgram_WAS.updateParticlesCount();
+    drawProgramField.updateParticlesCount();
+    drawProgramBC.updateParticlesCount();
+    //TODO WAS: two separate user-defined params
   }
 
   function initPanzoom() {

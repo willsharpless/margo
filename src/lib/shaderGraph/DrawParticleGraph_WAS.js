@@ -50,16 +50,32 @@ ${methods.join('\n')}
 
 void main() {
   vec2 du = (u_max - u_min);
+
+  vec2 Y;
   
-  vec2 X = vec2( // same as txPos externally
+  vec2 state = vec2( // same as txPos externally
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
         abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y);
-  gl_PointSize = 2.0;
 
-  // vec2 X = vec2(
-  //       decodeFloatRGBA(texture2D(u_particles_x, X)),
-  //       decodeFloatRGBA(texture2D(u_particles_y, X))
-  // );
+  if (texture_type == 0) { // Field Texture
+
+    Y = vec2( // @mourner's method: RGBA texture data is position
+          decodeFloatRGBA(texture2D(u_particles_x, state)),
+          decodeFloatRGBA(texture2D(u_particles_y, state))
+    );
+    gl_PointSize = 1.0;
+
+  } else if (texture_type == 1) { // Boundary Condition Texture
+
+    Y = state; // RGBA texture data irrelevant, position implicitly defined 
+    gl_PointSize = 2.0;
+
+  } else if (texture_type == 2) {
+
+    Y = state; // TODO: RGBA texture data is value!
+    gl_PointSize = 2.0;
+
+  }
 
 ${main.join('\n')}
 
@@ -71,10 +87,10 @@ ${main.join('\n')}
   if (texture_type == 1) { // Boundary Condition Texture
 
     if (bc_shape == 1) { // square
-      val = 0.5 * (max(abs(X.x - bc_cx)/bc_qx, abs(X.y - bc_cy)/bc_qy) - 1.);
+      val = 0.5 * (max(abs(state.x - bc_cx)/bc_qx, abs(state.y - bc_cy)/bc_qy) - 1.);
 
     } else if (bc_shape == 2) { // circle
-      val = 0.5 * ((X.x - bc_cx)*(X.x - bc_cx)/bc_qx + (X.y - bc_cy)*(X.y - bc_cy)/bc_qy - 1.);
+      val = 0.5 * ((state.x - bc_cx)*(state.x - bc_cx)/bc_qx + (state.y - bc_cy)*(state.y - bc_cy)/bc_qy - 1.);
 
     } else { // free draw?
       // TODO WAS: not implemented yet
@@ -85,6 +101,9 @@ ${main.join('\n')}
     // TODO WAS: val enc/de coded!
 
   }
+  
+  // TODO WAS: draw more than zero-level? with different colors?
+  // distinguishing reach and avoid might call for drawing, epsilon above and below with diff colors 
 
   if (abs(val) > thresh && texture_type != 0) { 
     // nothing
@@ -124,27 +143,10 @@ uniform sampler2D u_particles_y;
   function getMain() {
     return `
   // vec2 v_particle_pos = vec2(
-  //   decodeFloatRGBA(texture2D(u_particles_x, X)),
-  //   decodeFloatRGBA(texture2D(u_particles_y, X))
+  //   decodeFloatRGBA(texture2D(u_particles_x, state)),
+  //   decodeFloatRGBA(texture2D(u_particles_y, state))
   // );
-  vec2 v_particle_pos = X;
-
-  // if (texture_type == 0) { // Field Texture
-
-  //     vec2 v_particle_pos = vec2(
-  //       decodeFloatRGBA(texture2D(u_particles_x, X)),
-  //       decodeFloatRGBA(texture2D(u_particles_y, X))
-  //     );
-  
-  // } else if (texture_type == 1) { // Boundary Condition Texture
-
-  //     vec2 v_particle_pos = X;
-
-  // } else if (texture_type == 2) { // Value Texture
-    
-  //     // TODO: decode value from RGBA!
-
-  // }
+  vec2 v_particle_pos = Y;
 `
   }
 }

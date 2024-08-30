@@ -20,7 +20,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
   var numParticles;
 
   var currentVectorField = '';
-  var updatePositionProgram = makeUpdatePositionProgram_WAS(ctx);
+  var updatePositionProgram = makeUpdatePositionProgram_WAS(ctx, texture_type);
   var audioProgram;
 
   var drawProgram;

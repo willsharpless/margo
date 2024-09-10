@@ -5,9 +5,12 @@ import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
 import PanzoomTransform from './PanzoomTransform';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 
+import TextureTransferNode from './TextureTransferNode';
+import TextureValueNode from './TextureValueNode';
+
 export default class UpdatePositionGraph_WAS {
   constructor(options) {
-    // Field Texture
+    // Field Texture (old)
     this.readStoredPosition = new TexturePositionNode(/* isDecode = */ true);
     this.udfVelocity = new UserDefinedVelocityFunction();
     this.integratePositions = new RungeKuttaIntegrator();
@@ -17,11 +20,14 @@ export default class UpdatePositionGraph_WAS {
     this.panZoomEncode = new PanzoomTransform({decode: false});
     this.colorMode = options && options.colorMode;
 
+    // BC Texture
+    this.transferValue = new TextureTransferNode(/* isDecode = */ false);
+
     // Value Texture
-    // this.readStoredPosition = new TexturePositionNode(/* isDecode = */ true); // TextureValueNode
+    // this.readStoredPosition = new TextureValueNode(/* isDecode = */ true); // TextureValueNode
     // this.udfVelocity = new UserDefinedVelocityFunction(); // user defined Hamiltonian!
     // this.integratePositions = new RungeKuttaIntegrator(); // WENO + TVD-RK #fun
-    // this.writeComputedPosition = new TexturePositionNode(/* isDecode = */ false); // TextureValueNode
+    // this.writeComputedPosition = new TextureValueNode(/* isDecode = */ false); // TextureValueNode
     // this.colorMode = options && options.colorMode;
   }
 
@@ -45,12 +51,14 @@ void main() {
   }
 
   getFragmentShader(texture_type) {
+
     if (texture_type == 0) { // Field
       var nodes = [
         this.readStoredPosition,
         this.dropParticles,
         this.udfVelocity,
-        this.integratePositions, {
+        this.integratePositions, 
+        {
           getMainBody() {
             return `
             vec2 newPos = pos + velocity;
@@ -59,12 +67,28 @@ void main() {
         },
         this.writeComputedPosition
       ];
-    } else if (texture_type == 1) { // Boundary Condition (doesn't matter!)
+      
+    } else if (texture_type == 1) { // Boundary Condition
+      // var nodes = [
+      //   this.TextureValueNode,
+      //   // this.readStoredPosition,
+      //   // this.dropParticles,
+      //   // this.udfVelocity,
+      //   // this.integratePositions, {
+      //   //   getMainBody() {
+      //   //     return `
+      //   //     vec2 newPos = pos;
+      //   //     `
+      //   //   }
+      //   // },
+      //   // this.writeComputedPosition
+      // ];
       var nodes = [
         // this.readStoredPosition,
         // this.dropParticles,
         // this.udfVelocity,
-        // this.integratePositions, {
+        // this.integratePositions, 
+        // {
         //   getMainBody() {
         //     return `
         //     vec2 newPos = pos;
@@ -74,15 +98,14 @@ void main() {
         // this.writeComputedPosition
       ];
     } else if (texture_type == 2) { // Value
-      // TODO: Value Propagation Nodes!
       var nodes = [
         this.readStoredPosition,
-        this.dropParticles,
-        this.udfVelocity,
-        this.integratePositions, {
+        // this.udfVelocity, // TODO WAS: udfHamiltonian
+        // this.integratePositions, // TODO WAS: integrateValues (WENO/TVD RK5)
+        {
           getMainBody() {
             return `
-            vec2 newPos = pos + velocity;
+            vec2 newVal = val; // + valvelocity (velocity);
             `
           }
         },

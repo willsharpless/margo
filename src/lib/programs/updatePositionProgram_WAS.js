@@ -19,16 +19,18 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
   // If someone needs to get vectors out from the GPU, they send a `vector-lines-request`
   // over the bus. This request is delayed until next compute frame. Once it is handled,
   // we send them back response with calculated vectors.
-  var pendingVectorLines;
+  // var pendingVectorLines; // FIXME WAS: commenting for now
 
   // TODO: need to make sure we are not leaking.
-  bus.on('vector-lines-request', putVectorLinesRequestIntoQueue);
+  // bus.on('vector-lines-request', putVectorLinesRequestIntoQueue);
 
   return {
     updateCode,
     updateParticlesPositions,
     updateParticlesCount,
     prepareToDraw,
+    transferValue,
+    encodeBCValue
   };
 
   function updateCode(vectorField) {
@@ -62,6 +64,24 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     writeTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
 
     readVelocity.updateParticlesCount();
+  }
+
+  function encodeBCValue(reach, avoid) {
+    particleStateResolution = ctx.particleStateResolution;
+
+    var dimensions = [{
+      name: 'reach',
+      particleState: reach
+    }, {
+      name: 'avoid',
+      particleState: avoid
+    }]; // WAS: somehow x and y are still the proper tags in shaders...?
+
+    if (readTextures) readTextures.dispose();
+    readTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
+
+    if (writeTextures) writeTextures.dispose();
+    writeTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
   }
 
   function prepareToDraw(program) {
@@ -99,6 +119,13 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     gl.uniform1f(program.u_drop_rate, ctx.dropProbability);
   
+    // WAS: For BC-Value Transfer
+    // if texture_type == 1 (unused BC texture updatePositionProgram hijacked for transfering value)
+    // gl.useProgram(valueUpdatePositionProgram);
+    // then we will do something like the following to bind that programs textures (for write)
+    // next, we will switch back to the original program
+    // finally we will then drawArrays ()
+
     // Draw each coordinate individually
     for(var i = 0; i < writeTextures.length; ++i) {
       var writeInfo = writeTextures.get(i);
@@ -114,10 +141,10 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       readVelocity.updateParticlesPositions(program);
     }
 
-    if (pendingVectorLines) {
-      processVectorLinesRequest(program);
-      pendingVectorLines = null;
-    }
+    // if (pendingVectorLines) {
+    //   processVectorLinesRequest(program);
+    //   pendingVectorLines = null;
+    // }
 
     // swap the particle state textures so the new one becomes the current one
     var temp = readTextures;
@@ -125,77 +152,116 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     writeTextures = temp;
   }
 
-  function putVectorLinesRequestIntoQueue(request) {
-    pendingVectorLines = request;
+  // WAS: programBC for transferring BC to Value texture data
+  function transferValue(valueUpdatePositionProgram) {
+    var programBC = updateProgram;
+    var programVal = valueUpdatePositionProgram;
+
+    gl.useProgram(programBC.programBC);
+    
+    // old bindings
+    util.bindAttribute(gl, ctx.quadBuffer, programBC.a_pos, 2);
+    ctx.inputs.updateBindings(programBC);
+    readTextures.bindTextures(gl, programBC); // this old fn hides all the binding
+    gl.uniform2f(programBC.u_min, ctx.bbox.minX, ctx.bbox.minY);
+    gl.uniform2f(programBC.u_max, ctx.bbox.maxX, ctx.bbox.maxY);
+  
+    // WAS: For BC-Value Transfer, bind target texture (value) to buffer
+    gl.useProgram(programVal.program);
+    util.bindFramebuffer(gl, ctx.framebuffer, programVal.writeTextures.get(0).texture); // WAS: maybe reads?
+
+    // WAS: For BC-Value Transfer, switch back to use TransferNode shader
+    gl.useProgram(programBC.program);
+    gl.viewport(0, 0, particleStateResolution, particleStateResolution);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    // if fails, plan b: move this inside value program & swap roles?
+
+    // Draw each coordinate individually (OLD)
+    // for(var i = 0; i < writeTextures.length; ++i) {
+    //   var writeInfo = writeTextures.get(i);
+    //   gl.uniform1i(programBC.u_out_coordinate, i);
+    //   util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
+    //   gl.viewport(0, 0, particleStateResolution, particleStateResolution);
+    //   gl.drawArrays(gl.TRIANGLES, 0, 6);
+    // }
+
+    // swap the particle state textures so the new one becomes the current one
+    // var temp = readTextures;
+    // readTextures = writeTextures;
+    // writeTextures = temp;
   }
 
-  function processVectorLinesRequest(program) {
-    // TODO: Move this out
-    var dimensions = [{
-      name: 'x',
-      particleState: pendingVectorLines.x
-    }, {
-      name: 'y',
-      particleState: pendingVectorLines.y
-    }];
+  // function putVectorLinesRequestIntoQueue(request) {
+  //   pendingVectorLines = request;
+  // }
 
-    // We create temporary textures and load requested positions in there
-    var resolutionOfParticlesInRequest = pendingVectorLines.resolution;
-    var numParticles = resolutionOfParticlesInRequest * resolutionOfParticlesInRequest;
+  // function processVectorLinesRequest(program) {
+  //   // TODO: Move this out
+  //   var dimensions = [{
+  //     name: 'x',
+  //     particleState: pendingVectorLines.x
+  //   }, {
+  //     name: 'y',
+  //     particleState: pendingVectorLines.y
+  //   }];
 
-    var texturesForRead = textureCollection_WAS(gl, dimensions, resolutionOfParticlesInRequest);
-    var texturesForWrite = textureCollection_WAS(gl, dimensions, resolutionOfParticlesInRequest);
+  //   // We create temporary textures and load requested positions in there
+  //   var resolutionOfParticlesInRequest = pendingVectorLines.resolution;
+  //   var numParticles = resolutionOfParticlesInRequest * resolutionOfParticlesInRequest;
 
-    texturesForRead.bindTextures(gl, program);
+  //   var texturesForRead = textureCollection_WAS(gl, dimensions, resolutionOfParticlesInRequest);
+  //   var texturesForWrite = textureCollection_WAS(gl, dimensions, resolutionOfParticlesInRequest);
 
-    // Then we request coordinates out from GPU for each dimension
-    var writeInfo = texturesForWrite.get(0);
-    gl.uniform1i(program.u_out_coordinate, 6); // v_x
+  //   texturesForRead.bindTextures(gl, program);
 
-    util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
-    gl.viewport(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  //   // Then we request coordinates out from GPU for each dimension
+  //   var writeInfo = texturesForWrite.get(0);
+  //   gl.uniform1i(program.u_out_coordinate, 6); // v_x
 
-    var velocity_x = new Uint8Array(numParticles * 4);
-    gl.readPixels(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest, gl.RGBA, gl.UNSIGNED_BYTE, velocity_x);
+  //   util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
+  //   gl.viewport(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest);
+  //   gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    gl.uniform1i(program.u_out_coordinate, 7); // v_y
-    writeInfo = texturesForWrite.get(1);
-    util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
-    gl.viewport(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  //   var velocity_x = new Uint8Array(numParticles * 4);
+  //   gl.readPixels(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest, gl.RGBA, gl.UNSIGNED_BYTE, velocity_x);
 
-    var velocity_y = new Uint8Array(numParticles * 4);
-    gl.readPixels(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest, gl.RGBA, gl.UNSIGNED_BYTE, velocity_y);
+  //   gl.uniform1i(program.u_out_coordinate, 7); // v_y
+  //   writeInfo = texturesForWrite.get(1);
+  //   util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
+  //   gl.viewport(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest);
+  //   gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    texturesForWrite.dispose();
-    texturesForRead.dispose();
+  //   var velocity_y = new Uint8Array(numParticles * 4);
+  //   gl.readPixels(0, 0, resolutionOfParticlesInRequest, resolutionOfParticlesInRequest, gl.RGBA, gl.UNSIGNED_BYTE, velocity_y);
 
-    var xStats = makeStatCounter();
-    var yStats = makeStatCounter();
+  //   texturesForWrite.dispose();
+  //   texturesForRead.dispose();
 
-    var decoded_velocity_x = new Float32Array(numParticles);
-    var decoded_velocity_y = new Float32Array(numParticles);
-    for(var i = 0; i < velocity_y.length; i+=4) {
-      var idx = i/4;
-      var vx = readFloat(velocity_x, i);
-      var vy = readFloat(velocity_y, i);
-      decoded_velocity_x[idx] = vx;
-      decoded_velocity_y[idx] = vy;
-      xStats.add(vx);
-      yStats.add(vy);
-    }
+  //   var xStats = makeStatCounter();
+  //   var yStats = makeStatCounter();
 
-    var vectorLineInfo = {
-      xStats,
-      yStats,
-      decoded_velocity_x,
-      decoded_velocity_y,
-      resolution: resolutionOfParticlesInRequest
-    };
+  //   var decoded_velocity_x = new Float32Array(numParticles);
+  //   var decoded_velocity_y = new Float32Array(numParticles);
+  //   for(var i = 0; i < velocity_y.length; i+=4) {
+  //     var idx = i/4;
+  //     var vx = readFloat(velocity_x, i);
+  //     var vy = readFloat(velocity_y, i);
+  //     decoded_velocity_x[idx] = vx;
+  //     decoded_velocity_y[idx] = vy;
+  //     xStats.add(vx);
+  //     yStats.add(vy);
+  //   }
 
-    bus.fire('vector-line-ready', vectorLineInfo);
-  }
+  //   var vectorLineInfo = {
+  //     xStats,
+  //     yStats,
+  //     decoded_velocity_x,
+  //     decoded_velocity_y,
+  //     resolution: resolutionOfParticlesInRequest
+  //   };
+
+  //   bus.fire('vector-line-ready', vectorLineInfo);
+  // }
 }
 
 function readFloat(buffer, offset) {

@@ -31,6 +31,8 @@ attribute float a_index;
 uniform float u_particles_res;
 uniform vec2 u_min;
 uniform vec2 u_max;
+uniform vec2 u_min_enc;
+uniform vec2 u_max_enc;
 
 uniform int texture_type;
 uniform float thresh;
@@ -40,6 +42,8 @@ uniform float bc_cy;
 uniform float bc_qx;
 uniform float bc_qy;
 uniform int bc_shape;
+uniform float drawing_click_sum; // for debugging
+uniform bool bc_drawing_mode; // for debugging
 
 ${decodePositions.getVariables() || ''}
 ${colorParts.getVariables()}
@@ -50,16 +54,21 @@ ${methods.join('\n')}
 
 void main() {
   vec2 du = (u_max - u_min);
+  vec2 du_enc = (u_max_enc - u_min_enc);
 
-  vec2 Y;
+  vec2 v_particle_pos_c;
+  vec2 vals;
+  float val;
+  vec2 state_mag;
   
   vec2 state = vec2( // same as txPos externally
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
-        abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y);
+        abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y); // max bcuz col major
+  // WAS: note, this dynamically fluctuates w/ the box but the value is defined for a fixed box!
 
-  if (texture_type == 0) { // Field Texture
+  if (texture_type == 0) { // Field fwTexture
 
-    Y = vec2( // @mourner's method: RGBA texture data is position
+    v_particle_pos_c = vec2( // @mourner's method: RGBA texture data is position
           decodeFloatRGBA(texture2D(u_particles_x, state)),
           decodeFloatRGBA(texture2D(u_particles_y, state))
     );
@@ -67,12 +76,12 @@ void main() {
 
   } else if (texture_type == 1) { // Boundary Condition Texture
 
-    Y = state; // RGBA texture data irrelevant, position implicitly defined 
+    v_particle_pos_c = state; // Texture RGBA data is only for transfer
     gl_PointSize = 2.0;
-
+    
   } else if (texture_type == 2) {
 
-    Y = state; // TODO: RGBA texture data is value!
+    v_particle_pos_c = state; // TODO: Texture RGBA data is value!
     gl_PointSize = 2.0;
 
   }
@@ -81,8 +90,6 @@ ${main.join('\n')}
 
   // vec2 du = (u_max - u_min);
   v_particle_pos = (v_particle_pos - u_min)/du;
-
-  float val;
 
   if (texture_type == 1) { // Boundary Condition Texture
 
@@ -94,6 +101,19 @@ ${main.join('\n')}
 
     } else { // free draw?
       // TODO WAS: not implemented yet
+      val = 0.;
+    }
+    
+    // for testing bc encoding
+    if (mod(drawing_click_sum, 3.) == 2.) {
+      state_mag = vec2( // unit coding - fixed w/o respect to bbox!
+        fract(a_index / u_particles_res),
+        (floor(a_index / u_particles_res) / u_particles_res)
+      );
+      // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt bbox based on og loc
+      // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc enc loc (small bug in yloc still smh)
+
+      val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
     }
 
   } else if (texture_type == 2) { // Value Texture
@@ -104,6 +124,7 @@ ${main.join('\n')}
   
   // TODO WAS: draw more than zero-level? with different colors?
   // distinguishing reach and avoid might call for drawing, epsilon above and below with diff colors 
+  // TODO WAS: color mode for Vf, changes over timef
 
   if (abs(val) > thresh && texture_type != 0) { 
     // nothing
@@ -146,7 +167,7 @@ uniform sampler2D u_particles_y;
   //   decodeFloatRGBA(texture2D(u_particles_x, state)),
   //   decodeFloatRGBA(texture2D(u_particles_y, state))
   // );
-  vec2 v_particle_pos = Y;
+  vec2 v_particle_pos = v_particle_pos_c;
 `
   }
 }

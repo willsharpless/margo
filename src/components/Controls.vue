@@ -46,34 +46,26 @@ export default {
         this.togglePaused();
         e.preventDefault();
       }
-      if (e.which === 87) { // w for bc drawing
+      if (e.which === 87 && e.target === document.body) { // w for bc drawing
         this.toggleBCDrawing();
         e.preventDefault();
       }
-      if (e.which === 70) { // f for field
+      if (e.which === 70 && e.target === document.body) { // f for field
         this.toggleField();
         e.preventDefault();
       }
-      if (e.which === 13) { // Enter for BC Drawing Transfer
-        this.toggleField();
+      if (e.which === 13 && e.target === document.body) { // Enter for BC Drawing Transfer
+        // this.toggleField();
         e.preventDefault();
       }
 
-      // TODO: Make toggles for all these
-      if (e.which === 49) { // 1 for square drawing
-        this.toggleField();
+      // TODO: Make toggles for all these.. or put them inside the drawing program
+      if (e.which === 82 && e.target === document.body) { // r for reach/min drawing
+        // TODO: switch to reach drawing mode
         e.preventDefault();
       }
-      if (e.which === 50) { // 2 for circle drawing
-        this.toggleField();
-        e.preventDefault();
-      }
-      if (e.which === 82) { // r for reach/min drawing
-        this.toggleField();
-        e.preventDefault();
-      }
-      if (e.which === 65) { // a for avoid/max drawing
-        this.toggleField();
+      if (e.which === 65 && e.target === document.body) { // a for avoid/max drawing
+        // TODO: switch to avoid drawing mode
         e.preventDefault();
       }
     },

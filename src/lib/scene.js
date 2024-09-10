@@ -50,13 +50,16 @@ export default function initScene(gl) {
   };
 
   // Field Color
-  var field_color = [1., 1., 1., 1.];
+  var field_color = [1., 1., 1., 1.]; // white
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
-  var bc_color = [0.949, 0.768, 0.306, 1.0];
-  // var bc_color = [1., 1., 1., 1.];
+  var bc_color = [0.949, 0.768, 0.306, 1.0];  // gold
+  // var bc_color = [1., 1., 1., 1.]; // white
+  // var bbox_at_bc_enc = appState.getBBox() || {};
+  var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
+
   var thresh = 0.01; // TODO: make all these editable params^^
   var drawing_click_sum = 0;
 
@@ -78,6 +81,7 @@ export default function initScene(gl) {
     canvasRect,
 
     bc,
+    bbox_at_bc_enc,
     bc_drawing_mode,
     drawing_click_sum,
     thresh,
@@ -124,6 +128,8 @@ export default function initScene(gl) {
     // Ignore this one for a moment. Yes, the app support web audio API,
     // but it's rudimentary, so... shhh! it's a secret.
     // Don't shhh on me!
+    // WAS - these comments precede me, but damn would audio be cool
+    // especially if the field reacted to it...!
     audioTexture: null
   };
 
@@ -144,6 +150,9 @@ export default function initScene(gl) {
 
   // particles
   updateParticlesCount(particleCount);
+
+  // values
+  drawProgramBC.encodeBCValue()
 
   var api = {
     start: nextFrame,
@@ -358,6 +367,8 @@ export default function initScene(gl) {
       panzoom.dispose();
       window.removeEventListener('resize', onResize, true);
       cursorUpdater.dispose();
+      drawProgramBC.dispose();
+      drawProgramField.dispose();
       vectorFieldEditorState.dispose();
       vectorFieldEditorStateBC.dispose();
   }
@@ -419,8 +430,8 @@ export default function initScene(gl) {
     // we create a square texture where each pixel will hold a particle position encoded as RGBA
     ctx.particleStateResolution = Math.ceil(Math.sqrt(numParticles));
     drawProgramField.updateParticlesCount();
-    drawProgramBC.updateParticlesCount();
-    //TODO WAS: two separate user-defined params
+    // drawProgramBC.updateParticlesCount(); // don't think needed
+    //TODO WAS: two separate user-defined params for particle count and value grid size
   }
 
   function initPanzoom() {

@@ -55,6 +55,9 @@ export default function initScene(gl) {
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
+  var bc_inside_mode = true;
+  var draw_fill = false;
+  var bc_reach_mode = true; // if false, then avoid
   var bc_color = [0.949, 0.768, 0.306, 1.0];  // gold
   // var bc_color = [1., 1., 1., 1.]; // white
   // var bbox_at_bc_enc = appState.getBBox() || {};
@@ -83,6 +86,9 @@ export default function initScene(gl) {
     bc,
     bbox_at_bc_enc,
     bc_drawing_mode,
+    bc_reach_mode,
+    bc_inside_mode,
+    draw_fill,
     drawing_click_sum,
     thresh,
 
@@ -165,6 +171,7 @@ export default function initScene(gl) {
 
     setPaused,
     setBCDrawingMode,
+    setDrawFill,
     setFieldMode,
 
     getParticlesCount,
@@ -285,6 +292,11 @@ export default function initScene(gl) {
     ctx.cursor.clickX = 0.;
     ctx.cursor.clickY = 0.;
     ctx.bc_drawing_mode = shouldBCDrawingMode;
+    // nextFrame(); // do I need this?
+  }
+
+  function setDrawFill(shouldDrawFill) {
+    ctx.draw_fill = shouldDrawFill;
     // nextFrame(); // do I need this?
   }
 

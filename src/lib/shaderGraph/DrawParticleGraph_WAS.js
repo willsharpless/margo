@@ -11,8 +11,14 @@ export default class DrawParticleGraph_WAS {
   getFragmentShader() {
     return `precision highp float;
 varying vec4 v_particle_color;
+varying float filler;
 void main() {
-  gl_FragColor = v_particle_color;
+  if (filler == 1.) {
+    // gl_FragColor = v_particle_color * vec4(1., 1., 1., 0.1);  
+    gl_FragColor = vec4(1., 1., 1., 0.05);  
+  } else {
+    gl_FragColor = v_particle_color;  
+  }
 }`
   }
 
@@ -44,6 +50,9 @@ uniform float bc_qy;
 uniform int bc_shape;
 uniform float drawing_click_sum; // for debugging
 uniform bool bc_drawing_mode; // for debugging
+uniform bool reach_mode;
+uniform bool draw_fill;
+varying float filler;
 
 ${decodePositions.getVariables() || ''}
 ${colorParts.getVariables()}
@@ -113,7 +122,11 @@ ${main.join('\n')}
       // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt bbox based on og loc
       // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc enc loc (small bug in yloc still smh)
 
-      val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
+      if (reach_mode) {
+        val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
+      } else {
+        val = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
+      }
     }
 
   } else if (texture_type == 2) { // Value Texture
@@ -126,9 +139,22 @@ ${main.join('\n')}
   // distinguishing reach and avoid might call for drawing, epsilon above and below with diff colors 
   // TODO WAS: color mode for Vf, changes over timef
 
-  if (abs(val) > thresh && texture_type != 0) { 
+  // if (abs(val) > thresh && texture_type != 0) { 
+  //   // nothing
+  // } else {
+  //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
+  // }
+
+  if (val > thresh && texture_type != 0) { 
+    // nothing
+  } else if (val < -thresh && texture_type != 0) {
+    if (draw_fill) {
+      filler = 1.;
+      gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    
+    }
     // nothing
   } else {
+    filler = 0.;
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
   }
     

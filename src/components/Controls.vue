@@ -54,20 +54,15 @@ export default {
         this.toggleField();
         e.preventDefault();
       }
-      if (e.which === 13 && e.target === document.body) { // Enter for BC Drawing Transfer
-        // this.toggleField();
+      // if (e.which === 13 && e.target === document.body) { // Enter for BC Drawing Transfer
+      //   // this.toggleField();
+      //   e.preventDefault();
+      // }
+      if (e.which === 67 && e.target === document.body) { // c for draw fill
+        this.toggleDrawFill();
         e.preventDefault();
       }
-
-      // TODO: Make toggles for all these.. or put them inside the drawing program
-      if (e.which === 82 && e.target === document.body) { // r for reach/min drawing
-        // TODO: switch to reach drawing mode
-        e.preventDefault();
-      }
-      if (e.which === 65 && e.target === document.body) { // a for avoid/max drawing
-        // TODO: switch to avoid drawing mode
-        e.preventDefault();
-      }
+      // note, some of these live inside drawParticlesProgram_WAS
     },
     generateNewFunction() {
       window.scene.vectorFieldEditorState.setCode(wrapVectorField(generateFunction()));
@@ -79,6 +74,10 @@ export default {
     toggleBCDrawing() {
       this.bcDrawing = !this.bcDrawing;
       window.scene.setBCDrawingMode(this.bcDrawing);
+    },
+    toggleDrawFill() {
+      this.drawFill = !this.drawFill;
+      window.scene.setDrawFill(this.drawFill);
     },
     toggleField() {
       this.field = !this.field;

@@ -1,7 +1,8 @@
 import util from '../gl-utils';
 import DrawParticleGraph_WAS from '../shaderGraph/DrawParticleGraph_WAS';
 import makeUpdatePositionProgram_WAS from './updatePositionProgram_WAS';
-import { encodeFloatRGBA } from '../utils/floatPacking.js';
+import { encodeFloatRGBA, decodeFloatRGBA } from '../utils/floatPacking.js';
+// import { encodeFloatRGBA } from '../utils/floatPacking.js';
 import config from '../config';
 import createAudioProgram from './audioProgram';
 
@@ -19,6 +20,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
   var particleStateResolution, particleIndexBuffer;
   var valueIndexBuffer;
   var numParticles;
+  var valueReachRGBA_enc, valueAvoidRGBA_enc;
 
   var currentVectorField = '';
   var updatePositionProgram = makeUpdatePositionProgram_WAS(ctx, texture_type);
@@ -125,87 +127,103 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
     var valueIndices = new Float32Array(numParticles);
     var valueReachRGBA = new Uint8Array(numParticles * 4);
     var valueAvoidRGBA = new Uint8Array(numParticles * 4);
+    var reach_mode = ctx.bc_reach_mode;
+    var avoid_mode = !ctx.bc_reach_mode;
+    var inside_mode = ctx.bc_inside_mode;
 
-    var minX = ctx.bbox.minX; 
+    var minX = ctx.bbox.minX;
     var minY = ctx.bbox.minY;
     var width = ctx.bbox.maxX - minX;
     var height = ctx.bbox.maxY - minY;
 
-    // console.log("bbox at enc (orig) minX", ctx.bbox_at_bc_enc.minX);
     ctx.bbox_at_bc_enc = JSON.parse(JSON.stringify(ctx.bbox)); // bbox right now defines the grid location!
-    // console.log("bbox (now) minX", ctx.bbox.minX);
 
     var bbox_enc = ctx.bbox_at_bc_enc;
-    console.log("u_min_enc:", bbox_enc.minX, bbox_enc.minY)
-    console.log("du_enc:", bbox_enc.maxX - bbox_enc.minX, bbox_enc.maxY - bbox_enc.minY)
+    // console.log("u_min_enc:", bbox_enc.minX, bbox_enc.minY)
+    // console.log("du_enc:", bbox_enc.maxX - bbox_enc.minX, bbox_enc.maxY - bbox_enc.minY)
 
     var bc = ctx.bc
 
-    var max_val = -100.
-    var max_x = 0.
-    var max_y = 0.
-    var min_val = 100.
-    var min_x = 0.
-    var min_y = 0.
-
-    // for (var i = 0; i < 4; i++) {
     for (var i = 0; i < numParticles; i++) {
 
       var flr_ix = Math.floor(i / particleStateResolution);
       var x = width * ((i / particleStateResolution) - flr_ix) + minX;
       var y = -height * (flr_ix / particleStateResolution) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)
-      // var x = ((i / particleStateResolution) - flr_ix);
-      // var y = (flr_ix / particleStateResolution);
 
-      if (bc.shape == 1) { // square
-        var bc_val = 0.5 * (Math.max(Math.abs(x - bc.cx)/bc.qx, Math.abs(y - bc.cy)/bc.qy) - 1.);
-      } else if (bc.shape == 2) { // circle
-        var bc_val = 0.5 * ((x - bc.cx)*(x - bc.cx)/bc.qx + (y - bc.cy)*(y - bc.cy)/bc.qy - 1.);
-      } else { // free draw
-        // TODO WAS: not implemented yet
-        var bc_val = 0.;
+      if (valueReachRGBA_enc || valueAvoidRGBA_enc) { // TODO WAS: walk thru cases!
+        if (bc.shape == 1) { // square
+          var bc_val = 0.5 * (Math.max(Math.abs(x - bc.cx)/bc.qx, Math.abs(y - bc.cy)/bc.qy) - 1.);
+        } else if (bc.shape == 2) { // circle
+          var bc_val = 0.5 * ((x - bc.cx)*(x - bc.cx)/bc.qx + (y - bc.cy)*(y - bc.cy)/bc.qy - 1.);
+        } else { // free draw (not implemented yet)
+          var bc_val = 0.;
+        }
+      } else {
+        var bc_val = 3.4028234663852886e+38 // FIXME WAS: atm, ~largest 32-bit number, 10^38
+        // var bc_val = 100.;
       }
 
-      if (x > 0. && x < 1. && y > 0. && y < 1.) {
-        if (max_val < bc_val) {
-          max_x = x
-          max_y = y
-          max_val = bc_val
-        }
-        if (min_val > bc_val) {
-          min_x = x
-          min_y = y
-          min_val = bc_val
-        }
+      // Take minimum with existing bc (Reach or Avoid)
+      // if (i == 0) {
+      //   console.log("reach mode:", reach_mode)
+      //   // console.log("valueReachRGBA_enc:", valueReachRGBA_enc)
+      //   if (valueReachRGBA_enc) {
+      //     console.log("Should be taking min!")
+      //   }
+      // }
+      if (!inside_mode) { // Need to fill shapes for this to be usable, still might recommend against (given avoid)
+        bc_val = - bc_val;
       }
 
-      encodeFloatRGBA(bc_val, valueReachRGBA, i * 4); // insert value into texture, TODO WAS: only in reach mode
-      encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4); // TODO wAS: only in avoid mode
+      if (reach_mode && valueReachRGBA_enc) {
+        var old_val_rgba = valueReachRGBA_enc.slice(i*4, i*4 + 4)
+        bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
+        encodeFloatRGBA(bc_val, valueReachRGBA, i * 4);
+      } else if (avoid_mode && valueAvoidRGBA_enc) {
+        var old_val_rgba = valueAvoidRGBA_enc.slice(i*4, i*4 + 4)
+        bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
+        encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4); // TODO wAS: only in avoid mode
+      }
+
+      // insert value into temp array
+      if (i==0) {
+        console.log("bc_val", bc_val)
+      }
+      encodeFloatRGBA(bc_val, valueReachRGBA, i * 4);
+      encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4);
+
+      // // encoding/decoding test, interestingly only accurate to 1e-6
+      // if (i == 0) {
+      //   console.log("TEST, bc val before:", bc_val);
+      //   var slice = valueReachRGBA.slice(i*4, i*4 + 4);
+      //   console.log("slice:", slice)
+      //   console.log("TEST, bc val after at (i*4, i*4 + 4):", decodeFloatRGBA(slice[0], slice[1], slice[2], slice[3]))
+      // }
 
       valueIndices[i] = i;
-
-      // Debugging
-      // if (i == 0) {
-      //   console.log("i == 0, at ", x, y, ", bc_val=", bc_val)
-      // }
-      // if (Math.abs(x) < 0.001 || Math.abs(y) < 0.001) {
-      //   console.log("at ", x, y, ", bc_val=", bc_val)
-      // }
-      // if (Math.abs(bc_val) < ctx.thresh) {
-      //   console.log("at ", x, y, ", bc_val=", bc_val)
-      // }
-      // console.log("at (", x, y, "), bc_val=", bc_val)
     }
-
-    // console.log("Maximum value in [0,1] is ", max_val, ", occured at (",max_x, max_y,")")
-    // console.log("Minimum value in [0,1] is ", min_val, ", occured at (",min_x, min_y,")")
 
     if (valueIndexBuffer) gl.deleteBuffer(valueIndexBuffer);
     valueIndexBuffer = util.createBuffer(gl, valueIndices);
 
-    // console.log("valueIndices", valueIndices)
-
-    updatePositionProgram.updateParticlesCount(valueReachRGBA, valueAvoidRGBA);
+    // only store new one, this assumes the grid fixed after first bc encoding...
+    if (reach_mode && valueReachRGBA_enc) {
+      valueReachRGBA = valueReachRGBA;
+      valueAvoidRGBA = valueAvoidRGBA_enc; // avoid stays old, doesnt change
+    } else if (avoid_mode && valueAvoidRGBA_enc) {
+      valueReachRGBA = valueReachRGBA_enc; // reach stays old, doesnt change
+      valueAvoidRGBA = valueAvoidRGBA;
+    }
+    
+    // Overwrite and Store BC Textures
+    // console.log("valueReachRGBA", valueReachRGBA)
+    // console.log("valueAvoidRGBA", valueAvoidRGBA)
+    updatePositionProgram.updateParticlesCount(valueReachRGBA, valueAvoidRGBA); // 
+    // updatePositionProgram.encodeBCValue(valueReachRGBA, valueAvoidRGBA); //
+    valueReachRGBA_enc = valueReachRGBA
+    valueAvoidRGBA_enc = valueAvoidRGBA
+    // console.log("valueReachRGBA_enc", valueReachRGBA_enc)
+    // console.log("valueAvoidRGBA_enc", valueAvoidRGBA_enc)
   }
 
   function drawParticles() {
@@ -217,7 +235,6 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
     if (texture_type == 0) {
       util.bindAttribute(gl, particleIndexBuffer, program.a_index, 1);
     } else {
-      // updateParticlesCount(); util.bindAttribute(gl, particleIndexBuffer, program.a_index, 1);
       util.bindAttribute(gl, valueIndexBuffer, program.a_index, 1);
     }
     
@@ -235,13 +252,22 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
     gl.uniform2f(program.u_min_enc, bbox_enc.minX, bbox_enc.minY);
     gl.uniform2f(program.u_max_enc, bbox_enc.maxX, bbox_enc.maxY);
 
-    // gl.uniform1i(program.texture_type, 0);
     gl.uniform1i(program.texture_type, texture_type);
     gl.uniform1f(program.thresh, ctx.thresh);
     gl.uniform1f(program.drawing_click_sum, ctx.drawing_click_sum);
     gl.uniform1i(program.bc_drawing_mode, ctx.bc_drawing_mode);
+    gl.uniform1i(program.reach_mode, ctx.bc_reach_mode);
+    gl.uniform1i(program.draw_fill, ctx.draw_fill);
     
     if (texture_type == 1) { // Boundary Condition Texture (value defined by implicit location)
+
+      // draw the fill partially transparent - doesn't integrate with screenProgram mechanics yet, coming soon
+      // if (ctx.draw_fill) {
+      //   gl.enable(gl.BLEND); 
+      //   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      //   // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      //   // gl.clearColor(color[0], color[1], color[2], color[3]);
+      // }
 
       var bc = ctx.bc;
       gl.uniform1f(program.bc_cx, bc.cx);
@@ -264,6 +290,12 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
     gl.drawArrays(gl.POINTS, 0, numParticles); 
     // TODO: draw triangles between the points (shade)
+
+    // draw the fill partially transparent - doesn't integrate with screenProgram mechanics yet, coming soon
+    // if (ctx.draw_fill) {
+    //   gl.clear(gl.COLOR_BUFFER_BIT);
+    //   gl.disable(gl.BLEND);
+    // }
   }
 
 
@@ -287,20 +319,18 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
       ctx.bc.qy = 0.5 * h;
     } else if (ctx.bc.shape == 2) { // circle
       ctx.bc.qx = 2 * Math.pow(0.5 * w, 2);
-      ctx.bc.qy = 2 * Math.pow(0.5 * h, 2); // 2x for better UX
+      ctx.bc.qy = 2 * Math.pow(0.5 * h, 2); // 2x for better Ux
     } else {
-      console.log(ctx.bc.shape, " not possible yet!")
+      console.log("Drawing mode ", ctx.bc.shape, " not possible yet!")
     }
   }
 
   function onKey(e) {
     if (ctx.bc_drawing_mode && texture_type == 1) {
-      if (e.which === 13 && e.target === document.body) { // Enter for BC Drawing Transfer
+      if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
         encodeBCValue();
-        // transferValue(); //TODO
-
         e.preventDefault(); // do I need this?
-        console.log("value encoded")
+        console.log("bc encoded")
       }
       if (e.which === 49 && e.target === document.body) { // 1 for square drawing
         ctx.bc.shape = 1;
@@ -312,6 +342,40 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
         e.preventDefault();
         console.log("circle drawing mode")
       }
+      if (e.which === 82 && e.target === document.body) { // r for reach drawing (default)
+        ctx.bc_reach_mode = true;
+        e.preventDefault();
+        console.log("reach drawing mode")
+      }
+      if (e.which === 65 && e.target === document.body) { // a for avoid drawing
+        ctx.bc_reach_mode = false;
+        e.preventDefault();
+        console.log("avoid drawing mode")
+      }
+      if (e.which === 73 && e.target === document.body) { // i for inside drawing (default)
+        ctx.bc_inside_mode = true;
+        e.preventDefault();
+        console.log("inside drawing mode")
+      }
+      if (e.which === 79 && e.target === document.body) { // o for inside drawing
+        ctx.bc_inside_mode = false;
+        e.preventDefault();
+        console.log("outside drawing mode")
+      }
     }
+    // if (ctx.bc_drawing_mode && texture_type == 2) {
+    //   if (e.which === 13 && e.target === document.body) { // SPACE set value in motion? actually probably should just be pause induced so UL button also works
+    //     // encodeBCValue();
+    //     transferValue(); //TODO
+
+    //     e.preventDefault(); // do I need this?
+    //     console.log("value transferred bc to value")
+    //   }
+    //   if (e.which === 49 && e.target === document.body) { // R for reset?
+    //     ctx.bc.shape = 1;
+    //     e.preventDefault();
+    //     console.log("square drawing mode")
+    //   }
+    // }
   }
 }

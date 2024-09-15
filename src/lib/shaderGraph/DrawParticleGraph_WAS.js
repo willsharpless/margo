@@ -75,7 +75,7 @@ void main() {
         abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y); // max bcuz col major
   // WAS: note, this dynamically fluctuates w/ the box but the value is defined for a fixed box!
 
-  if (texture_type == 0) { // Field fwTexture
+  if (texture_type == 0) { // Field Texture
 
     v_particle_pos_c = vec2( // @mourner's method: RGBA texture data is position
           decodeFloatRGBA(texture2D(u_particles_x, state)),

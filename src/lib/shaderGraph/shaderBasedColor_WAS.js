@@ -43,10 +43,19 @@ ${getColorFunctionBody()}
       return `
 vec4 get_color(vec2 p) {
   return vec4(${r}, ${g}, ${b}, ${a});
-  // return vec4(0.949, 0.768, 0.306, 1.);
 }
 `
     }
+    if (colorMode === ColorModes.REACHAVOID) {
+      return `
+vec4 get_color(vec2 p) {
+  // TODO WAS: different color for active drawing than R or A 
+  // would need draw_click_sum, might be easier to separate drawing/bc textures
+  return vec4(${r}, ${g}, ${b}, ${a}); 
+}
+`
+    }
+
     if (colorMode === ColorModes.VELOCITY) {
       return `
 vec4 get_color(vec2 p) {

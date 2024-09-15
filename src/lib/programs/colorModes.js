@@ -20,5 +20,10 @@ export default {
   /**
    * The color comes from a shader. WIP
    */
-  CUSTOM: 4
+  CUSTOM: 4,
+
+  /**
+   * Each particle gets its own color
+   */
+  REACHAVOID: 1,
 }

@@ -14,8 +14,9 @@ import createAudioProgram from './audioProgram';
  * @param {Int} texture_type gives the type: 1 = bc texture (no tex enc/dec), 2 = value texture
  * @param {Float32Array} color gives the color fo the texture
  */
-export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
+export default function drawParticlesProgram_WAS(ctx, texture_type, color_start) {
   var gl = ctx.gl;
+  var color = color_start;
 
   var particleStateResolution, particleIndexBuffer;
   var valueIndexBuffer;
@@ -163,7 +164,6 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
         // var bc_val = 100.;
       }
 
-      // Take minimum with existing bc (Reach or Avoid)
       // if (i == 0) {
       //   console.log("reach mode:", reach_mode)
       //   // console.log("valueReachRGBA_enc:", valueReachRGBA_enc)
@@ -175,6 +175,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
         bc_val = - bc_val;
       }
 
+      // Take minimum with existing bc (Reach or Avoid)
       if (reach_mode && valueReachRGBA_enc) {
         var old_val_rgba = valueReachRGBA_enc.slice(i*4, i*4 + 4)
         bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
@@ -218,8 +219,8 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
     // Overwrite and Store BC Textures
     // console.log("valueReachRGBA", valueReachRGBA)
     // console.log("valueAvoidRGBA", valueAvoidRGBA)
-    updatePositionProgram.updateParticlesCount(valueReachRGBA, valueAvoidRGBA); // 
-    // updatePositionProgram.encodeBCValue(valueReachRGBA, valueAvoidRGBA); //
+    updatePositionProgram.updateParticlesCount(valueReachRGBA, valueAvoidRGBA); // this works as intended for some rzn...
+    // updatePositionProgram.encodeBCValue(valueReachRGBA, valueAvoidRGBA); // doesn't show the textures for some rzn... something in uPP/uPG_WAS.js
     valueReachRGBA_enc = valueReachRGBA
     valueAvoidRGBA_enc = valueAvoidRGBA
     // console.log("valueReachRGBA_enc", valueReachRGBA_enc)
@@ -344,13 +345,17 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color) {
       }
       if (e.which === 82 && e.target === document.body) { // r for reach drawing (default)
         ctx.bc_reach_mode = true;
-        e.preventDefault();
+        color = [46/255, 121/255, 199/255, 0.9];  // blue
+        initDrawProgram();
         console.log("reach drawing mode")
+        e.preventDefault();
       }
       if (e.which === 65 && e.target === document.body) { // a for avoid drawing
         ctx.bc_reach_mode = false;
-        e.preventDefault();
+        color = [223/255, 28/255, 28/255, 0.85];  // red
+        initDrawProgram();
         console.log("avoid drawing mode")
+        e.preventDefault();
       }
       if (e.which === 73 && e.target === document.body) { // i for inside drawing (default)
         ctx.bc_inside_mode = true;

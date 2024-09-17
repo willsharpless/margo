@@ -15,7 +15,10 @@ varying float filler;
 void main() {
   if (filler == 1.) {
     // gl_FragColor = v_particle_color * vec4(1., 1., 1., 0.1);  
-    gl_FragColor = vec4(1., 1., 1., 0.05);  
+    // gl_FragColor = vec4(1., 1., 1., 0.05);  // gray
+    // color = [154/255, 103/255, 103/255, 0.9];  // gray-red
+    // color = [223/255, 28/255, 28/255, 0.05];  // gray-red v2
+    gl_FragColor = vec4(154/255, 103/255, 103/255, 0.9); // weird, its always just gray to black?
   } else {
     gl_FragColor = v_particle_color;  
   }
@@ -51,6 +54,8 @@ uniform int bc_shape;
 uniform float drawing_click_sum; // for debugging
 uniform bool bc_drawing_mode; // for debugging
 uniform bool reach_mode;
+uniform bool flip_mode;
+uniform float sign;
 uniform bool draw_fill;
 varying float filler;
 
@@ -103,10 +108,10 @@ ${main.join('\n')}
   if (texture_type == 1) { // Boundary Condition Texture
 
     if (bc_shape == 1) { // square
-      val = 0.5 * (max(abs(state.x - bc_cx)/bc_qx, abs(state.y - bc_cy)/bc_qy) - 1.);
+      val = sign * 0.5 * (max(abs(state.x - bc_cx)/bc_qx, abs(state.y - bc_cy)/bc_qy) - 1.);
 
     } else if (bc_shape == 2) { // circle
-      val = 0.5 * ((state.x - bc_cx)*(state.x - bc_cx)/bc_qx + (state.y - bc_cy)*(state.y - bc_cy)/bc_qy - 1.);
+      val = sign * 0.5 * ((state.x - bc_cx)*(state.x - bc_cx)/bc_qx + (state.y - bc_cy)*(state.y - bc_cy)/bc_qy - 1.);
 
     } else { // free draw?
       // TODO WAS: not implemented yet
@@ -119,8 +124,8 @@ ${main.join('\n')}
         fract(a_index / u_particles_res),
         (floor(a_index / u_particles_res) / u_particles_res)
       );
-      // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt bbox based on og loc
-      // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc enc loc (small bug in yloc still smh)
+      // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt default bbox
+      // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc encoding loc (small bug in yloc still smh)
 
       if (reach_mode) {
         val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
@@ -132,6 +137,7 @@ ${main.join('\n')}
   } else if (texture_type == 2) { // Value Texture
 
     // TODO WAS: val enc/de coded!
+    // always draw me after enter?
 
   }
   

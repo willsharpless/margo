@@ -14,7 +14,7 @@ import createAudioProgram from './audioProgram';
  * @param {Int} texture_type gives the type: 1 = bc texture (no tex enc/dec), 2 = value texture
  * @param {Float32Array} color gives the color fo the texture
  */
-export default function drawParticlesProgram_WAS(ctx, texture_type, color_start) {
+export default function drawParticlesProgram_WAS(ctx, texture_type, color_start, external_program=null) {
   var gl = ctx.gl;
   var color = color_start;
 
@@ -24,10 +24,12 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
   var valueReachRGBA_enc, valueAvoidRGBA_enc;
 
   var currentVectorField = '';
-  var updatePositionProgram = makeUpdatePositionProgram_WAS(ctx, texture_type);
+  var updatePositionProgram = makeUpdatePositionProgram_WAS(ctx, texture_type, external_program);
   var audioProgram;
 
-  window.addEventListener('keydown', onKey, true);
+  let keysPressed = {};
+  window.addEventListener('keydown', onKeyDown, true);
+  window.addEventListener('keyup', onKeyUp, true);
 
   var drawProgram;
   initPrograms();
@@ -39,9 +41,11 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     updateCode,
     updateColorMode,
     convertCursor2bcParams,
-    // transferValue,
     encodeBCValue,
     dispose,
+    drawProgram,
+    updatePositionProgram,
+    eraseBC
   }
 
   function initPrograms() {
@@ -63,7 +67,8 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
   }
 
   function dispose() {
-    window.removeEventListener('keydown', onKey, true);
+    window.removeEventListener('keydown', onKeyUp, true);
+    window.removeEventListener('keyup', onKeyUp, true);
   }
 
   function updateParticlesPositions() {
@@ -78,13 +83,13 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     updatePositionProgram.updateParticlesPositions();
   }
 
-  function transferValue(valueProgram) {
-    if (texture_type != 1) return;
+  // function transferValue(valueProgram) {
+  //   if (texture_type != 1) return;
 
-    // WAS TODO: ready SPACEBAR for starting value evolution?
+  //   // WAS TODO: ready SPACEBAR for starting value evolution?
 
-    updatePositionProgram.transferValue(valueProgram);
-  }
+  //   updatePositionProgram.transferValue(valueProgram);
+  // }
 
   function updateColorMode() {
     initDrawProgram();
@@ -130,7 +135,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     var valueAvoidRGBA = new Uint8Array(numParticles * 4);
     var reach_mode = ctx.bc_reach_mode;
     var avoid_mode = !ctx.bc_reach_mode;
-    var inside_mode = ctx.bc_inside_mode;
+    var flip_mode = ctx.bc_flip_mode;
 
     var minX = ctx.bbox.minX;
     var minY = ctx.bbox.minY;
@@ -145,23 +150,32 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
 
     var bc = ctx.bc
 
+    // var sign = (2 * reach_mode - 1) * (2 * !flip_mode - 1) // determines up/down of bc
+    var sign = (2 * !flip_mode - 1) // determines up/down of bc
+    console.log("reach mode?", reach_mode)
+    console.log("flip mode?", flip_mode)
+    console.log("sign", sign)
+
     for (var i = 0; i < numParticles; i++) {
 
       var flr_ix = Math.floor(i / particleStateResolution);
       var x = width * ((i / particleStateResolution) - flr_ix) + minX;
       var y = -height * (flr_ix / particleStateResolution) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)
-
-      if (valueReachRGBA_enc || valueAvoidRGBA_enc) { // TODO WAS: walk thru cases!
+      
+      if (valueReachRGBA_enc && valueAvoidRGBA_enc) { // TODO WAS: walk thru cases!
         if (bc.shape == 1) { // square
-          var bc_val = 0.5 * (Math.max(Math.abs(x - bc.cx)/bc.qx, Math.abs(y - bc.cy)/bc.qy) - 1.);
+          var bc_val = sign * 0.5 * (Math.max(Math.abs(x - bc.cx)/bc.qx, Math.abs(y - bc.cy)/bc.qy) - 1.);
         } else if (bc.shape == 2) { // circle
-          var bc_val = 0.5 * ((x - bc.cx)*(x - bc.cx)/bc.qx + (y - bc.cy)*(y - bc.cy)/bc.qy - 1.);
+          var bc_val = sign * 0.5 * ((x - bc.cx)*(x - bc.cx)/bc.qx + (y - bc.cy)*(y - bc.cy)/bc.qy - 1.);
         } else { // free draw (not implemented yet)
           var bc_val = 0.;
         }
       } else {
-        var bc_val = 3.4028234663852886e+38 // FIXME WAS: atm, ~largest 32-bit number, 10^38
-        // var bc_val = 100.;
+        var bc_val = 3.4028234663852886e+38 // FIXME WAS: atm, ~largest 32-bit number, 10^38            
+      }
+      
+      if (i==0) {
+        console.log("First i, Before min/max, bc_val", bc_val)
       }
 
       // if (i == 0) {
@@ -171,24 +185,32 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
       //     console.log("Should be taking min!")
       //   }
       // }
-      if (!inside_mode) { // Need to fill shapes for this to be usable, still might recommend against (given avoid)
-        bc_val = - bc_val;
-      }
+
+      // Flip Draw Sets (Need to fill shapes for this to be usable, still might recommend against (given avoid))
+      // if (!flip_mode && valueReachRGBA_enc && valueAvoidRGBA_enc) {
+      //   bc_val = - bc_val;
+      // }
 
       // Take minimum with existing bc (Reach or Avoid)
       if (reach_mode && valueReachRGBA_enc) {
         var old_val_rgba = valueReachRGBA_enc.slice(i*4, i*4 + 4)
-        bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
-        encodeFloatRGBA(bc_val, valueReachRGBA, i * 4);
+        if (!flip_mode) {
+          bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
+        } else {
+          bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
+        }
       } else if (avoid_mode && valueAvoidRGBA_enc) {
         var old_val_rgba = valueAvoidRGBA_enc.slice(i*4, i*4 + 4)
-        bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
-        encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4); // TODO wAS: only in avoid mode
+        if (!flip_mode) {
+          bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
+        } else {
+          bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
+        }
       }
 
       // insert value into temp array
       if (i==0) {
-        console.log("bc_val", bc_val)
+        console.log("First i, After min/max, bc_val", bc_val)
       }
       encodeFloatRGBA(bc_val, valueReachRGBA, i * 4);
       encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4);
@@ -208,12 +230,14 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     valueIndexBuffer = util.createBuffer(gl, valueIndices);
 
     // only store new one, this assumes the grid fixed after first bc encoding...
-    if (reach_mode && valueReachRGBA_enc) {
-      valueReachRGBA = valueReachRGBA;
-      valueAvoidRGBA = valueAvoidRGBA_enc; // avoid stays old, doesnt change
-    } else if (avoid_mode && valueAvoidRGBA_enc) {
-      valueReachRGBA = valueReachRGBA_enc; // reach stays old, doesnt change
-      valueAvoidRGBA = valueAvoidRGBA;
+    if (valueReachRGBA_enc || valueAvoidRGBA_enc) {
+      if (reach_mode) {
+        valueReachRGBA = valueReachRGBA;
+        valueAvoidRGBA = valueAvoidRGBA_enc; // avoid stays old, doesnt change
+      } else if (avoid_mode) {
+        valueReachRGBA = valueReachRGBA_enc; // reach stays old, doesnt change
+        valueAvoidRGBA = valueAvoidRGBA;
+      }
     }
     
     // Overwrite and Store BC Textures
@@ -225,6 +249,17 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     valueAvoidRGBA_enc = valueAvoidRGBA
     // console.log("valueReachRGBA_enc", valueReachRGBA_enc)
     // console.log("valueAvoidRGBA_enc", valueAvoidRGBA_enc)
+  }
+
+  function eraseBC(erase_reach, erase_avoid) {
+    if (erase_reach) {
+      valueReachRGBA_enc = null; 
+    } else if (erase_avoid) {
+      valueAvoidRGBA_enc = null;
+    }
+    if (erase_reach || erase_avoid) {
+      encodeBCValue();
+    }
   }
 
   function drawParticles() {
@@ -258,6 +293,10 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     gl.uniform1f(program.drawing_click_sum, ctx.drawing_click_sum);
     gl.uniform1i(program.bc_drawing_mode, ctx.bc_drawing_mode);
     gl.uniform1i(program.reach_mode, ctx.bc_reach_mode);
+    gl.uniform1i(program.flip_mode, ctx.bc_flip_mode);
+    // gl.uniform1f(program.sign, (2 * ctx.bc_reach_mode - 1) * (2 * !ctx.bc_flip_mode - 1))
+    gl.uniform1f(program.sign, (2 * !ctx.bc_flip_mode - 1))
+    // console.log("program.sign", (2 * ctx.bc_reach_mode - 1) * (2 * !ctx.bc_flip_mode - 1))
     gl.uniform1i(program.draw_fill, ctx.draw_fill);
     
     if (texture_type == 1) { // Boundary Condition Texture (value defined by implicit location)
@@ -326,10 +365,11 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     }
   }
 
-  function onKey(e) {
+  function onKeyDown(e) {
+    keysPressed[e.key] = true;
     if (ctx.bc_drawing_mode && texture_type == 1) {
       if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
-        encodeBCValue();
+        encodeBCValue(); // I get a violation(warning?) saying this takes too long
         e.preventDefault(); // do I need this?
         console.log("bc encoded")
       }
@@ -347,27 +387,39 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
         ctx.bc_reach_mode = true;
         color = [46/255, 121/255, 199/255, 0.9];  // blue
         initDrawProgram();
-        console.log("reach drawing mode")
+        console.log("You are reach drawing (reach mode true, default)")
         e.preventDefault();
       }
       if (e.which === 65 && e.target === document.body) { // a for avoid drawing
         ctx.bc_reach_mode = false;
         color = [223/255, 28/255, 28/255, 0.85];  // red
         initDrawProgram();
-        console.log("avoid drawing mode")
+        console.log("You are avoid drawing (reach mode false)")
         e.preventDefault();
       }
       if (e.which === 73 && e.target === document.body) { // i for inside drawing (default)
-        ctx.bc_inside_mode = true;
+        ctx.bc_flip_mode = false;
         e.preventDefault();
-        console.log("inside drawing mode")
+        console.log("You are inside drawing which takes unions (flip mode false, default)")
       }
       if (e.which === 79 && e.target === document.body) { // o for inside drawing
-        ctx.bc_inside_mode = false;
+        ctx.bc_flip_mode = true;
         e.preventDefault();
-        console.log("outside drawing mode")
+        console.log("You are outside drawing which takes intersections (flip mode true)")
       }
     }
+    if (keysPressed['Backspace']) {
+      if (keysPressed['r']) {
+        console.log('Reach drawings erased.');
+        eraseBC(true, false);
+      } else if (keysPressed['a']) {
+        console.log('Avoid drawings erased.');
+        eraseBC(false, true);
+      } else if (keysPressed['Shift']) {
+        console.log('All drawings erased.');
+        eraseBC(true, true);
+      }
+    } 
     // if (ctx.bc_drawing_mode && texture_type == 2) {
     //   if (e.which === 13 && e.target === document.body) { // SPACE set value in motion? actually probably should just be pause induced so UL button also works
     //     // encodeBCValue();
@@ -376,11 +428,15 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start)
     //     e.preventDefault(); // do I need this?
     //     console.log("value transferred bc to value")
     //   }
-    //   if (e.which === 49 && e.target === document.body) { // R for reset?
+    //   if (e.which === 49 && e.target === document.body) { // Q for reset?
     //     ctx.bc.shape = 1;
     //     e.preventDefault();
     //     console.log("square drawing mode")
     //   }
     // }
+  }
+
+  function onKeyUp(e) {
+    delete keysPressed[e.key];
   }
 }

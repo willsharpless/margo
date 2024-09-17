@@ -55,7 +55,7 @@ export default function initScene(gl) {
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
-  var bc_inside_mode = true;
+  var bc_flip_mode = false;
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
   var bc_color = [0.949, 0.768, 0.306, 1.0];  // gold
@@ -87,7 +87,7 @@ export default function initScene(gl) {
     bbox_at_bc_enc,
     bc_drawing_mode,
     bc_reach_mode,
-    bc_inside_mode,
+    bc_flip_mode,
     draw_fill,
     drawing_click_sum,
     thresh,

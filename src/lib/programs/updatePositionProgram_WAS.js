@@ -9,7 +9,7 @@ import bus from '../bus';
 
 const particlePositionShaderCodeBuilder = new UpdatePositionGraph_WAS();
 
-export default function updatePositionProgram_WAS(ctx, texture_type) {
+export default function updatePositionProgram_WAS(ctx, texture_type, external_program=null) {
   var gl = ctx.gl;
   var readTextures, writeTextures;
   var particleStateResolution;
@@ -29,8 +29,8 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     updateParticlesPositions,
     updateParticlesCount,
     prepareToDraw,
-    transferValue,
-    encodeBCValue
+    encodeBCValue,
+    readTextures
   };
 
   function updateCode(vectorField) {
@@ -106,7 +106,17 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     }
 
     readTextures.bindTextures(gl, program);
-  
+
+    // dont forget to define the value program in scene in the am!
+    // once decoded in the shader, should be viewable all the time
+    gl.uniform1i(program.texture_type, texture_type) // inside texturePositionNode rn
+    if (texture_type == 2) {
+      extra_tag='bc'
+      external_program.readTextures.bindTextures(gl, program, extra_tag) // for texturePositionNode
+    }
+    // late night idea: really need to ultimately interpolate the value with frag shader
+    // late night idea: is searching a 1-d graph with branches a lowering or lifting?
+
     gl.uniform1f(program.u_rand_seed, ctx.frameSeed);
     gl.uniform1f(program.u_h, ctx.integrationTimeStep);
     gl.uniform1f(program.frame, ctx.frame);
@@ -152,44 +162,44 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     writeTextures = temp;
   }
 
-  // WAS: programBC for transferring BC to Value texture data
-  function transferValue(valueUpdatePositionProgram) {
-    var programBC = updateProgram;
-    var programVal = valueUpdatePositionProgram;
+  // // WAS: programBC for transferring BC to Value texture data
+  // function transferValue(valueUpdatePositionProgram) {
+  //   var programBC = updateProgram;
+  //   var programVal = valueUpdatePositionProgram;
 
-    gl.useProgram(programBC.programBC);
+  //   gl.useProgram(programBC.programBC);
     
-    // old bindings
-    util.bindAttribute(gl, ctx.quadBuffer, programBC.a_pos, 2);
-    ctx.inputs.updateBindings(programBC);
-    readTextures.bindTextures(gl, programBC); // this old fn hides all the binding
-    gl.uniform2f(programBC.u_min, ctx.bbox.minX, ctx.bbox.minY);
-    gl.uniform2f(programBC.u_max, ctx.bbox.maxX, ctx.bbox.maxY);
+  //   // old bindings
+  //   util.bindAttribute(gl, ctx.quadBuffer, programBC.a_pos, 2);
+  //   ctx.inputs.updateBindings(programBC);
+  //   readTextures.bindTextures(gl, programBC); // this old fn hides all the binding
+  //   gl.uniform2f(programBC.u_min, ctx.bbox.minX, ctx.bbox.minY);
+  //   gl.uniform2f(programBC.u_max, ctx.bbox.maxX, ctx.bbox.maxY);
   
-    // WAS: For BC-Value Transfer, bind target texture (value) to buffer
-    gl.useProgram(programVal.program);
-    util.bindFramebuffer(gl, ctx.framebuffer, programVal.writeTextures.get(0).texture); // WAS: maybe reads?
+  //   // WAS: For BC-Value Transfer, bind target texture (value) to buffer
+  //   gl.useProgram(programVal.program);
+  //   util.bindFramebuffer(gl, ctx.framebuffer, programVal.writeTextures.get(0).texture); // WAS: maybe reads?
 
-    // WAS: For BC-Value Transfer, switch back to use TransferNode shader
-    gl.useProgram(programBC.program);
-    gl.viewport(0, 0, particleStateResolution, particleStateResolution);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    // if fails, plan b: move this inside value program & swap roles?
+  //   // WAS: For BC-Value Transfer, switch back to use TransferNode shader
+  //   gl.useProgram(programBC.program);
+  //   gl.viewport(0, 0, particleStateResolution, particleStateResolution);
+  //   gl.drawArrays(gl.TRIANGLES, 0, 6);
+  //   // if fails, plan b: move this inside value program & swap roles?
 
-    // Draw each coordinate individually (OLD)
-    // for(var i = 0; i < writeTextures.length; ++i) {
-    //   var writeInfo = writeTextures.get(i);
-    //   gl.uniform1i(programBC.u_out_coordinate, i);
-    //   util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
-    //   gl.viewport(0, 0, particleStateResolution, particleStateResolution);
-    //   gl.drawArrays(gl.TRIANGLES, 0, 6);
-    // }
+  //   // Draw each coordinate individually (OLD)
+  //   // for(var i = 0; i < writeTextures.length; ++i) {
+  //   //   var writeInfo = writeTextures.get(i);
+  //   //   gl.uniform1i(programBC.u_out_coordinate, i);
+  //   //   util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
+  //   //   gl.viewport(0, 0, particleStateResolution, particleStateResolution);
+  //   //   gl.drawArrays(gl.TRIANGLES, 0, 6);
+  //   // }
 
-    // swap the particle state textures so the new one becomes the current one
-    // var temp = readTextures;
-    // readTextures = writeTextures;
-    // writeTextures = temp;
-  }
+  //   // swap the particle state textures so the new one becomes the current one
+  //   // var temp = readTextures;
+  //   // readTextures = writeTextures;
+  //   // writeTextures = temp;
+  // }
 
   // function putVectorLinesRequestIntoQueue(request) {
   //   pendingVectorLines = request;

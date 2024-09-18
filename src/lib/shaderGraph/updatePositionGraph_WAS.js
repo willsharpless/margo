@@ -100,12 +100,13 @@ void main() {
     } else if (texture_type == 2) { // Value
       var nodes = [
         this.readStoredPosition,
-        // this.udfVelocity, // TODO WAS: udfHamiltonian
+        this.udfVelocity, // TODO WAS: udfHamiltonian
         // this.integratePositions, // TODO WAS: integrateValues (WENO/TVD RK5)
         {
           getMainBody() {
             return `
-            vec2 newVal = val; // + valvelocity (velocity);
+            vec2 newPos = 1.0 * pos; // + valvelocity (velocity);
+            // TO BE: vec2 newVal = val; // + valvelocity (velocity);
             `
           }
         },

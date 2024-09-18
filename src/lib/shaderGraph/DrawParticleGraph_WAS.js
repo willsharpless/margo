@@ -95,7 +95,10 @@ void main() {
     
   } else if (texture_type == 2) {
 
-    v_particle_pos_c = state; // TODO: Texture RGBA data is value!
+    v_particle_pos_c = vec2( // @mourner's method: RGBA texture data is position
+          decodeFloatRGBA(texture2D(u_particles_x, state)),
+          decodeFloatRGBA(texture2D(u_particles_y, state))
+    );
     gl_PointSize = 2.0;
 
   }
@@ -151,9 +154,9 @@ ${main.join('\n')}
   //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
   // }
 
-  if (val > thresh && texture_type != 0) { 
+  if (val > thresh && texture_type != 0 && texture_type != 2) { //FIXME (last condit)
     // nothing
-  } else if (val < -thresh && texture_type != 0) {
+  } else if (val < -thresh && texture_type != 0 && texture_type != 2) { //FIXME (last condit)
     if (draw_fill) {
       filler = 1.;
       gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    

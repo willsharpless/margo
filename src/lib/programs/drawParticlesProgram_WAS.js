@@ -268,7 +268,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     var program = drawProgram;
     gl.useProgram(program.program);
     
-    if (texture_type == 0) {
+    if (texture_type == 0 || texture_type == 2) {
       util.bindAttribute(gl, particleIndexBuffer, program.a_index, 1);
     } else {
       util.bindAttribute(gl, valueIndexBuffer, program.a_index, 1);

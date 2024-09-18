@@ -150,9 +150,11 @@ export default function initScene(gl) {
   // var drawProgram = createDrawParticlesProgram_WAS(ctx, 0, );
   var drawProgramField = createDrawParticlesProgram_WAS(ctx, 0, field_color);
   var drawProgramBC = createDrawParticlesProgram_WAS(ctx, 1, bc_color); // Boundary Condition Program
+  var drawProgramValue = createDrawParticlesProgram_WAS(ctx, 2, bc_color); // Value Program
   var cursorUpdater = createCursorUpdater(ctx);
   var vectorFieldEditorState = createVectorFieldEditorState(drawProgramField);
   var vectorFieldEditorStateBC = createVectorFieldEditorState(drawProgramBC);
+  var vectorFieldEditorStateValue = createVectorFieldEditorState(drawProgramValue);
 
   // particles
   updateParticlesCount(particleCount);
@@ -191,6 +193,7 @@ export default function initScene(gl) {
 
     vectorFieldEditorState,
     vectorFieldEditorStateBC,
+    vectorFieldEditorStateValue,
 
     inputsModel,
 
@@ -264,6 +267,7 @@ export default function initScene(gl) {
     ctx.colorMode = appState.getColorMode();
     drawProgramField.updateColorMode(mode);
     drawProgramBC.updateColorMode(mode);
+    drawProgramValue.updateColorMode(mode);
   }
 
   function getColorMode() {
@@ -381,8 +385,10 @@ export default function initScene(gl) {
       cursorUpdater.dispose();
       drawProgramBC.dispose();
       drawProgramField.dispose();
+      drawProgramValue.dispose();
       vectorFieldEditorState.dispose();
       vectorFieldEditorStateBC.dispose();
+      vectorFieldEditorStateValue.dispose();
   }
 
   function nextFrame() {
@@ -411,6 +417,7 @@ export default function initScene(gl) {
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
 
+    drawProgramValue.drawParticles();
     if (ctx.field_mode) {
       drawProgramField.drawParticles();
     }
@@ -432,6 +439,7 @@ export default function initScene(gl) {
     if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
       // drawProgramBC.updateParticlesPositions();
     }
+    drawProgramValue.updateParticlesPositions();
 
     // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles?
     // TODO WAS: if ctx.bc_drawing_mode done, start value evolution (and reverse particle flow?)
@@ -443,6 +451,7 @@ export default function initScene(gl) {
     ctx.particleStateResolution = Math.ceil(Math.sqrt(numParticles));
     drawProgramField.updateParticlesCount();
     // drawProgramBC.updateParticlesCount(); // don't think needed
+    drawProgramValue.updateParticlesCount(); // don't think needed
     //TODO WAS: two separate user-defined params for particle count and value grid size
   }
 

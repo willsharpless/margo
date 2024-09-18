@@ -9,7 +9,7 @@ import bus from '../bus';
 
 const particlePositionShaderCodeBuilder = new UpdatePositionGraph_WAS();
 
-export default function updatePositionProgram_WAS(ctx, texture_type, external_program=null) {
+export default function updatePositionProgram_WAS(ctx, texture_type) {
   var gl = ctx.gl;
   var readTextures, writeTextures;
   var particleStateResolution;
@@ -109,11 +109,11 @@ export default function updatePositionProgram_WAS(ctx, texture_type, external_pr
 
     // dont forget to define the value program in scene in the am!
     // once decoded in the shader, should be viewable all the time
-    gl.uniform1i(program.texture_type, texture_type) // inside texturePositionNode rn
-    if (texture_type == 2) {
-      extra_tag='bc'
-      external_program.readTextures.bindTextures(gl, program, extra_tag) // for texturePositionNode
-    }
+    // gl.uniform1i(program.texture_type, texture_type) // inside texturePositionNode rn
+    // if (texture_type == 2) {
+    //   extra_tag='bc'
+    //   external_program.readTextures.bindTextures(gl, program, extra_tag) // for texturePositionNode
+    // }
     // late night idea: really need to ultimately interpolate the value with frag shader
     // late night idea: is searching a 1-d graph with branches a lowering or lifting?
 

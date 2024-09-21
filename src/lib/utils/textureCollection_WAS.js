@@ -34,10 +34,10 @@ export default function textureCollection_WAS(gl, dimensions, particleStateResol
     textures.forEach(tInfo => gl.deleteTexture(tInfo.texture));
   }
 
-  function bindTextures(gl, program) {
+  function bindTextures(gl, program, extra_tag='', unit_offset=0) {
     textures.forEach((tInfo) => {
-      glUtil.bindTexture(gl, tInfo.texture, tInfo.index);
-      gl.uniform1i(program['u_particles_' + tInfo.name], tInfo.index);
+      glUtil.bindTexture(gl, tInfo.texture, tInfo.index + unit_offset);
+      gl.uniform1i(program['u_particles_' + tInfo.name + extra_tag], tInfo.index + unit_offset);
     })
   }
 }

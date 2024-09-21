@@ -21,13 +21,13 @@ export default class UpdatePositionGraph_WAS {
     this.colorMode = options && options.colorMode;
 
     // BC Texture
-    this.transferValue = new TextureTransferNode(/* isDecode = */ false);
+    // this.transferValue = new TextureTransferNode(/* isDecode = */ false);
 
     // Value Texture
-    // this.readStoredPosition = new TextureValueNode(/* isDecode = */ true); // TextureValueNode
+    this.readStoredValue = new TextureValueNode(/* isDecode = */ true); // TextureValueNode
     // this.udfVelocity = new UserDefinedVelocityFunction(); // user defined Hamiltonian!
     // this.integratePositions = new RungeKuttaIntegrator(); // WENO + TVD-RK #fun
-    // this.writeComputedPosition = new TextureValueNode(/* isDecode = */ false); // TextureValueNode
+    this.writeComputedValue = new TextureValueNode(/* isDecode = */ false); // TextureValueNode
     // this.colorMode = options && options.colorMode;
   }
 
@@ -99,18 +99,19 @@ void main() {
       ];
     } else if (texture_type == 2) { // Value
       var nodes = [
-        this.readStoredPosition,
-        this.udfVelocity, // TODO WAS: udfHamiltonian
+        this.readStoredValue,
+        this.udfVelocity, // TODO WAS: udfHamiltonian 
         // this.integratePositions, // TODO WAS: integrateValues (WENO/TVD RK5)
         {
           getMainBody() {
             return `
-            vec2 newPos = 1.0 * pos; // + valvelocity (velocity);
-            // TO BE: vec2 newVal = val; // + valvelocity (velocity);
+            // vec2 newPos = 1.01 * pos; //
+            vec2 newPos = 0.01 + pos; //
+            // TO BE: vec2 newVal = val; // + valvelocity (to be computed);
             `
           }
         },
-        this.writeComputedPosition
+        this.writeComputedValue
       ];
     }
     return renderNodes(nodes);

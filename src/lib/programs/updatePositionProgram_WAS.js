@@ -12,6 +12,7 @@ const particlePositionShaderCodeBuilder = new UpdatePositionGraph_WAS();
 export default function updatePositionProgram_WAS(ctx, texture_type) {
   var gl = ctx.gl;
   var readTextures, writeTextures;
+  // var bc_textures;
   var particleStateResolution;
   var updateProgram;
   var readVelocity = makeReadProgram(ctx);
@@ -30,7 +31,8 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     updateParticlesCount,
     prepareToDraw,
     encodeBCValue,
-    readTextures
+    getTextures,
+    // setBCTextures, 
   };
 
   function updateCode(vectorField) {
@@ -45,6 +47,16 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     if (ctx.colorMode === ColorMode.VELOCITY) readVelocity.requestSpeedUpdate();
   }
+
+  function getTextures() {
+    return readTextures
+  }
+
+  // function setBCTextures(bc_textures_in) {
+  //   // modification to distinguish index etc?
+  //   bc_textures = {...bc_textures_in}
+  //   bc_textures.textures.index + uniqueness_offset
+  // }
   
   function updateParticlesCount(x, y) {
     particleStateResolution = ctx.particleStateResolution;
@@ -59,6 +71,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     if (readTextures) readTextures.dispose();
     readTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
+    // if (texture_type == 1) {console.log("readTextures (inside uPP)", readTextures)} // DELETE ME
 
     if (writeTextures) writeTextures.dispose();
     writeTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
@@ -91,7 +104,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     readTextures.bindTextures(gl, program);
   }
 
-  function updateParticlesPositions() {
+  function updateParticlesPositions(bc_textures=null) {
     var program = updateProgram;
     gl.useProgram(program.program);
   
@@ -109,13 +122,17 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     // dont forget to define the value program in scene in the am!
     // once decoded in the shader, should be viewable all the time
-    // gl.uniform1i(program.texture_type, texture_type) // inside texturePositionNode rn
-    // if (texture_type == 2) {
-    //   extra_tag='bc'
-    //   external_program.readTextures.bindTextures(gl, program, extra_tag) // for texturePositionNode
-    // }
+    gl.uniform1i(program.texture_type, texture_type) // inside texturePositionNode rn
+    // console.log("bc_textures (inside uPP)", bc_textures)
+    if (texture_type == 2 && bc_textures) {
+      // console.log("binding the bc textures to value uPP shader")
+      var extra_tag = '_bc';
+      var unit_offset = 2;
+      bc_textures.bindTextures(gl, program, extra_tag, unit_offset) // for texturePositionNode
+    }
     // late night idea: really need to ultimately interpolate the value with frag shader
-    // late night idea: is searching a 1-d graph with branches a lowering or lifting?
+    // late night idea: M optimal flow mode based on value evolution
+    // late night idea: evolution relative to the target
 
     gl.uniform1f(program.u_rand_seed, ctx.frameSeed);
     gl.uniform1f(program.u_h, ctx.integrationTimeStep);

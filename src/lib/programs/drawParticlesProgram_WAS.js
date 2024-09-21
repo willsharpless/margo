@@ -71,7 +71,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     window.removeEventListener('keyup', onKeyUp, true);
   }
 
-  function updateParticlesPositions() {
+  function updateParticlesPositions(external_textures=null) {
     if (!currentVectorField) return;
 
     ctx.frame += 1
@@ -80,7 +80,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     // TODO: Remove this.
     if (audioProgram) audioProgram.updateTextures();
 
-    updatePositionProgram.updateParticlesPositions();
+    updatePositionProgram.updateParticlesPositions(external_textures);
   }
 
   // function transferValue(valueProgram) {
@@ -245,10 +245,13 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     // console.log("valueAvoidRGBA", valueAvoidRGBA)
     updatePositionProgram.updateParticlesCount(valueReachRGBA, valueAvoidRGBA); // this works as intended for some rzn...
     // updatePositionProgram.encodeBCValue(valueReachRGBA, valueAvoidRGBA); // doesn't show the textures for some rzn... something in uPP/uPG_WAS.js
+    if (texture_type == 1) {console.log("uPP.readTextures UPDATED", updatePositionProgram.getTextures())} // DELETE ME
+
     valueReachRGBA_enc = valueReachRGBA
     valueAvoidRGBA_enc = valueAvoidRGBA
     // console.log("valueReachRGBA_enc", valueReachRGBA_enc)
     // console.log("valueAvoidRGBA_enc", valueAvoidRGBA_enc)
+    
   }
 
   function eraseBC(erase_reach, erase_avoid) {

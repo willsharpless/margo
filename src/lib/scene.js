@@ -59,6 +59,7 @@ export default function initScene(gl) {
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
   var bc_color = [0.949, 0.768, 0.306, 1.0];  // gold
+  var test_color = [245/255, 50/255, 145/255, 1.0];  // magenta
   // var bc_color = [1., 1., 1., 1.]; // white
   // var bbox_at_bc_enc = appState.getBBox() || {};
   var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
@@ -150,7 +151,7 @@ export default function initScene(gl) {
   // var drawProgram = createDrawParticlesProgram_WAS(ctx, 0, );
   var drawProgramField = createDrawParticlesProgram_WAS(ctx, 0, field_color);
   var drawProgramBC = createDrawParticlesProgram_WAS(ctx, 1, bc_color); // Boundary Condition Program
-  var drawProgramValue = createDrawParticlesProgram_WAS(ctx, 2, bc_color); // Value Program
+  var drawProgramValue = createDrawParticlesProgram_WAS(ctx, 2, test_color); // Value Program
   var cursorUpdater = createCursorUpdater(ctx);
   var vectorFieldEditorState = createVectorFieldEditorState(drawProgramField);
   var vectorFieldEditorStateBC = createVectorFieldEditorState(drawProgramBC);
@@ -414,10 +415,14 @@ export default function initScene(gl) {
     nextFrame();
   }
 
+
+  // DRAWING FUNCTION //
+
+
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
 
-    drawProgramValue.drawParticles();
+    drawProgramValue.drawParticles(); // only works after recompilation
     if (ctx.field_mode) {
       drawProgramField.drawParticles();
     }
@@ -439,12 +444,21 @@ export default function initScene(gl) {
     if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
       // drawProgramBC.updateParticlesPositions();
     }
-    drawProgramValue.updateParticlesPositions();
+    
+    // console.log(drawProgramBC.updatePositionProgram) // defined!
+    // console.log(drawProgramBC.updatePositionProgram.getTextures()) // undefined
+    // var bc_textures = drawProgramBC.updatePositionProgram.getTextures();
+    // if (bc_textures) {console.log("bc_textures (inside uPP)", bc_textures)}
+    drawProgramValue.updateParticlesPositions(drawProgramBC.updatePositionProgram.getTextures());
 
-    // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles?
+    // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles? 
     // TODO WAS: if ctx.bc_drawing_mode done, start value evolution (and reverse particle flow?)
-    // note, particle slowing and reversing could be done by decaying or making negative the field!
+    // note, particle slowing/reversing could be done by simply altering field...
   }
+
+
+  // //
+
 
   function updateParticlesCount(numParticles) {
     // we create a square texture where each pixel will hold a particle position encoded as RGBA

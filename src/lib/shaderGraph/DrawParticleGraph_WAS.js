@@ -95,10 +95,12 @@ void main() {
     
   } else if (texture_type == 2) {
 
-    v_particle_pos_c = vec2( // @mourner's method: RGBA texture data is position
-          decodeFloatRGBA(texture2D(u_particles_x, state)),
-          decodeFloatRGBA(texture2D(u_particles_y, state))
-    );
+    // v_particle_pos_c = vec2( // @mourner's method: RGBA texture data is position
+    //       decodeFloatRGBA(texture2D(u_particles_x, state)),
+    //       decodeFloatRGBA(texture2D(u_particles_y, state))
+    // );
+    
+    v_particle_pos_c = state; // Texture RGBA data is only for transfer
     gl_PointSize = 2.0;
 
   }
@@ -141,6 +143,16 @@ ${main.join('\n')}
 
     // TODO WAS: val enc/de coded!
     // always draw me after enter?
+    
+    state_mag = vec2( // unit coding - fixed w/o respect to bbox!
+        fract(a_index / u_particles_res),
+        (floor(a_index / u_particles_res) / u_particles_res)
+      );
+    // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt default bbox
+    // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc encoding loc (small bug in yloc still smh)
+    
+    val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
+    // val = 1.0
 
   }
   
@@ -154,9 +166,9 @@ ${main.join('\n')}
   //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
   // }
 
-  if (val > thresh && texture_type != 0 && texture_type != 2) { //FIXME (last condit)
+  if (val > thresh && texture_type != 0) { //FIXME (last condit)
     // nothing
-  } else if (val < -thresh && texture_type != 0 && texture_type != 2) { //FIXME (last condit)
+  } else if (val < -thresh && texture_type != 0) { //FIXME (last condit)
     if (draw_fill) {
       filler = 1.;
       gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    

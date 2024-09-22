@@ -50,15 +50,15 @@ varying vec2 v_tex_pos;
   //    decodeFloatRGBA(texture2D(u_particles_y, v_tex_pos))
   //  );
 
-  float reach_val = decodeFloatRGBA(texture2D(u_particles_x_bc, v_tex_pos));
-  float avoid_val = decodeFloatRGBA(texture2D(u_particles_y_bc, v_tex_pos));
+  float reach_val = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos));
+  float avoid_val = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
   // working!! but flipped??
 
   // float val = min(reach_val, avoid_val)
   float val = reach_val;
 
   vec2 pos = vec2(
-    val,       // decodeFloatRGBA(texture2D(u_particles_x_bc, v_tex_pos)),
+    val,       // decoded value,
     0.         // u_particles_y texture will be all 0.
   );
 

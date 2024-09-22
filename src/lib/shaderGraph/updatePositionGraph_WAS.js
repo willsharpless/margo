@@ -106,7 +106,8 @@ void main() {
           getMainBody() {
             return `
             // vec2 newPos = 1.01 * pos; //
-            vec2 newPos = 0.01 + pos; //
+            // vec2 newPos = 0.01 + pos; //
+            vec2 newPos = pos;
             // TO BE: vec2 newVal = val; // + valvelocity (to be computed);
             `
           }

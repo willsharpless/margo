@@ -120,9 +120,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     readTextures.bindTextures(gl, program);
 
-    // dont forget to define the value program in scene in the am!
-    // once decoded in the shader, should be viewable all the time
-    gl.uniform1i(program.texture_type, texture_type) // inside texturePositionNode rn
+    gl.uniform1i(program.texture_type, texture_type);
     // console.log("bc_textures (inside uPP)", bc_textures)
     if (texture_type == 2 && bc_textures) {
       // console.log("binding the bc textures to value uPP shader")
@@ -145,13 +143,6 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     gl.uniform2f(program.u_max, bbox.maxX, bbox.maxY);
 
     gl.uniform1f(program.u_drop_rate, ctx.dropProbability);
-  
-    // WAS: For BC-Value Transfer
-    // if texture_type == 1 (unused BC texture updatePositionProgram hijacked for transfering value)
-    // gl.useProgram(valueUpdatePositionProgram);
-    // then we will do something like the following to bind that programs textures (for write)
-    // next, we will switch back to the original program
-    // finally we will then drawArrays ()
 
     // Draw each coordinate individually
     for(var i = 0; i < writeTextures.length; ++i) {

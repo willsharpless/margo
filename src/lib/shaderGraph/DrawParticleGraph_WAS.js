@@ -141,10 +141,9 @@ ${main.join('\n')}
 
   } else if (texture_type == 2) { // Value Texture
 
-    // TODO WAS: val enc/de coded!
-    // always draw me after enter?
+    // always draw me after ENTER?
     
-    state_mag = vec2( // unit coding - fixed w/o respect to bbox!
+    state_mag = vec2( // unit coding - fixed w/ respect to window not bbox (grid loc)
         fract(a_index / u_particles_res),
         (floor(a_index / u_particles_res) / u_particles_res)
       );

@@ -29,6 +29,9 @@ export default class TextureValue extends BaseShaderNode {
     return `
 precision highp float;
 
+uniform vec2 u_min;
+uniform vec2 u_max;
+
 uniform sampler2D u_particles_x;     // stores evolving value
 uniform sampler2D u_particles_y;     // unneeded
 uniform sampler2D u_particles_x_bc;  // reach bc
@@ -50,15 +53,19 @@ varying vec2 v_tex_pos;
   //    decodeFloatRGBA(texture2D(u_particles_y, v_tex_pos))
   //  );
 
-  float reach_val = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, meaning the actual state will need to be flipped
+  float reach_val = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, interesting
   float avoid_val = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
-
-  // vec2 state = vec2(
   
-  // );
-
-  // float val = min(reach_val, avoid_val)
-  float val = reach_val;
+  vec2 state = abs(u_max - u_min) * (0.5 - v_tex_pos);
+  
+  float val;
+  if (state.x > 0. && state.y > 0.) {
+    val = reach_val;
+  } else {
+    val = 1.;
+  }
+  val = reach_val;
+  // float val = min(reach_val, avoid_val);
 
   vec2 pos = vec2(
     val,       // decoded value,

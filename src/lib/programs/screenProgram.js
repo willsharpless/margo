@@ -15,7 +15,7 @@ export default function makeScreenProgram(ctx) {
   // TODO: Allow customization? Last time I tried, I didn't like it too much.
   // It was very easy to screw up the design, and the tool looked ugly :-/
   // let backgroundColor = { r: 19/255, g: 41/255, b: 79/255, a: 1 }; // deep gray blue (og)
-  let backgroundColor = { r: 12/255, g: 16/255, b: 18/255, a: 1 }; // charcoal dark
+  let backgroundColor = { r: 12/255, g: 16/255, b: 18/255, a: 0.95 }; // charcoal dark
 
   updateScreenTextures();
   var screenProgram = glUtils.createProgram(gl, getScreenVertexShader(), getScreenFragmentShader());

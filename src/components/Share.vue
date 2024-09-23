@@ -172,7 +172,7 @@ function getProviders() {
         &:focus {
           outline: none;
           border: 1px dashed;
-          background: #13294f;
+          background: #0c1012;
         }
       }
       .hint {

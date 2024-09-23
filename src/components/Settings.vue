@@ -356,7 +356,7 @@ help-background = rgb(7, 12, 23);
       outline-offset: 0;
       outline: none;
       border: 1px dashed;
-      background: #13294f;
+      background: #0c1012;
     }
     &:invalid {
       box-shadow:none;
@@ -421,7 +421,7 @@ form.block {
     &:focus {
       outline: none;
       border: 1px dashed;
-      background: #13294f;
+      background: #0c1012;
     }
   }
 }

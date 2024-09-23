@@ -49,8 +49,12 @@ export default function initScene(gl) {
     y: 0
   };
 
-  // Field Color
+  // Some Colors
   var field_color = [1., 1., 1., 1.]; // white
+  var field_color_second = [0.949, 0.768, 0.306, 1.0]; // gold
+  var reach_color = [46/255, 121/255, 199/255, 0.9];  // blue
+  var avoid_color = [223/255, 28/255, 28/255, 0.85];  // red
+  var value_color = [245/255, 50/255, 145/255, 1.0];  // magenta
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
@@ -58,13 +62,9 @@ export default function initScene(gl) {
   var bc_flip_mode = false;
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
-  var bc_color = [0.949, 0.768, 0.306, 1.0];  // gold
-  var test_color = [245/255, 50/255, 145/255, 1.0];  // magenta
-  // var bc_color = [1., 1., 1., 1.]; // white
   // var bbox_at_bc_enc = appState.getBBox() || {};
   var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
-
-  var thresh = 0.01; // TODO: make all these editable params^^
+  var thresh = 0.01; // TODO: make all this editable
   var drawing_click_sum = 0;
 
   var field_mode = false;
@@ -149,11 +149,13 @@ export default function initScene(gl) {
   // screen rendering;
   var screenProgram = createScreenProgram(ctx);
   // var drawProgram = createDrawParticlesProgram_WAS(ctx, 0, );
-  var drawProgramField = createDrawParticlesProgram_WAS(ctx, 0, field_color);
-  var drawProgramBC = createDrawParticlesProgram_WAS(ctx, 1, bc_color); // Boundary Condition Program
-  var drawProgramValue = createDrawParticlesProgram_WAS(ctx, 2, test_color); // Value Program
+  var drawProgramField = createDrawParticlesProgram_WAS(ctx, 0, field_color, field_color_second);
+  // var drawProgramField2 = createDrawParticlesProgram_WAS(ctx, 0, field_color_second, field_color_second);
+  var drawProgramBC = createDrawParticlesProgram_WAS(ctx, 1, reach_color, avoid_color); // Boundary Condition Program
+  var drawProgramValue = createDrawParticlesProgram_WAS(ctx, 2, value_color, value_color); // Value Program
   var cursorUpdater = createCursorUpdater(ctx);
   var vectorFieldEditorState = createVectorFieldEditorState(drawProgramField);
+  // var vectorField2EditorState = createVectorFieldEditorState(drawProgramField2);
   var vectorFieldEditorStateBC = createVectorFieldEditorState(drawProgramBC);
   var vectorFieldEditorStateValue = createVectorFieldEditorState(drawProgramValue);
 
@@ -193,6 +195,7 @@ export default function initScene(gl) {
     getColorMode,
 
     vectorFieldEditorState,
+    // vectorField2EditorState,
     vectorFieldEditorStateBC,
     vectorFieldEditorStateValue,
 
@@ -267,6 +270,7 @@ export default function initScene(gl) {
     appState.setColorMode(mode);
     ctx.colorMode = appState.getColorMode();
     drawProgramField.updateColorMode(mode);
+    // drawProgramField2.updateColorMode(mode);
     drawProgramBC.updateColorMode(mode);
     drawProgramValue.updateColorMode(mode);
   }
@@ -386,8 +390,10 @@ export default function initScene(gl) {
       cursorUpdater.dispose();
       drawProgramBC.dispose();
       drawProgramField.dispose();
+      // drawProgramField2.dispose();
       drawProgramValue.dispose();
       vectorFieldEditorState.dispose();
+      // vectorField2EditorState.dispose();
       vectorFieldEditorStateBC.dispose();
       vectorFieldEditorStateValue.dispose();
   }
@@ -425,6 +431,7 @@ export default function initScene(gl) {
     drawProgramValue.drawParticles(); // only works after recompilation
     if (ctx.field_mode) {
       drawProgramField.drawParticles();
+      // drawProgramField2.drawParticles();
     }
 
     // Boundary Condition Drawing
@@ -440,15 +447,12 @@ export default function initScene(gl) {
 
     if (ctx.field_mode) {
       drawProgramField.updateParticlesPositions();
+      // drawProgramField2.updateParticlesPositions();
     }
     if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
       // drawProgramBC.updateParticlesPositions();
     }
     
-    // console.log(drawProgramBC.updatePositionProgram) // defined!
-    // console.log(drawProgramBC.updatePositionProgram.getTextures()) // undefined
-    // var bc_textures = drawProgramBC.updatePositionProgram.getTextures();
-    // if (bc_textures) {console.log("bc_textures (inside uPP)", bc_textures)}
     drawProgramValue.updateParticlesPositions(drawProgramBC.updatePositionProgram.getTextures());
 
     // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles? 
@@ -464,6 +468,7 @@ export default function initScene(gl) {
     // we create a square texture where each pixel will hold a particle position encoded as RGBA
     ctx.particleStateResolution = Math.ceil(Math.sqrt(numParticles));
     drawProgramField.updateParticlesCount();
+    // drawProgramField2.updateParticlesCount();
     // drawProgramBC.updateParticlesCount(); // don't think needed
     drawProgramValue.updateParticlesCount(); // don't think needed
     //TODO WAS: two separate user-defined params for particle count and value grid size

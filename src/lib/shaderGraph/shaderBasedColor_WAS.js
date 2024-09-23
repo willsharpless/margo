@@ -2,10 +2,11 @@ import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 import ColorModes from '../programs/colorModes';
 
-export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode, color) {
+export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode, color, color2) {
   var udf = new UserDefinedVelocityFunction(vfCode);
   var integrate = new RungeKuttaIntegrator();
   const [r, g, b, a] = color;
+  const [r2, g2, b2, a2] = color2;
 
   return {
     getVariables,
@@ -46,15 +47,27 @@ vec4 get_color(vec2 p) {
 }
 `
     }
-    if (colorMode === ColorModes.REACHAVOID) {
+    if (colorMode === ColorModes.DUAL) {
       return `
 vec4 get_color(vec2 p) {
-  // TODO WAS: different color for active drawing than R or A 
-  // would need draw_click_sum, might be easier to separate drawing/bc textures
-  return vec4(${r}, ${g}, ${b}, ${a}); 
+  float rand = fract(sin(p.x * 12.9898 + p.y * 78.233) * 43758.5453);
+  if (rand < 0.5) {
+    return vec4(${r}, ${g}, ${b}, ${a});
+  } else {
+    return vec4(${r2}, ${g2}, ${b2}, ${a2});
+  }
 }
 `
     }
+//     if (colorMode === ColorModes.REACHAVOID) {
+//       return `
+// vec4 get_color(vec2 p) {
+//   // TODO WAS: different color for active drawing than R or A 
+//   // would need draw_click_sum, might be easier to separate drawing/bc textures
+//   return vec4(${r}, ${g}, ${b}, ${a}); 
+// }
+// `
+//     }
 
     if (colorMode === ColorModes.VELOCITY) {
       return `

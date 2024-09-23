@@ -18,12 +18,12 @@ export default {
   ANGLE: 3,
 
   /**
-   * The color comes from a shader. WIP
+   * Each particle gets one of two colors
    */
-  CUSTOM: 4,
+  DUAL: 4,
 
   /**
-   * Each particle gets its own color
+   * The color comes from a shader. WIP
    */
-  REACHAVOID: 1,
+  CUSTOM: 5,
 }

@@ -17,6 +17,7 @@
               <option value='1'>Uniform</option>
               <option value='2'>Velocity</option>
               <option value='3'>Angle</option>
+              <option value='4'>Dual</option>
 	        </select>
         </div>
         <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
@@ -28,6 +29,7 @@
             <li><i>Uniform color</i> gives all particles the same color</li>
             <li><i>Velocity color</i>  makes particles "hotter" if they move faster, and "colder" if they move slower. Notable exception is when you have singularities in field. Then all colors are the same.</li>
             <li><i>Angle color</i> highlights zones based on velocity vector angle.</li>
+            <li><i>Dual color</i> adds a second color to distinguish the particles.</li>
           </ul>
           <p>Default value is "Uniform"</p>
         </div>

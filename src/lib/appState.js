@@ -27,7 +27,7 @@ var defaultVectorField = wrapVectorField(`v.x = 0.1 * p.y;
 var pendingSave;
 var defaults = {
   timeStep: 0.01,
-  dropProbability: 0.0001,
+  dropProbability: 0.000125,
   particleCount: 1000000, // FIXME WAS: Separate particle count for value textures
   fadeout: .999,
   colorMode: ColorModes.UNIFORM

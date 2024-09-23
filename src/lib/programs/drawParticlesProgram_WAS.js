@@ -12,11 +12,13 @@ import createAudioProgram from './audioProgram';
  * 
  * @param {Object} ctx rendering context. Holds WebGL state
  * @param {Int} texture_type gives the type: 1 = bc texture (no tex enc/dec), 2 = value texture
- * @param {Float32Array} color gives the color fo the texture
+ * @param {Float32Array} color_start gives the color of the texture
+ * @param {Float32Array} color_start2 gives second color of the texture
  */
-export default function drawParticlesProgram_WAS(ctx, texture_type, color_start, external_program=null) {
+export default function drawParticlesProgram_WAS(ctx, texture_type, color_start, color_start2, external_program=null) {
   var gl = ctx.gl;
   var color = color_start;
+  var color2 = color_start2;
 
   var particleStateResolution, particleIndexBuffer;
   var valueIndexBuffer;
@@ -62,7 +64,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     if (drawProgram) drawProgram.unload();
 
     const drawGraph = new DrawParticleGraph_WAS(ctx);
-    const vertexShaderCode = drawGraph.getVertexShader(currentVectorField, color);
+    const vertexShaderCode = drawGraph.getVertexShader(currentVectorField, color, color2);
     drawProgram = util.createProgram(gl, vertexShaderCode, drawGraph.getFragmentShader());
   }
 
@@ -388,14 +390,16 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       }
       if (e.which === 82 && e.target === document.body) { // r for reach drawing (default)
         ctx.bc_reach_mode = true;
-        color = [46/255, 121/255, 199/255, 0.9];  // blue
+        // color = [46/255, 121/255, 199/255, 0.9];  // blue
+        color = color_start;
         initDrawProgram();
         console.log("You are reach drawing (reach mode true, default)")
         e.preventDefault();
       }
       if (e.which === 65 && e.target === document.body) { // a for avoid drawing
         ctx.bc_reach_mode = false;
-        color = [223/255, 28/255, 28/255, 0.85];  // red
+        // color = [223/255, 28/255, 28/255, 0.85];  // red
+        color = color_start2;
         initDrawProgram();
         console.log("You are avoid drawing (reach mode false)")
         e.preventDefault();

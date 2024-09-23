@@ -25,9 +25,9 @@ void main() {
 }`
   }
 
-  getVertexShader(vfCode, color) {
+  getVertexShader(vfCode, color, color2) {
     let decodePositions = textureBasedPosition();
-    let colorParts = shaderBasedColor_WAS(this.colorMode, vfCode, this.colorFunction, color);
+    let colorParts = shaderBasedColor_WAS(this.colorMode, vfCode, this.colorFunction, color, color2);
     let methods = []
     addMethods(decodePositions, methods);
     addMethods(colorParts, methods);

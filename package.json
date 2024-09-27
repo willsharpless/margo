@@ -1,8 +1,8 @@
 {
-  "name": "field-play",
+  "name": "margo",
   "version": "1.0.0",
-  "description": "playing with vector fields",
-  "author": "Andrei Kashcha",
+  "description": "an interactive level-set solver for planar systems and differential games",
+  "author": "Will Sharpless",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",

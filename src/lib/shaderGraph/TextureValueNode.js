@@ -56,6 +56,8 @@ varying vec2 v_tex_pos;
   vec2 state = abs(u_max - u_min) * (0.5 - v_tex_pos);
   
   float val;
+
+  // this will probably move to body
   if (value_transfer > 0.) {
     val = reach_val;
     // val = min(reach_val, avoid_val);

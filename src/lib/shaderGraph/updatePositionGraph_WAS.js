@@ -2,6 +2,7 @@ import BaseShaderNode from './BaseShaderNode';
 import TexturePositionNode from './TexturePositionNode';
 import renderNodes from './renderNodes';
 import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
+import UserDefinedVelocityHamiltonianFunctions from './UserDefinedVelocityHamiltonianFunctions';
 import PanzoomTransform from './PanzoomTransform';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 
@@ -26,7 +27,7 @@ export default class UpdatePositionGraph_WAS {
 
     // Value Texture
     this.readStoredValue = new TextureValueNode(/* isDecode = */ true); // TextureValueNode
-    // this.udfVelocity = new UserDefinedVelocityFunction(); // user defined Hamiltonian!
+    this.udfVelocityHamiltonian = new UserDefinedVelocityHamiltonianFunctions(); // user defined Hamiltonian!
     this.integrateValues = new ValueIntegrator(); // WENO + TVD-RK #fun
     this.writeComputedValue = new TextureValueNode(/* isDecode = */ false); // TextureValueNode
     // this.colorMode = options && options.colorMode;
@@ -34,7 +35,12 @@ export default class UpdatePositionGraph_WAS {
 
   setCustomVectorField(velocityCode) {
     this.udfVelocity.setNewUpdateCode(velocityCode);
+    this.udfVelocityHamiltonian.setNewUpdateCode(velocityCode);
   }
+
+  // setCustomHamiltonian(hamiltonianCode) {
+  //   this.udfVelocityHamiltonian.setNewHamiltonianUpdateCode(hamiltonianCode);
+  // }
 
   getVertexShader () {
     return `precision highp float;
@@ -87,7 +93,7 @@ void main() {
     } else if (texture_type == 2) { // Value
       var nodes = [
         this.readStoredValue,
-        this.udfVelocity, // TODO WAS: udfHamiltonian 
+        this.udfVelocityHamiltonian, // TODO WAS: udfHamiltonian 
         this.integrateValues, // TODO WAS: integrateValues (WENO/TVD RK5)
         {
           getMainBody() {

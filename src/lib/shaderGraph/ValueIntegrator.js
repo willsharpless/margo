@@ -27,7 +27,12 @@ vec2 rk4(const vec2 point) {
     return `
     // vec2 velocity = rk4(pos);
     // float valVelocity = -0.;
-    float valVelocity = -0.002;
+    // float valVelocity = -0.002;
+
+    vec2 costate = state;
+    float time = frame * u_h;
+    float valVelocity = get_hamiltonian(state, costate, time);
+
 `
   }
 }

@@ -21,8 +21,8 @@ var qs = queryState({}, {
 
 var currentState = qs.get();
 
-var defaultVectorField = wrapVectorField(`v.x = 0.1 * p.y;
-  v.y = -0.2 * p.y;`);
+var defaultVectorField = wrapVectorField(`v.x = -0.2 * p.x + 0.1 * p.y;
+  v.y = -0.1 * p.x - 0.2 * p.y;`);
 
 var pendingSave;
 var defaults = {

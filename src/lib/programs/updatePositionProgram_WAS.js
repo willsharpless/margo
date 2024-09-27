@@ -121,6 +121,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     readTextures.bindTextures(gl, program);
 
     gl.uniform1i(program.texture_type, texture_type);
+    gl.uniform1f(program.value_transfer, ctx.value_transfer);
     // console.log("bc_textures (inside uPP)", bc_textures)
     if (texture_type == 2 && bc_textures) {
       // console.log("binding the bc textures to value uPP shader")

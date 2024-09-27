@@ -5,8 +5,9 @@ import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
 import PanzoomTransform from './PanzoomTransform';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 
-import TextureTransferNode from './TextureTransferNode';
+// import TextureTransferNode from './TextureTransferNode';
 import TextureValueNode from './TextureValueNode';
+import ValueIntegrator from './ValueIntegrator';
 
 export default class UpdatePositionGraph_WAS {
   constructor(options) {
@@ -26,7 +27,7 @@ export default class UpdatePositionGraph_WAS {
     // Value Texture
     this.readStoredValue = new TextureValueNode(/* isDecode = */ true); // TextureValueNode
     // this.udfVelocity = new UserDefinedVelocityFunction(); // user defined Hamiltonian!
-    // this.integratePositions = new RungeKuttaIntegrator(); // WENO + TVD-RK #fun
+    this.integrateValues = new ValueIntegrator(); // WENO + TVD-RK #fun
     this.writeComputedValue = new TextureValueNode(/* isDecode = */ false); // TextureValueNode
     // this.colorMode = options && options.colorMode;
   }
@@ -69,20 +70,6 @@ void main() {
       ];
       
     } else if (texture_type == 1) { // Boundary Condition
-      // var nodes = [
-      //   this.TextureValueNode,
-      //   // this.readStoredPosition,
-      //   // this.dropParticles,
-      //   // this.udfVelocity,
-      //   // this.integratePositions, {
-      //   //   getMainBody() {
-      //   //     return `
-      //   //     vec2 newPos = pos;
-      //   //     `
-      //   //   }
-      //   // },
-      //   // this.writeComputedPosition
-      // ];
       var nodes = [
         // this.readStoredPosition,
         // this.dropParticles,
@@ -101,14 +88,12 @@ void main() {
       var nodes = [
         this.readStoredValue,
         this.udfVelocity, // TODO WAS: udfHamiltonian 
-        // this.integratePositions, // TODO WAS: integrateValues (WENO/TVD RK5)
+        this.integrateValues, // TODO WAS: integrateValues (WENO/TVD RK5)
         {
           getMainBody() {
             return `
-            // vec2 newPos = 1.01 * pos; //
-            // vec2 newPos = 0.01 + pos; //
-            vec2 newPos = pos;
-            // TO BE: vec2 newVal = val; // + valvelocity (to be computed);
+            // vec2 newPos = pos + velocity;
+            float newVal = val + valVelocity; // (to be computed)
             `
           }
         },

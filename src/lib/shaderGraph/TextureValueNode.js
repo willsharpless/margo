@@ -31,6 +31,7 @@ precision highp float;
 
 uniform vec2 u_min;
 uniform vec2 u_max;
+uniform float value_transfer;
 
 uniform sampler2D u_particles_x;     // stores evolving value
 uniform sampler2D u_particles_y;     // unneeded
@@ -48,45 +49,23 @@ varying vec2 v_tex_pos;
   getMainBody() {
   if (this.isDecode) {
     return `
-  //  vec2 pos = vec2(
-  //    decodeFloatRGBA(texture2D(u_particles_x, v_tex_pos)),
-  //    decodeFloatRGBA(texture2D(u_particles_y, v_tex_pos))
-  //  );
-
   float reach_val = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, interesting
   float avoid_val = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
+  float old_val = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
   
   vec2 state = abs(u_max - u_min) * (0.5 - v_tex_pos);
   
   float val;
-  if (state.x > 0. && state.y > 0.) {
+  if (value_transfer > 0.) {
     val = reach_val;
+    // val = min(reach_val, avoid_val);
   } else {
-    val = 1.;
+    val = old_val;
   }
-  val = reach_val;
-  // float val = min(reach_val, avoid_val);
-
-  vec2 pos = vec2(
-    val,       // decoded value,
-    0.         // u_particles_y texture will be all 0.
-  );
-
 `
     }
     return `
-    // if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newPos.x);
-    // else if (u_out_coordinate == 1) gl_FragColor = encodeFloatRGBA(newPos.y);
-    // else if (u_out_coordinate == 6) gl_FragColor = encodeFloatRGBA(get_velocity(pos).x);
-    // else if (u_out_coordinate == 7) gl_FragColor = encodeFloatRGBA(get_velocity(pos).y);
-    // WAS: why store the pos from get_velocity? 
-
-    if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newPos.x);
-    else if (u_out_coordinate == 1) gl_FragColor = encodeFloatRGBA(newPos.y);
-    // gl_FragColor = encodeFloatRGBA(newPos.x); // dont forget its a vec2
-    
-    // gl_FragColor = encodeFloatRGBA(newVal); 
-    // TODO WAS: for now, just writing value to all textures (to prevent breaking TextureCollection)
+    if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newVal); // write to x only
 `
   }
 }

@@ -54,11 +54,13 @@ export default function initScene(gl) {
   var field_color_second = [0.949, 0.768, 0.306, 1.0]; // gold
   var reach_color = [46/255, 121/255, 199/255, 0.9];  // blue
   var avoid_color = [223/255, 28/255, 28/255, 0.85];  // red
-  var value_color = [245/255, 50/255, 145/255, 1.0];  // magenta
+  var value_color = [245/255, 50/255, 145/255, 1.0];  // magenta for now
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
   var bc_drawing_mode = false;
+  var value_mode = false;
+  var value_transfer = false;
   var bc_flip_mode = false;
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
@@ -87,6 +89,8 @@ export default function initScene(gl) {
     bc,
     bbox_at_bc_enc,
     bc_drawing_mode,
+    value_mode,
+    value_transfer,
     bc_reach_mode,
     bc_flip_mode,
     draw_fill,
@@ -428,10 +432,13 @@ export default function initScene(gl) {
   function drawScreen() {
     screenProgram.fadeOutLastFrame()
 
-    drawProgramValue.drawParticles(); // only works after recompilation
     if (ctx.field_mode) {
       drawProgramField.drawParticles();
       // drawProgramField2.drawParticles();
+    }
+
+    if (ctx.value_mode && !ctx.value_transfer) {
+      drawProgramValue.drawParticles(); // only works after recompilation
     }
 
     // Boundary Condition Drawing
@@ -453,7 +460,10 @@ export default function initScene(gl) {
       // drawProgramBC.updateParticlesPositions();
     }
     
-    drawProgramValue.updateParticlesPositions(drawProgramBC.updatePositionProgram.getTextures());
+    if (ctx.value_mode) {
+      drawProgramValue.updateParticlesPositions(drawProgramBC.updatePositionProgram.getTextures());
+      if (ctx.value_transfer) { ctx.value_transfer = false; }
+    }
 
     // TODO WAS: if ctx.bc_drawing_mode, pause or slow & gray particles? 
     // TODO WAS: if ctx.bc_drawing_mode done, start value evolution (and reverse particle flow?)

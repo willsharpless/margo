@@ -425,7 +425,16 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       } else if (keysPressed['Shift']) {
         console.log('All drawings erased.');
         eraseBC(true, true);
+        ctx.value_mode = false;
+      } else if (keysPressed['v']) {
+        console.log('Value erased.')
+        ctx.value_mode = false;
       }
+    } 
+    if (keysPressed['Shift'] && (keysPressed['Return'] || keysPressed['Enter'])) {
+      ctx.value_transfer = true;
+      ctx.value_mode = true;
+      console.log('Value evolution beginning :)');
     } 
     // if (ctx.bc_drawing_mode && texture_type == 2) {
     //   if (e.which === 13 && e.target === document.body) { // SPACE set value in motion? actually probably should just be pause induced so UL button also works

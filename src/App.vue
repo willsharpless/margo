@@ -13,6 +13,7 @@
       <vector-view v-if='vectorLinesEnabled'></vector-view>
       <ruler></ruler>
       <a href='#' @click.prevent='aboutVisible = !aboutVisible' class='about-link' title='click to learn more about this website'>about...</a>
+      <a href='#' @click.prevent='aboutcontrolsVisible = !aboutcontrolsVisible' class='aboutcontrols-link' title='click to learn how to draw and evolve'>controls...</a>
       <div class='controls-container' :style='getControlsContainerStyle()' ref='controls'>
         <controls></controls>
         <settings :scene='scene'></settings>
@@ -20,6 +21,7 @@
       </div>
       <share></share>
       <about @close='aboutVisible = false' v-if='aboutVisible'></about>
+      <about-controls @close='aboutcontrolsVisible = false' v-if='aboutcontrolsVisible'></about-controls>
     </div>
   </div>
 </template>
@@ -30,6 +32,7 @@ import Ruler from './components/Ruler';
 import Settings from './components/Settings';
 import Share from './components/Share';
 import About from './components/About';
+import AboutControls from './components/AboutControls'; // only new
 import bus from './lib/bus';
 import isSmallScreen from './lib/isSmallScreen';
 import VectorView from './components/VectorView';
@@ -66,6 +69,7 @@ export default {
       width: MIN_SETTINGS_WIDTH,
       webGLEnabled: window.webGLEnabled,
       aboutVisible: false,
+      aboutcontrolsVisible: false,
       hideUI: appState.getQS().get('ui') === 0,
       vectorLinesEnabled: config.vectorLinesEnabled
     };
@@ -76,6 +80,7 @@ export default {
     Settings,
     Share,
     About,
+    AboutControls,
     VectorView
   },
   methods: {
@@ -154,10 +159,18 @@ a.about-link {
   left: 7px;
   bottom: 26px;
 }
+a.aboutcontrols-link {
+  position: absolute;
+  right: 7px;
+  bottom: 26px;
+}
 
 @media (max-width: small-screen) {
   a.about-link {
     bottom: 14px;
+  }
+  a.aboutcontrols-link {
+    bottom: 18px;
   }
 
   .controls-container {

@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <!-- Google tag (gtag.js) -->
-<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXT6313TGG"></script> -->
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <head>    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-KNRWM3XF');</script>
+    <!-- End Google Tag Manager -->
 
-  gtag('config', 'G-TXT6313TGG');
-</script>
-    <meta property="og:title" content="Margo" />
-    <!-- <meta property="og:image" content="https://github.com/anvaka/fieldplay/wiki/images/field_play_icon.png" /> -->
+    <meta property="og:title" content="margo" />
     <meta property="og:description" content="An interactive level-set solver in WebGL/GLSL for flows and differential games in 2D. This is built atop a vector field explorer (@anvaka) which was once a wind map (@mourner), inspired by a particle simulator (@skeeto)." />
     <meta charset="utf-8">
     <meta http-equiv='content-type' content='text/html; charset=utf-8' />
@@ -19,7 +17,7 @@
     <meta name="Description" content="An interactive level-set solver in WebGL/GLSL for flows and differential games in 2D. This is built atop a vector field explorer (@anvaka) which was once a wind map (@mourner), inspired by a particle simulator (@skeeto).">
     <meta name="keywords" content="level-set, hamiltonian, reachability, differential game, field, visualization, generative art, visualizations, webgl, particles" />
     <meta name="author" content="Will Sharpless">
-    <title>Margo</title>
+    <title>margo</title>
     <style>
 canvas {
   position: absolute;
@@ -42,6 +40,11 @@ body {
     </style>
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNRWM3XF"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <canvas id='scene'></canvas>
     <div id="app">
     </div>

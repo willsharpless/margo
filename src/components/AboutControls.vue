@@ -1,35 +1,14 @@
 
 <template>
-  <div class='about'>
+  <div class='about-controls'>
     <div class='background absolute' @click.prevent='close'></div>
     <div class='content'>
-      <h3><a class='title'>Margo</a></h3>
+      <h3><a class='title'>Controls for Drawing and Evolution</a></h3>
+
       <p>
-        This is an interactive software for solving 2D level-set evolutions (or Hamilton-Jacobi differential equations).
+        Blah blah
       </p>
-      <p>
-        The set here is a shape that matches the zero level of a function, called the energy or value. 
-        This energy and its shape evolve based on a momentum (or Hamiltonian). 
-      </p>
-      <p>
-        The initial shape and momentum may be whatever we like. We often define the latter to match a flow 
-        (aka vector-field) which models a physical or virtual process, such as jet flight, options pricing or protein kinetics.
-        It has become popular to define the momentum in an optimal sense so that the energy defines the best path 
-        (e.g. least time/input, most reward) to a future target and the input needed to achieve it.
-        In fact, solving this evolution or learning its solution is how a modern robot guides itself autonomously 
-        (so maybe I am not the only one dreaming in shapes).
-      </p>
-      <p>
-        I built this because I was tired of coding up scripts to test and discuss new ideas, but also to share the beauty of these evolutions. 
-      </p>
-      <p>
-        Find the code and technical details <a href='https://github.com/willsharpless/margo' class='highlighted'> here</a>. 
-        Cheers to previous developers @anvaka, @mourner, and @skeeto without whom this wouldnt exist.
-      </p>
-      <p>
-        Best, <br>
-        WAS
-      </p>
+
       <a href='#' @click.prevent='close' class='large-close bold'>
         close
       </a>
@@ -61,7 +40,7 @@ export default {
 <style lang='stylus'>
 @import "./shared.styl";
 
-.about {
+.about-controls {
   position: absolute;
   overflow-y: auto;
   top: 0;
@@ -107,10 +86,10 @@ export default {
   height: 100%;
 }
 @media (max-width: 800px) {
-  .about {
+  .about-controls {
     justify-content: initial;
   }
-  .about .content {
+  .about-controls .content {
     width: 100%;
     border: none;
   }

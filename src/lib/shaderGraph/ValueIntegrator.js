@@ -24,6 +24,15 @@ vec2 rk4(const vec2 state) {
   return k1 * time_step / 6. + k2 * time_step/3. + k3 * time_step/3. + k4 * time_step/6.;
 }
   
+vec2 locallocalLF(vec2 state, vec2 costate_L, vec2 costate_R, float time) {
+  return vec2(0.1);
+}
+
+float lax_friedrichs_hamiltonian(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
+  vec2 alpha = locallocalLF(state, costate_L, costate_R, time);
+  return get_hamiltonian(state, 0.5 * (costate_L + costate_R), time, value) - dot(alpha, 0.5 * abs(costate_L - costate_R));
+}
+
 vec2 euler_step(vec2 state, float time, float value, float time_step, float fixed_or_max) {
 
   // fixed_or_max determines if the time step is a fixed step (==0.) or the max allowed (==1.)
@@ -32,8 +41,12 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
   // vec2 LR_value_grads = upwind_ENO3(value) // TODO WAS: make WENO5 + others
   
   // Compute the Artificial Dissipation
-  // vec2 dvdt = lax_friedrichs_global(state, value, time)
-  float dvdt = 0.2 * cos(time); // debugging
+  // float global = 1.
+  // float diss = lax_friedrichs_dissipation(value, time, global)
+  // vec2 dvdt = lax_friedrichs_hamiltonian(state, costate_L, costate_R, time, value)
+  // float dvdt = 0.2 * cos(time); // debugging
+  vec2 costate = state;
+  float dvdt = get_hamiltonian(state, costate, time, value);
 
   // Compute or Pass the Time-step
   float t_step_c;
@@ -88,7 +101,7 @@ vec2 tvd_rk_3o(vec2 state, float time, float value, float target_time_step, floa
 
   vec2 costate = state;
   float time = frame * time_step;
-  float valVelocity = get_hamiltonian(state, costate, time);
+  float valVelocity = get_hamiltonian(state, costate, time, value);
   
   float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
   float target_time_step = time_step;

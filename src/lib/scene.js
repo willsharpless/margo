@@ -430,6 +430,9 @@ export default function initScene(gl) {
   // DRAWING FUNCTION //
   // panzoom.moveBy(0, 0, false);
   // panzoom.dispose();
+  // maybe we can turn this on by pressing w or z? 
+  // do I have to force deletion? should I give a warning? 
+  // maybe I could just shift the old parameter (centers) by the change in bbox center? so we can keep previous drawings
 
   function drawScreen() {
     screenProgram.fadeOutLastFrame()

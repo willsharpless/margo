@@ -135,6 +135,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     gl.uniform1f(program.u_rand_seed, ctx.frameSeed);
     gl.uniform1f(program.u_h, ctx.integrationTimeStep);
+    gl.uniform1f(program.time_step, ctx.integrationTimeStep);
     gl.uniform1f(program.frame, ctx.frame);
     var cursor = ctx.cursor;
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
@@ -146,12 +147,39 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     gl.uniform1f(program.u_drop_rate, ctx.dropProbability);
 
     // Draw each coordinate individually
-    for(var i = 0; i < writeTextures.length; ++i) {
-      var writeInfo = writeTextures.get(i);
-      gl.uniform1i(program.u_out_coordinate, i);
+    if (texture_type == 0) {
+      for(var i = 0; i < writeTextures.length; ++i) {
+        var writeInfo = writeTextures.get(i);
+        gl.uniform1i(program.u_out_coordinate, i);
+        util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
+        gl.viewport(0, 0, particleStateResolution, particleStateResolution);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      }
+    } else if (texture_type == 2) { // value only uses one texture atm
+      var writeInfo = writeTextures.get(0);
       util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
       gl.viewport(0, 0, particleStateResolution, particleStateResolution);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      // debugging
+      gl.bindFramebuffer(gl.FRAMEBUFFER, ctx.framebuffer);
+      var pixelData = new Uint8Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
+      gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
+      // var pixelData = new Float32Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
+      // gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
+      // console.log("Raw output texture data:", pixelData);
+      var mid_txture_i = particleStateResolution * particleStateResolution / 2 + 500;
+      // console.log("mid_txture_i", mid_txture_i)
+      var mid_texture_RGBA = pixelData.slice(mid_txture_i*4, mid_txture_i*4 + 4);
+      var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
+      console.log("mid_texture_value (decoded)", mid_texture_value)
+    }
+    // bc doesn't use any textures!
+
+    // debugging
+    var error = gl.getError();
+    if (error !== gl.NO_ERROR) {
+      console.error("WebGL Error:", error);
     }
 
     // TODO: I think I need to keep this time-bound, i.e. allocate X ms to

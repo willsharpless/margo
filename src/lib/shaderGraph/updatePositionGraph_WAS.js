@@ -99,7 +99,8 @@ void main() {
           getMainBody() {
             return `
             // vec2 newPos = pos + velocity;
-            float newVal = val + valVelocity; // (to be computed)
+            // float newValue = value + valVelocity;
+            float newValue = next_tv.y;
             `
           }
         },

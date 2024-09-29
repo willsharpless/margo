@@ -55,10 +55,11 @@ export default function initScene(gl) {
   var reach_color = [46/255, 121/255, 199/255, 0.9];  // blue
   var avoid_color = [223/255, 28/255, 28/255, 0.85];  // red
   var value_color = [245/255, 50/255, 145/255, 1.0];  // magenta for now
+  // var value_color = [1., 1., 1., 1.];  // 
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
-  var bc_drawing_mode = false;
+  var bc_drawing_mode = true;
   var value_mode = false;
   var value_transfer = false;
   var bc_flip_mode = false;
@@ -427,7 +428,8 @@ export default function initScene(gl) {
 
 
   // DRAWING FUNCTION //
-
+  // panzoom.moveBy(0, 0, false);
+  // panzoom.dispose();
 
   function drawScreen() {
     screenProgram.fadeOutLastFrame()

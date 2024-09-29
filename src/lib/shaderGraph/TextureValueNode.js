@@ -49,25 +49,25 @@ varying vec2 v_tex_pos;
   getMainBody() {
   if (this.isDecode) {
     return `
-  float reach_val = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, interesting
-  float avoid_val = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
-  float old_val = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
+  
+  float reach_value = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, interesting
+  float avoid_value = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
+  float last_value = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
   
   vec2 state = abs(u_max - u_min) * (0.5 - v_tex_pos);
-  
-  float val;
 
-  // this will probably move to body
+  // this will move to main body?
+  float value;
   if (value_transfer > 0.) {
-    val = reach_val;
-    // val = min(reach_val, avoid_val);
+    value = reach_value;
+    // value = min(reach_value, avoid_value); // (applied after, was for testing)
   } else {
-    val = old_val;
+    value = last_value;
   }
 `
     }
     return `
-    if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newVal); // write to x only
+    if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newValue); // write to x only
 `
   }
 }

@@ -282,7 +282,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     updatePositionProgram.prepareToDraw(program);
     ctx.inputs.updateBindings(program);
   
-    gl.uniform1f(program.u_h, ctx.integrationTimeStep);
+    gl.uniform1f(program.time_step, ctx.integrationTimeStep);
     gl.uniform1f(program.frame, ctx.frame);
     gl.uniform1f(program.u_particles_res, particleStateResolution);
     var bbox = ctx.bbox;

@@ -3,28 +3,32 @@
   <div class='about'>
     <div class='background absolute' @click.prevent='close'></div>
     <div class='content'>
-      <h3><a class='title'>Margo</a></h3>
+      <h3><a class='title'>Margo,</a></h3>
       <p>
-        This is an interactive software for solving 2D level-set evolutions (or Hamilton-Jacobi differential equations).
+        is an interactive software for solving level-set evolutions (of Hamilton-Jacobi differential equations).
       </p>
       <p>
-        The set here is a shape that matches the zero level of a function, called the energy or value. 
-        This energy and its shape evolve based on a momentum (or Hamiltonian). 
+        The set is a shape that matches the zero-level of a function, called the energy or value. 
+        This energy evolves based on a momentum, called the Hamiltonian. 
       </p>
       <p>
-        The initial shape and momentum may be whatever we like. We often define the latter to match a flow 
-        (aka vector-field) which models a physical or virtual process, such as jet flight, options pricing or protein kinetics.
-        It has become popular to define the momentum in an optimal sense so that the energy defines the best path 
-        (e.g. least time/input, most reward) to a future target and the input needed to achieve it.
-        In fact, solving this evolution or learning its solution is how a modern robot guides itself autonomously 
-        (so maybe I am not the only one dreaming in shapes).
+        This shape and momentum are your choice; draw or define them.
+      </p>
+      <p>We often choose the momentum to match a flow (aka vector-field) which models a dynamic system, e.g. jet flight, 
+        options pricing or protein kinetics. This is the default definition, thus, the shape will move with the flow.
       </p>
       <p>
-        I built this because I was tired of coding up scripts to test and discuss new ideas, but also to share the beauty of these evolutions. 
+        Moreover, the momentum may be defined with respect to control of the flow such that the evolution reveals the best path, 
+        e.g. least time & most reward, to a future target and the inputs needed to achieve it.
+        In fact, solving or learning this evolution is how a modern robot guides itself 
+        (so maybe I am not the only one dreaming in shape).
+      </p>
+      <p>
+        I built this because I wanted a faster way to test and discuss new ideas, but also because I wanted to share the beauty of these evolutions. 
       </p>
       <p>
         Find the code and technical details <a href='https://github.com/willsharpless/margo' class='highlighted'> here</a>. 
-        Cheers to previous developers @anvaka, @mourner, and @skeeto without whom this wouldnt exist.
+        Cheers to previous developers for the flow visualization &#8212 @anvaka, @mourner, @skeeto &#8212 and HJ-solver &#8212 @ian-mitchell, @schmrlng &#8212 without whom this wouldnt exist.
       </p>
       <p>
         Best, <br>
@@ -88,7 +92,7 @@ export default {
     color: secondary-text;
     position: relative;
     background: window-background;
-    top: 100px;
+    top: 50px;
     width: 600px;
     padding: 14px;
     border: 1px solid primary-border;

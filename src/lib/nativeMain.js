@@ -25,6 +25,7 @@ function initVectorFieldApp(canvas) {
 
   var gl = canvas.getContext('webgl', ctxOptions) ||
           canvas.getContext('experimental-webgl', ctxOptions);
+  // var gl = canvas.getContext('webgl2', ctxOptions);
 
   if (gl) {
     window.webGLEnabled = true;

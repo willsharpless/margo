@@ -83,11 +83,11 @@ class ConstantFunction extends BaseFunctionNode {
 
 
 var fList = [
-  new ConstantFunction('p.x', 'POINT'),
-  new ConstantFunction('p.y', 'POINT'),
+  new ConstantFunction('s.x', 'POINT'),
+  new ConstantFunction('s.y', 'POINT'),
 
   // new DualArgumentFunction((a, b) => `length(vec2(${a}, ${b}))`, 'TRIGONOMETRY'),
-  new ConstantFunction('length(p)', 'LENGTH'),
+  new ConstantFunction('length(s)', 'LENGTH'),
 
   new SingleArgumentFunction(a => `sin(${a})`, 'TRIGONOMETRY'),
   new SingleArgumentFunction(a => `cos(${a})`, 'TRIGONOMETRY'),

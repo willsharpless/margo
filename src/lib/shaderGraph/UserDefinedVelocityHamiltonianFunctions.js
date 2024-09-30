@@ -65,45 +65,69 @@ float audio(float index) {
   return rgba[3];
 }
 
-${this.updateCode ? this.updateCode : 'vec2 get_velocity(vec2 x) { return vec2(0.003); }'}
-
-${this.updateHamiltonianCode ? this.updateHamiltonianCode : `
-  float get_hamiltonian(vec2 x, vec2 p, float t, float val) { 
-    vec2 f = get_velocity(x);
-    // vec2 h = p * (get_velocity(x, t) + get_control(x, t, p, val) + get_disturbance(x, t, p, val));
-    // return - 0.01 * (f.x + f.y);
-    return 0.1 * cos(t);
-  }`
-}
+${this.updateCode ? this.updateCode : 'vec2 get_velocity(vec2 x, float t) { return vec2(0.003); }'} // FIXME wrapped get_vel needs time
 
 ${this.updateInputCode ? this.updateInputCode : `
 
-  // Input Parameters (Linear By Default)
-  mat2 control_map = mat2(1., 0., 0., 1.);
-  vec2 control_max_mag = vec2(1., 1.);
-  mat2 disturbance_map = mat2(1., 0., 0., 1.);
-  vec2 disturbance_max_mag = vec2(0.5, 0.5);
+// Input Parameters (Linear By Default)
 
-  // Input Laws (Max by Default)
-  vec2 control_law(vec2 x, float t, vec2 p, vec2 val) {
-    return control_max_mag; // debug
-  }
-  vec2 disturbance_law(vec2 x, float t, vec2 p, vec2 val) {
-    return disturbance_max_mag; // debug
-  }
+float game = 0.; // 0. for reach, 1. for avoid
 
-  // Final Input
-  vec2 get_control(vec2 x, float t, vec2 p, vec2 val) { 
-    return control_map * control_law(x, t, p, val);
-  }
-  vec2 get_disturbance(vec2 x, float t, vec2 p, vec2 val) { 
-    return disturbance_map * disturbance_law(x, t, p, val);
-  }
+mat2 control_matrix = mat2(1., 0., 0., 1.); // TODO relax to jacobian fn
+vec2 control_max_mag = vec2(1., 0.5);
+float control_bound_shape = 0.; // 0. for box, 1. for ball
 
-  // if the input map nonlinear/time-varying, 
-  // you must define control_jac and disturbance_jac fns here
-`
+mat2 disturbance_matrix = mat2(1., 0., 0., 1.);
+vec2 disturbance_max_mag = vec2(0.5, 0.25);
+float disturbance_bound_shape = 0.; // 0. for box, 1. for ball
+
+// Input Laws
+
+// TODO after upwind
+
+vec2 get_control(vec2 x, vec2 p, float t) { 
+  vec2 optimal_control = vec2(0.);
+  return control_matrix * optimal_control;
 }
-  `
+
+vec2 get_disturbance(vec2 x, vec2 p, float t) { 
+  vec2 optimal_disturbance = vec2(0.);
+  return disturbance_matrix * optimal_disturbance;
+}
+
+// Input Jacobians (ignorable)
+
+mat2 control_jacobian(vec2 x, float time) {
+  return control_matrix;
+}
+
+mat2 disturbance_jacobian(vec2 x, float time) {
+  return disturbance_matrix;
+}`}
+
+${this.updateHamiltonianCode ? this.updateHamiltonianCode : `
+
+// Momentum ie Hamiltonian
+
+float get_hamiltonian(vec2 x, vec2 p, float t, float val) { 
+  // float h = 0.1 * cos(t);
+  float h = dot(p, get_velocity(x) + get_control(x, p, t) + get_disturbance(x, p, t));
+  return h;
+}
+
+// Max Hamiltonian Derivative (ignorable)
+
+vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float val) {
+  mat2 control_jac = control_jacobian(x, t);
+  mat2 disturbance_jac = disturbance_jacobian(x, t);
+  return abs(get_velocity(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
+}
+
+// if your hamiltonian is NOT solely defined wrt a flow,
+// you must define max_partial_hamiltonian_costate or use a fixed LF parameter
+
+`}
+
+`
   }
 }

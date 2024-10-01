@@ -83,7 +83,7 @@ float disturbance_bound_shape = 0.; // 0. for box, 1. for ball
 
 // Input Laws
 
-// TODO after upwind
+// TODO after upwind (autonomy easier to debug)
 
 vec2 get_control(vec2 x, vec2 p, float t) { 
   vec2 optimal_control = vec2(0.);

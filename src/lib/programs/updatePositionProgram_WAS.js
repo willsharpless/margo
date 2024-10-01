@@ -105,7 +105,12 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
   }
 
   function updateParticlesPositions(bc_textures=null) {
+    
     var program = updateProgram;
+    var cursor = ctx.cursor;
+    var bbox = ctx.bbox;
+    var bbox_enc = ctx.bbox_at_bc_enc;
+
     gl.useProgram(program.program);
   
     util.bindAttribute(gl, ctx.quadBuffer, program.a_pos, 2);
@@ -122,25 +127,24 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     gl.uniform1i(program.texture_type, texture_type);
     gl.uniform1f(program.value_transfer, ctx.value_transfer);
-    // console.log("bc_textures (inside uPP)", bc_textures)
+    gl.uniform1f(program.spacing_std, 1/(ctx.particleStateResolution-1)); //
+    gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1)); // TODO WAS: diff size for diff dims
+    gl.uniform1f(program.spacing_y, Math.abs(bbox_enc.maxY - bbox_enc.minY)/(ctx.particleStateResolution-1)); // TODO WAS: diff size for diff dims
+
+    // Bind the external bc textures
     if (texture_type == 2 && bc_textures) {
-      // console.log("binding the bc textures to value uPP shader")
       var extra_tag = '_bc';
       var unit_offset = 2;
       bc_textures.bindTextures(gl, program, extra_tag, unit_offset) // for texturePositionNode
     }
     // late night idea: really need to ultimately interpolate the value with frag shader
     // late night idea: M optimal flow mode based on value evolution
-    // late night idea: evolution relative to the target
 
     gl.uniform1f(program.u_rand_seed, ctx.frameSeed);
     gl.uniform1f(program.u_h, ctx.integrationTimeStep);
     gl.uniform1f(program.time_step, ctx.integrationTimeStep);
     gl.uniform1f(program.frame, ctx.frame);
-    var cursor = ctx.cursor;
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
-
-    var bbox = ctx.bbox;
     gl.uniform2f(program.u_min, bbox.minX, bbox.minY);
     gl.uniform2f(program.u_max, bbox.maxX, bbox.maxY);
 

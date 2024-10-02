@@ -172,11 +172,51 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       // var pixelData = new Float32Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
       // gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
       // console.log("Raw output texture data:", pixelData);
-      var mid_txture_i = particleStateResolution * particleStateResolution / 2 + 500;
-      // console.log("mid_txture_i", mid_txture_i)
-      var mid_texture_RGBA = pixelData.slice(mid_txture_i*4, mid_txture_i*4 + 4);
-      var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
-      console.log("mid_texture_value (decoded)", mid_texture_value)
+      // var mid_txture_i = particleStateResolution * particleStateResolution / 2 + 500;
+      // // console.log("mid_txture_i", mid_txture_i)
+      // var mid_texture_RGBA = pixelData.slice(mid_txture_i*4, mid_txture_i*4 + 4);
+      // var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
+      // console.log("mid_texture_value (decoded)", mid_texture_value)
+      // var mid_texture_RGBA = pixelData.slice((mid_txture_i-1)*4, (mid_txture_i-1)*4 + 4);
+      // var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
+      // console.log("mid_texture_value @ - 1y_pos (decoded)", mid_texture_value)
+      // var mid_texture_RGBA = pixelData.slice((mid_txture_i-1)*4, (mid_txture_i-1)*4 + 4);
+      // var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
+      // console.log("mid_texture_value @ + 1y_pos (decoded)", mid_texture_value)
+
+      var spread = 1.;
+      var mid_i   = particleStateResolution * particleStateResolution / 2 + particleStateResolution / 2;
+      var mid_i_A = mid_i + spread * particleStateResolution;
+      var mid_i_B = mid_i - spread * particleStateResolution;
+      var mid_i_L = mid_i - spread * 1;
+      var mid_i_R = mid_i + spread * 1;
+
+      var mid_i_RGBA  = pixelData.slice(mid_i*4, mid_i*4 + 4);
+      var mid_iA_RGBA = pixelData.slice(mid_i_A*4, mid_i_A*4 + 4);
+      var mid_iB_RGBA = pixelData.slice(mid_i_B*4, mid_i_B*4 + 4);
+      var mid_iL_RGBA = pixelData.slice(mid_i_L*4, mid_i_L*4 + 4);
+      var mid_iR_RGBA = pixelData.slice(mid_i_R*4, mid_i_R*4 + 4);
+
+      var mid_i_val  = decodeFloatRGBA(mid_i_RGBA[0], mid_i_RGBA[1], mid_i_RGBA[2], mid_i_RGBA[3]);
+      var mid_iA_val = decodeFloatRGBA(mid_iA_RGBA[0], mid_iA_RGBA[1], mid_iA_RGBA[2], mid_iA_RGBA[3]);
+      var mid_iB_val = decodeFloatRGBA(mid_iB_RGBA[0], mid_iB_RGBA[1], mid_iB_RGBA[2], mid_iB_RGBA[3]);
+      var mid_iL_val = decodeFloatRGBA(mid_iL_RGBA[0], mid_iL_RGBA[1], mid_iL_RGBA[2], mid_iL_RGBA[3]);
+      var mid_iR_val = decodeFloatRGBA(mid_iR_RGBA[0], mid_iR_RGBA[1], mid_iR_RGBA[2], mid_iR_RGBA[3]);
+
+      if (ctx.frame == 1) {
+        console.log("At f1, mid_iB data  : ", mid_iB_val);
+        console.log("At f1, mid_iL data  : ", mid_iL_val);
+        console.log("At f1, mid_i  data  : ", mid_i_val);
+        console.log("At f1, mid_iR data  : ", mid_iR_val);
+        console.log("At f1, mid_iA data  : ", mid_iA_val);
+        
+        // var spac = spacing_x;
+        // console.log("At f1, mid_iB data  : ", spac * mid_iB_val);
+        // console.log("At f1, mid_iL data  : ", spac * mid_iL_val);
+        // console.log("At f1, mid_i  data  : ", spac * mid_i_val);
+        // console.log("At f1, mid_iR data  : ", spac * mid_iR_val);
+        // console.log("At f1, mid_iA data  : ", spac * mid_iA_val);
+      }
     }
     // bc doesn't use any textures!
 

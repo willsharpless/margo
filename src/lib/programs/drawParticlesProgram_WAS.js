@@ -180,6 +180,8 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
         console.log("First i, Before min/max, bc_val", bc_val)
       }
 
+      // var topmid_txture_i = particleStateResolution * particleStateResolution / 2;
+
       // if (i == 0) {
       //   console.log("reach mode:", reach_mode)
       //   // console.log("valueReachRGBA_enc:", valueReachRGBA_enc)
@@ -208,6 +210,35 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
         } else {
           bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
         }
+      }
+
+      // debugging diff
+      var spread = 1.;
+      var mid_i   = particleStateResolution * particleStateResolution / 2 + particleStateResolution / 2;
+      var mid_i_A = mid_i + spread * particleStateResolution;
+      var mid_i_B = mid_i - spread * particleStateResolution;
+      var mid_i_L = mid_i - spread * 1;
+      var mid_i_R = mid_i + spread * 1;
+      
+      if (i == mid_i) {
+        console.log("mid_i  : bc_val", bc_val, ", (x,y)", x, y);
+        // bc_val = 0.;
+      }
+      if (i == mid_i_R) {
+        console.log("mid_i_R: bc_val", bc_val, ", (x,y)", x, y);
+        // bc_val = 0.;
+      }
+      if (i == mid_i_L) {
+        console.log("mid_i_L: bc_val", bc_val, ", (x,y)", x, y);
+        // bc_val = 0.;
+      }
+      if (i == mid_i_A) {
+        console.log("mid_i_A: bc_val", bc_val, ", (x,y)", x, y);
+        // bc_val = 0.;
+      }
+      if (i == mid_i_B) {
+        console.log("mid_i_B: bc_val", bc_val, ", (x,y)", x, y);
+        // bc_val = 0.;
       }
 
       // insert value into temp array

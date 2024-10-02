@@ -100,7 +100,22 @@ void main() {
             return `
             // vec2 newPos = pos + velocity;
             // float newValue = value + valVelocity;
-            float newValue = next_tv.y;
+            
+            vec2 v_tex_pos_f = 1.-v_tex_pos;
+            // float newValue = v_tex_pos_f.x;
+            
+            vec2 L_tex_pos = v_tex_pos_f - 1. * spacing_std; 
+            // vec2 LR_tex_pos_x = get_LRpos_inbound(L_tex_pos.x, spacing_std, 0.);
+            // vec2 LR_tex_pos_y = get_LRpos_inbound(L_tex_pos.y, spacing_std, 0.);
+            // float newValue = LR_tex_pos_x.x;
+            // float newValue = L_tex_pos.x;
+            
+            vec2 costate_L = get_diff(u_particles_x, L_tex_pos);
+            vec2 raw_diff_L = get_diff(u_particles_x, L_tex_pos) * vec2(spacing_x, spacing_y);
+            float newValue = raw_diff_L.x;
+
+            // float newValue = value;
+            // float newValue = next_tv.y; // TRUE LINE
             `
           }
         },

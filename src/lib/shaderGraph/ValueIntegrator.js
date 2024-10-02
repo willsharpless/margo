@@ -33,7 +33,9 @@ uniform float spacing_std;
 // }
 
 vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {
-  float R_pos = L_pos + LRstep;
+  // given an L texture position and the L-R step size, this fn returns the bc-corrected L and R texture positions
+
+  float R_pos = L_pos + LRstep; // in [0,1]
 
   if (periodic == 1.) { // periodic extrap
     L_pos = floor(L_pos + 1.);
@@ -52,15 +54,21 @@ vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {
 }
   
 vec2 get_diff(sampler2D values, vec2 L_tex_pos) {
+  // given an L texture position, this fn returns the finite differences in x & y to the R counterpart in the grid
 
   float x_periodic = 0.; // TODO WAS: make global
   float y_periodic = 0.; // TODO WAS: make global
 
   vec2 LR_tex_pos_x = get_LRpos_inbound(L_tex_pos.x, spacing_std, x_periodic);
+  float LR_tex_pos_x_L = LR_tex_pos_x.x;
+  float LR_tex_pos_x_R = LR_tex_pos_x.y;
+  
   vec2 LR_tex_pos_y = get_LRpos_inbound(L_tex_pos.y, spacing_std, y_periodic);
+  float LR_tex_pos_y_L = LR_tex_pos_y.x;
+  float LR_tex_pos_y_R = LR_tex_pos_y.y;
 
-  float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x.y, L_tex_pos.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x.x, L_tex_pos.y)))) / spacing_x;
-  float diff_y = (decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y.y))) - decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y.x)))) / spacing_y;
+  float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_R, L_tex_pos.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_L, L_tex_pos.y)))) / spacing_x;
+  float diff_y = (decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
 
   return vec2(diff_x, diff_y);
 }

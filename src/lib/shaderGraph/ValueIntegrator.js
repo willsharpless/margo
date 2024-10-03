@@ -9,9 +9,9 @@ export default class ValueIntegrator extends BaseShaderNode {
     return `
 uniform float time_step;
 uniform float u_h;
-uniform float spacing_x;
-uniform float spacing_y;
-uniform float spacing_std;
+// uniform float spacing_x;
+// uniform float spacing_y;
+// uniform float spacing_std;
 `
   }
 
@@ -67,9 +67,11 @@ vec2 get_diff(sampler2D values, vec2 L_tex_pos) {
   float LR_tex_pos_y_L = LR_tex_pos_y.x;
   float LR_tex_pos_y_R = LR_tex_pos_y.y;
 
-  float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_R, L_tex_pos.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_L, L_tex_pos.y)))) / spacing_x;
-  float diff_y = (decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
-
+  // float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_R, L_tex_pos.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_L, L_tex_pos.y)))) / spacing_x;
+  // float diff_y = (decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
+  float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_R, v_tex_pos_f.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_L, v_tex_pos_f.y)))) / spacing_x;
+  float diff_y = (decodeFloatRGBA(texture2D(values, vec2(v_tex_pos_f.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(values, vec2(v_tex_pos_f.x, LR_tex_pos_y_L)))) / spacing_y;
+  
   return vec2(diff_x, diff_y);
 }
 
@@ -106,7 +108,7 @@ mat2 WENO5(sampler2D values) {
   // vec2 v_tex_pos_f = v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
   // float value = decodeFloatRGBA(texture2D(values, 1.-v_tex_pos));
   vec2 v_tex_pos_f = 1.-v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
-  float value = decodeFloatRGBA(texture2D(values, v_tex_pos_f));
+  // float value = decodeFloatRGBA(texture2D(values, v_tex_pos_f));
   
   // Compute Differences
 
@@ -131,7 +133,7 @@ mat2 FO(sampler2D values) {
   // vec2 v_tex_pos_f = v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
   // float value = decodeFloatRGBA(texture2D(values, 1.-v_tex_pos));
   vec2 v_tex_pos_f = 1.-v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
-  float value = decodeFloatRGBA(texture2D(values, v_tex_pos_f));
+  // float value = decodeFloatRGBA(texture2D(values, v_tex_pos_f));
   
   // Compute Differences
 
@@ -241,13 +243,13 @@ vec2 rk4(const vec2 state) {
   // float valVelocity = -0.;
   // float valVelocity = -0.002;
 
-  vec2 costate = state;
-  float time = frame * time_step;
-  float valVelocity = get_hamiltonian(state, costate, time, value);
+  // vec2 costate = state;
+  // float time = frame * time_step;
+  // float valVelocity = get_hamiltonian(state, costate, time, value);
   
-  float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
-  float target_time_step = time_step;
-  vec2 next_tv = tvd_rk_3o(state, time, value, target_time_step, ts_fxd_or_adp);
+  // float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
+  // float target_time_step = time_step;
+  // vec2 next_tv = tvd_rk_3o(state, time, value, target_time_step, ts_fxd_or_adp);
 `
   }
 }

@@ -6,6 +6,7 @@ import textureCollection_WAS from '../utils/textureCollection_WAS';
 import makeStatCounter from '../utils/makeStatCounter';
 import {decodeFloatRGBA} from '../utils/floatPacking';
 import bus from '../bus';
+import frame from 'stylus/lib/stack/frame';
 
 const particlePositionShaderCodeBuilder = new UpdatePositionGraph_WAS();
 
@@ -137,7 +138,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       var unit_offset = 2;
       bc_textures.bindTextures(gl, program, extra_tag, unit_offset) // for texturePositionNode
     }
-    // late night idea: really need to ultimately interpolate the value with frag shader
+    // late night idea: really should be interpolating the value with frag shader
     // late night idea: M optimal flow mode based on value evolution
 
     gl.uniform1f(program.u_rand_seed, ctx.frameSeed);
@@ -203,12 +204,18 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       var mid_iL_val = decodeFloatRGBA(mid_iL_RGBA[0], mid_iL_RGBA[1], mid_iL_RGBA[2], mid_iL_RGBA[3]);
       var mid_iR_val = decodeFloatRGBA(mid_iR_RGBA[0], mid_iR_RGBA[1], mid_iR_RGBA[2], mid_iR_RGBA[3]);
 
-      if (ctx.frame == 1) {
-        console.log("At f1, mid_iB data  : ", mid_iB_val);
-        console.log("At f1, mid_iL data  : ", mid_iL_val);
-        console.log("At f1, mid_i  data  : ", mid_i_val);
-        console.log("At f1, mid_iR data  : ", mid_iR_val);
-        console.log("At f1, mid_iA data  : ", mid_iA_val);
+      // console.log("frame", ctx.frame)
+      if (ctx.frame == 1 || ctx.frame == 2) {
+        console.log("At f", ctx.frame, ", mid_iB data  : ", mid_iB_val);
+        console.log("At f", ctx.frame, ", mid_iL data  : ", mid_iL_val);
+        console.log("At f", ctx.frame, ", mid_i  data  : ", mid_i_val);
+        console.log("At f", ctx.frame, ", mid_iR data  : ", mid_iR_val);
+        console.log("At f", ctx.frame, ", mid_iA data  : ", mid_iA_val);
+
+        // console.log("At f", ctx.frame, ", mid_i Ly diff  : ", mid_i_val - mid_iB_val);
+        // console.log("At f", ctx.frame, ", mid_i Lx diff  : ", mid_i_val - mid_iL_val);
+        // console.log("At f", ctx.frame, ", mid_iA  Ly diff  : ", mid_iA_val - mid_i_val);
+        // console.log("At f", ctx.frame, ", mid_iR  Lx diff  : ", mid_iR_val - mid_i_val);
         
         // var spac = spacing_x;
         // console.log("At f1, mid_iB data  : ", spac * mid_iB_val);

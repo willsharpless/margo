@@ -221,23 +221,23 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       var mid_i_R = mid_i + spread * 1;
       
       if (i == mid_i) {
-        console.log("mid_i  : bc_val", bc_val, ", (x,y)", x, y);
+        console.log("mid_i  : bc_val", bc_val);
         // bc_val = 0.;
       }
       if (i == mid_i_R) {
-        console.log("mid_i_R: bc_val", bc_val, ", (x,y)", x, y);
+        console.log("mid_i_R: bc_val", bc_val);
         // bc_val = 0.;
       }
       if (i == mid_i_L) {
-        console.log("mid_i_L: bc_val", bc_val, ", (x,y)", x, y);
+        console.log("mid_i_L: bc_val", bc_val);
         // bc_val = 0.;
       }
       if (i == mid_i_A) {
-        console.log("mid_i_A: bc_val", bc_val, ", (x,y)", x, y);
+        console.log("mid_i_A: bc_val", bc_val);
         // bc_val = 0.;
       }
       if (i == mid_i_B) {
-        console.log("mid_i_B: bc_val", bc_val, ", (x,y)", x, y);
+        console.log("mid_i_B: bc_val", bc_val);
         // bc_val = 0.;
       }
 

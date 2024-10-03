@@ -101,20 +101,41 @@ void main() {
             // vec2 newPos = pos + velocity;
             // float newValue = value + valVelocity;
             
-            vec2 v_tex_pos_f = 1.-v_tex_pos;
+            // vec2 v_tex_pos_f = 1.-v_tex_pos;
             // float newValue = v_tex_pos_f.x;
             
-            vec2 L_tex_pos = v_tex_pos_f - 1. * spacing_std; 
+            // vec2 L_tex_pos = v_tex_pos_f - 1. * spacing_std; 
             // vec2 LR_tex_pos_x = get_LRpos_inbound(L_tex_pos.x, spacing_std, 0.);
             // vec2 LR_tex_pos_y = get_LRpos_inbound(L_tex_pos.y, spacing_std, 0.);
             // float newValue = LR_tex_pos_x.x;
             // float newValue = L_tex_pos.x;
+
+            // vec2 LR_tex_pos_x = get_LRpos_inbound(L_tex_pos.x, spacing_std, 0.);
+            // float LR_tex_pos_x_L = LR_tex_pos_x.x;
+            // float LR_tex_pos_x_R = LR_tex_pos_x.y;
             
-            vec2 costate_L = get_diff(u_particles_x, L_tex_pos);
-            vec2 raw_diff_L = get_diff(u_particles_x, L_tex_pos) * vec2(spacing_x, spacing_y);
-            float newValue = raw_diff_L.x;
+            // vec2 LR_tex_pos_y = get_LRpos_inbound(L_tex_pos.y, spacing_std, 0.);
+            // float LR_tex_pos_y_L = LR_tex_pos_y.x;
+            // float LR_tex_pos_y_R = LR_tex_pos_y.y;
+
+            // float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_R, L_tex_pos.y))) - decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_L, L_tex_pos.y)))) / spacing_x;
+            // float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, vec2(L_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(u_particles_x, vec2(L_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
+            // float newValue = diff_x;
+            
+            // vec2 costate_L = get_diff(u_particles_x, L_tex_pos);
+            // vec2 raw_diff_L = get_diff(u_particles_x, L_tex_pos) * vec2(spacing_x, spacing_y);
+            // float newValue = costate_L.y;
+
+            // float newValue = diff_x_dec;
 
             // float newValue = value;
+
+            // if (value_transfer > 0.) {
+            //   newValue = value;
+            // } else {
+            //   newValue = next_tv.y;
+            // }
+
             // float newValue = next_tv.y; // TRUE LINE
             `
           }

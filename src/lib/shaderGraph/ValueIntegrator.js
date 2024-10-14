@@ -22,30 +22,20 @@ uniform float u_h;
 
 // SPATIAL BOUNDARY CONDITION
 
-// float spatial_bc_linear(sampler2D tex, vec2 tex_pos, ) {
-  //   vec2 tex_pos_c = clamp(tex_pos, vec2(0.), vec2(1.));
-  //   float val_c = decodeFloatRGBA(texture2D(tex, tex_pos_c));
-  //   if (tex_pos_c == tex_pos) { return val_c }
-  //   extrap_dir = tex_pos - tex_pos_c;
-  //   tex_pos_i = tex_pos_c - extrap_dir;
-  //   val_i = decodeFloatRGBA(texture2D(tex, tex_pos_i));
-  //   return (val_c - val_i) + val_c;
-// }
-
 vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {
   // given an L texture position and the L-R step size, this fn returns the bc-corrected L and R texture positions
 
   float R_pos = L_pos + LRstep; // in [0,1]
 
-  if (periodic == 1.) { // periodic extrap
+  if (periodic == 1.) { // periodic extrap (UNTESTED)
     L_pos = floor(L_pos + 1.);
     R_pos = floor(R_pos + 1.);
     
-  } else { // linear extrap, diff is boundary diff
-    if (L_pos < 0.) {
+  } else { // linear extrap, diff is boundary diff (cuz lin -> const diff)
+    if (L_pos <= 0.) {
       L_pos = 0.;
       R_pos = LRstep;
-    } else if (R_pos > 1.) {
+    } else if (R_pos >= 1.) {
       L_pos = 1. - LRstep;
       R_pos = 1.;
     }
@@ -53,7 +43,7 @@ vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {
   return vec2(L_pos, R_pos);
 }
   
-vec2 get_diff(sampler2D values, vec2 L_tex_pos) {
+vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos) {
   // given an L texture position, this fn returns the finite differences in x & y to the R counterpart in the grid
 
   float x_periodic = 0.; // TODO WAS: make global
@@ -67,11 +57,9 @@ vec2 get_diff(sampler2D values, vec2 L_tex_pos) {
   float LR_tex_pos_y_L = LR_tex_pos_y.x;
   float LR_tex_pos_y_R = LR_tex_pos_y.y;
 
-  // float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_R, L_tex_pos.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_L, L_tex_pos.y)))) / spacing_x;
-  // float diff_y = (decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(values, vec2(L_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
-  float diff_x = (decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_R, v_tex_pos_f.y))) - decodeFloatRGBA(texture2D(values, vec2(LR_tex_pos_x_L, v_tex_pos_f.y)))) / spacing_x;
-  float diff_y = (decodeFloatRGBA(texture2D(values, vec2(v_tex_pos_f.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(values, vec2(v_tex_pos_f.x, LR_tex_pos_y_L)))) / spacing_y;
-  
+  float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_R, og_tex_pos.y))) - decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_L, og_tex_pos.y)))) / spacing_x;
+  float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, vec2(og_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(u_particles_x, vec2(og_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
+
   return vec2(diff_x, diff_y);
 }
 
@@ -105,19 +93,16 @@ vec2 weno_comp(vec2 v0, vec2 v1, vec2 v2, vec2 v3, vec2 v4) {
 
 mat2 WENO5(sampler2D values) {
 
-  // vec2 v_tex_pos_f = v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
-  // float value = decodeFloatRGBA(texture2D(values, 1.-v_tex_pos));
-  vec2 v_tex_pos_f = 1.-v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
-  // float value = decodeFloatRGBA(texture2D(values, v_tex_pos_f));
+  vec2 v_tex_pos_f = 1. - v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
   
   // Compute Differences
 
-  vec2 diff_m3 = get_diff(values, v_tex_pos_f - 3. * spacing_std);
-  vec2 diff_m2 = get_diff(values, v_tex_pos_f - 2. * spacing_std);
-  vec2 diff_m1 = get_diff(values, v_tex_pos_f - 1. * spacing_std);
-  vec2 diff_m0 = get_diff(values, v_tex_pos_f - 0. * spacing_std);
-  vec2 diff_p1 = get_diff(values, v_tex_pos_f + 1. * spacing_std);
-  vec2 diff_p2 = get_diff(values, v_tex_pos_f + 2. * spacing_std);
+  vec2 diff_m3 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 3. * spacing_std);
+  vec2 diff_m2 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 2. * spacing_std);
+  vec2 diff_m1 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std);
+  vec2 diff_m0 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std);
+  vec2 diff_p1 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 1. * spacing_std);
+  vec2 diff_p2 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 2. * spacing_std);
 
   // Compute Weighting
 
@@ -130,15 +115,12 @@ mat2 WENO5(sampler2D values) {
 
 mat2 FO(sampler2D values) {
 
-  // vec2 v_tex_pos_f = v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
-  // float value = decodeFloatRGBA(texture2D(values, 1.-v_tex_pos));
-  vec2 v_tex_pos_f = 1.-v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
-  // float value = decodeFloatRGBA(texture2D(values, v_tex_pos_f));
-  
+  vec2 v_tex_pos_f = 1. - v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
+
   // Compute Differences
 
-  vec2 costate_L = get_diff(values, v_tex_pos_f - 1. * spacing_std); // diff_m1
-  vec2 costate_R = get_diff(values, v_tex_pos_f - 0. * spacing_std); // diff_m0
+  vec2 costate_L = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std); // diff_m1
+  vec2 costate_R = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std); // diff_m0
   mat2 costate_LR = mat2(costate_L, costate_R);
 
   return costate_LR;
@@ -168,12 +150,12 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
   // fixed_or_max determines if the time step is a fixed step (==0.) or the max allowed (==1.)
 
   // Compute the Upwind Gradients
-  // vec2 costate_L = state;
-  // vec2 costate_R = state;
-  mat2 costate_LR = FO(u_particles_x);
+  vec2 costate_L = state;
+  vec2 costate_R = state;
+  // mat2 costate_LR = FO(u_particles_x);
   // mat2 costate_LR = WENO5(u_particles_x);
-  vec2 costate_L = costate_LR[0];
-  vec2 costate_R = costate_LR[1];
+  // vec2 costate_L = costate_LR[0];
+  // vec2 costate_R = costate_LR[1];
   
   // Compute the Artificial Dissipation
   // float dvdt = 0.2 * cos(time); // debugging

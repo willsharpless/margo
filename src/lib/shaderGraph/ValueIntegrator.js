@@ -128,19 +128,20 @@ mat2 FO(sampler2D values) {
 
 // mat2 ENO3(vec2 state, float time, float value) {
 //   // TODO!
-//   return costate_L_costate_R;
+//   return costate_LR;
 // }
 
 // DISSIPATION
 
 vec2 locallocalLF(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
   // TODO: for globalLF/localLF will need to compute max range
+  // e.g. max_partial_hamiltonian_costate(state, max_costate_L, max_costate_R, time, value);
   return max_partial_hamiltonian_costate(state, costate_L, costate_R, time, value);
 }
 
 float dissipated_hamiltonian(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
   vec2 alpha = locallocalLF(state, costate_L, costate_R, time, value);
-  return get_hamiltonian(state, 0.5 * (costate_L + costate_R), time, value) - dot(alpha, 0.5 * (costate_R - costate_L)); // or abs?
+  return get_hamiltonian(state, 0.5 * (costate_L + costate_R), time, value) - dot(alpha, 0.5 * abs(costate_R - costate_L)); // for costate diff in diss, abs or not?
 }
 
 // STEP FUNCTION
@@ -150,12 +151,11 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
   // fixed_or_max determines if the time step is a fixed step (==0.) or the max allowed (==1.)
 
   // Compute the Upwind Gradients
-  vec2 costate_L = state;
-  vec2 costate_R = state;
-  // mat2 costate_LR = FO(u_particles_x);
+  // mat2 costate_LR = mat2(state, state);
+  mat2 costate_LR = FO(u_particles_x);
   // mat2 costate_LR = WENO5(u_particles_x);
-  // vec2 costate_L = costate_LR[0];
-  // vec2 costate_R = costate_LR[1];
+  vec2 costate_L = costate_LR[0];
+  vec2 costate_R = costate_LR[1];
   
   // Compute the Artificial Dissipation
   // float dvdt = 0.2 * cos(time); // debugging

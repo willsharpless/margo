@@ -83,7 +83,7 @@ float disturbance_bound_shape = 0.; // 0. for box, 1. for ball
 
 // Input Laws
 
-// TODO after upwind (autonomy easier to debug)
+// FIXME autonomous for now (will test after upwind)
 
 vec2 get_control(vec2 x, vec2 p, float t) { 
   vec2 optimal_control = vec2(0.);
@@ -110,7 +110,7 @@ ${this.updateHamiltonianCode ? this.updateHamiltonianCode : `
 // Momentum ie Hamiltonian
 
 float get_hamiltonian(vec2 x, vec2 p, float t, float val) { 
-  // float h = 0.1 * cos(t);
+  // float h = 0.1 * cos(t); // debugging
   float h = dot(p, get_velocity(x) + get_control(x, p, t) + get_disturbance(x, p, t));
   return h;
 }

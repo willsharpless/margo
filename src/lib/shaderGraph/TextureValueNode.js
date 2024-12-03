@@ -164,39 +164,33 @@ varying vec2 v_tex_pos;
     // float diffusion = dot(vec2(0.0001), abs(costate_R_FO - costate_L_FO));
     // float diffusion = dot(vec2(1.), abs(costate_R_FO - costate_L_FO));
     // float diffusion = dot(vec2(0.001 * abs(diff_x_dec)), (costate_R_FO - costate_L_FO)); // workish
-    float diffusion = dot(vec2(0.001 * 0.5 * abs(diff_x_dec + diff_x_dec2)), 0.5 * (costate_R_FO - costate_L_FO)); // workish
     // float diffusion = dot(vec2(0.001 * abs(diff_x_dec)+abs(diff_y_dec)), abs(costate_R_FO - costate_L_FO)); //doesnt work
 
     // float ham = abs(diff_x_dec + diff_x_dec2)/2. + abs(diff_y_dec + diff_y_dec2)/2.;
-    float ham = abs(diff_x_dec + diff_x_dec2)/2.;
     // float ham = (diff_x_dec + diff_x_dec2)/2.;
-    newValue = value + 0.01 * time_step * (ham - diffusion);
 
-    // if (v_tex_pos_f.x <= 0.) {
-    //   newValue = value;
-    // } else {
-    //   newValue = value + 0.01 * time_step * diff_x_dec; 
-    //   // newValue = value + 0.1 * time_step * sqrt(diff_x_dec*diff_x_dec + diff_x_dec*diff_x_dec);
-    // }
+    // last debugging state for horizontal ham
+    // float diffusion = dot(vec2(0.0001 * 0.5 * abs(diff_x_dec + diff_x_dec2)), 0.5 * abs(costate_R_FO - costate_L_FO)); // works-ish
+    float diffusion = dot(vec2(0.0001), 0.5 * abs(costate_R_FO - costate_L_FO)); // works-ish
+    float ham = abs(diff_x_dec + diff_x_dec2)/2.;
+    // newValue = value + 0.1 * time_step * (ham - diffusion);
+    newValue = value + time_step * (ham - diffusion);
 
     // vec2 next_tv = tvd_rk_3o(state, time, last_value, target_time_step, ts_fxd_or_adp);
     // newValue = next_tv.y;
     // newValue = value;
 
-    vec2 costate = state;
-    float time = frame * time_step;
+    // vec2 costate = state;
     // float valVelocity = get_hamiltonian(state, costate, time, value);
     
-    // float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
+    // float time = frame * time_step;
+    // float ts_fxd_or_adp = 0.; // FIXME fixed time-step for now (will need to split frame from time...)
     // float target_time_step = time_step;
+
     // vec2 next_tv = tvd_rk_3o(state, time, value, target_time_step, ts_fxd_or_adp);
     // newValue = next_tv.y;
 
   }
-  // float newValue = decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_R, L_tex_pos.y)));
-  // float newValue = decodeFloatRGBA(texture2D(u_particles_x, vec2(L_tex_pos.x, L_tex_pos.y)));
-  // float newValue = decodeFloatRGBA(texture2D(u_particles_x, 1. - v_tex_pos_f));
-  // float newValue = decodeFloatRGBA(texture2D(u_particles_x, 1. - v_tex_pos));
 `
     }
     return `

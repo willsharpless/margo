@@ -179,7 +179,7 @@ ${main.join('\n')}
   }
   
   // level set plotting
-  if ((val/2. - floor(val/2.)) > thresh && texture_type != 0) { //FIXME (last condit)
+  if ((val/1.2 - floor(val/1.2)) > thresh && texture_type != 0) { //FIXME (last condit)
     // nothing
   } else if (val < thresh && texture_type != 0) {
     filler = 1.;

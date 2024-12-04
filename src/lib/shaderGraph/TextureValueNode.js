@@ -123,15 +123,15 @@ varying vec2 v_tex_pos;
   vec2 costate_L_FO = costate_LR_FO[0];
   vec2 costate_R_FO = costate_LR_FO[1];
 
-  vec2 costate_L = 1. * costate_L_FO;
-  vec2 costate_R = 1. * costate_R_FO;
+  // vec2 costate_L = 1. * costate_L_FO;
+  // vec2 costate_R = 1. * costate_R_FO;
 
   mat2 costate_LR_WEN05 = WENO5(u_particles_x);
   vec2 costate_L_WEN05 = costate_LR_WEN05[0];
   vec2 costate_R_WEN05 = costate_LR_WEN05[1];
   
-  // vec2 costate_L = 1. * costate_L_WEN05;
-  // vec2 costate_R = 1. * costate_R_WEN05;
+  vec2 costate_L = 1. * costate_L_WEN05;
+  vec2 costate_R = 1. * costate_R_WEN05;
 
   float diff_x_dec = costate_L.x;
   float diff_y_dec = costate_L.y;
@@ -170,9 +170,13 @@ varying vec2 v_tex_pos;
     // float ham = (diff_x_dec + diff_x_dec2)/2.;
 
     // last debugging state for horizontal ham
+    
     // float diffusion = dot(vec2(0.0001 * 0.5 * abs(diff_x_dec + diff_x_dec2)), 0.5 * abs(costate_R_FO - costate_L_FO)); // works-ish
     float diffusion = dot(vec2(0.0001), 0.5 * abs(costate_R_FO - costate_L_FO)); // works-ish
-    float ham = abs(diff_x_dec + diff_x_dec2)/2.;
+    // float diffusion = dot(vec2(0.01), 0.5 * (abs(costate_R_FO) + abs(costate_L_FO))); // no diff
+    
+    // float ham = abs(diff_x_dec + diff_x_dec2)/2.;
+    float ham = abs(diff_x_dec + diff_x_dec2)/2. + abs(diff_y_dec + diff_y_dec2)/2.;
     // newValue = value + 0.1 * time_step * (ham - diffusion);
     newValue = value + time_step * (ham - diffusion);
 

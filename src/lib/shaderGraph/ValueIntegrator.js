@@ -57,8 +57,13 @@ vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos) {
   float LR_tex_pos_y_L = LR_tex_pos_y.x;
   float LR_tex_pos_y_R = LR_tex_pos_y.y;
 
-  float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_R, og_tex_pos.y))) - decodeFloatRGBA(texture2D(u_particles_x, vec2(LR_tex_pos_x_L, og_tex_pos.y)))) / spacing_x;
-  float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, vec2(og_tex_pos.x, LR_tex_pos_y_R))) - decodeFloatRGBA(texture2D(u_particles_x, vec2(og_tex_pos.x, LR_tex_pos_y_L)))) / spacing_y;
+  vec2 R_tex_pos_ogy = vec2(LR_tex_pos_x_R, og_tex_pos.y);
+  vec2 L_tex_pos_ogy = vec2(LR_tex_pos_x_L, og_tex_pos.y);
+  vec2 R_tex_pos_ogx = vec2(og_tex_pos.x, LR_tex_pos_y_R);
+  vec2 L_tex_pos_ogx = vec2(og_tex_pos.x, LR_tex_pos_y_L);
+
+  float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogy))) / spacing_x;
+  float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogx))) / spacing_y;
 
   return vec2(diff_x, diff_y);
 }

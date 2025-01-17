@@ -51,8 +51,12 @@ uniform vec2 u_min;
 uniform vec2 u_max;
 // uniform int texture_type;
 
+attribute float a_index;
+varying float v_tex_index;
+
 void main() {
     v_tex_pos = a_pos;
+    v_tex_index = a_index;
     gl_Position = vec4(1.0 - 2.0 * a_pos, 0, 1);
 }`
   }

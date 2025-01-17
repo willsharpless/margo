@@ -26,7 +26,7 @@ var defaultVectorField = wrapVectorField(`v.x = -0.2 * s.x + 0.1 * s.y;
 
 var pendingSave;
 var defaults = {
-  timeStep: 0.01,
+  timeStep: 0.003,
   dropProbability: 0.000125,
   particleCount: 1000000, // FIXME WAS: Separate particle count for value textures
   fadeout: .999,
@@ -142,19 +142,43 @@ function setDropProbability(dropProbability) {
 }
 
 function getBC() {
+  // Initial Shape!
+  
+  // First Quadrant Sqr
   // return {
-  //   minX: -1.,
-  //   maxX: 1.,
-  //   minY: -1.,
-  //   maxY: 1.,
+  //   cx: 0.5,
+  //   cy: 0.5,
+  //   qx: 0.5,
+  //   qy: 0.5,
+  //   shape: 1, 
   // };
-  return {
-    cx: 0.,
-    cy: 0.,
-    qx: 1.,
-    qy: 1.,
-    shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
-  };
+
+  // Center Circle
+  // return {
+  //   cx: 0.,
+  //   cy: 0.,
+  //   qx: 1.,
+  //   qy: 1.,
+  //   shape: 2, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+  // };
+
+  // Center Sqr
+  // return {
+  //   cx: 0.,
+  //   cy: 0.,
+  //   qx: 0.5,
+  //   qy: 0.5,
+  //   shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+  // };
+
+    // Center Cyclinder
+    return {
+      cx: 0.,
+      cy: 0.,
+      qx: 0.5,
+      qy: 3.4028234663852886e+38,
+      shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+    };
 }
 
 function getBBox() {

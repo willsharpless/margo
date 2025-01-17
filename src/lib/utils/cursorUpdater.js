@@ -57,6 +57,7 @@ export default function createCursorUpdater(ctx) {
   function setClick(clientX, clientY) {
     if (ctx.bc_drawing_mode) {
       ctx.drawing_click_sum += 1;
+      // console.log("Click Sum % 3:", ctx.drawing_click_sum % 3) // DELETE ME
     }
     ctx.cursor.clickX = getSceneXFromClientX(clientX);
     ctx.cursor.clickY = getSceneYFromClientY(clientY);

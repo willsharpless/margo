@@ -128,9 +128,10 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     gl.uniform1i(program.texture_type, texture_type);
     gl.uniform1f(program.value_transfer, ctx.value_transfer);
-    gl.uniform1f(program.spacing_std, 1/(ctx.particleStateResolution-1)); //
-    gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1)); // TODO WAS: diff size for diff dims
-    gl.uniform1f(program.spacing_y, Math.abs(bbox_enc.maxY - bbox_enc.minY)/(ctx.particleStateResolution-1)); // TODO WAS: diff size for diff dims
+    gl.uniform1f(program.spacing_std, 1/ctx.particleStateResolution); //
+    gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution)); // TODO WAS: diff size for diff dims
+    gl.uniform1f(program.spacing_y, Math.abs(bbox_enc.maxY - bbox_enc.minY)/(ctx.particleStateResolution)); // TODO WAS: diff size for diff dims
+    gl.uniform1f(program.u_particles_res, ctx.particleStateResolution)
 
     // Bind the external bc textures
     if (texture_type == 2 && bc_textures) {
@@ -170,6 +171,8 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, ctx.framebuffer);
       var pixelData = new Uint8Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
       gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
+      
+      // og attempts at this
       // var pixelData = new Float32Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
       // gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
       // console.log("Raw output texture data:", pixelData);
@@ -206,6 +209,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
       // console.log("frame", ctx.frame)
       if (ctx.frame == 1 || ctx.frame == 2) {
+        console.log("writeTextures.length", writeTextures.length)
         console.log("At f", ctx.frame, ", mid_iB data  : ", mid_iB_val);
         console.log("At f", ctx.frame, ", mid_iL data  : ", mid_iL_val);
         console.log("At f", ctx.frame, ", mid_i  data  : ", mid_i_val);
@@ -223,6 +227,54 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
         // console.log("At f1, mid_i  data  : ", spac * mid_i_val);
         // console.log("At f1, mid_iR data  : ", spac * mid_iR_val);
         // console.log("At f1, mid_iA data  : ", spac * mid_iA_val);
+      }
+
+      if (ctx.frame == 1 || ctx.frame == 2 || ctx.frame == 3) { //ctx.frame % 2 == 0) {
+
+        var mat_len = 5;
+        var lowerl_mat = new Float64Array(mat_len * mat_len);
+        var center_mat = new Float64Array(mat_len * mat_len);
+        var lowerl_i_RGBA;
+        var center_i_RGBA;
+        var lowerl_i_val;
+        var center_i_val;
+
+        for (let k = 0; k < mat_len; k ++) {
+          for (let j = 0; j < mat_len; j ++) {
+    
+            var i = (k * particleStateResolution) + j; // lower left indices
+            var ic = (k * particleStateResolution) + j + (mid_i - 2 - 2 * particleStateResolution); // center indices
+
+            lowerl_i_RGBA = pixelData.slice(i*4, i*4 + 4);
+            center_i_RGBA = pixelData.slice(ic*4, ic*4 + 4);
+
+            lowerl_i_val = decodeFloatRGBA(lowerl_i_RGBA[0], lowerl_i_RGBA[1], lowerl_i_RGBA[2], lowerl_i_RGBA[3]);
+            center_i_val = decodeFloatRGBA(center_i_RGBA[0], center_i_RGBA[1], center_i_RGBA[2], center_i_RGBA[3]);
+            
+            lowerl_mat[k * mat_len + j] = lowerl_i_val;
+            center_mat[k * mat_len + j] = center_i_val;
+          }
+        }
+        
+        var round_num = 8;
+        console.log("\n(AT FRAME",ctx.frame,") LOWERL - MAT")
+        for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+          console.log(Array.from(lowerl_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+        }
+        console.log("\n(AT FRAME",ctx.frame,") CENTER - MAT")
+        for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+          console.log(Array.from(center_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+        }
+    
+        // NEXT NEED TO CONSOLE LOG:
+        // LR grads (in uPP)
+        // Diss coeff (in uPP)
+        // Diss ham (in uPP)
+        // Ham (in uPP)
+        // Next value (in uPP)
+    
+        console.log("")
+      
       }
     }
     // bc doesn't use any textures!

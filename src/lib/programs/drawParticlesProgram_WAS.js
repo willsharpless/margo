@@ -124,6 +124,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
 
     if (particleIndexBuffer) gl.deleteBuffer(particleIndexBuffer);
     particleIndexBuffer = util.createBuffer(gl, particleIndices);
+    ctx.particleIndexBuffer = particleIndexBuffer
 
     updatePositionProgram.updateParticlesCount(particleStateX, particleStateY);
   }
@@ -158,6 +159,66 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     console.log("flip mode?", flip_mode)
     console.log("sign", sign)
 
+    var min_enc_BC_val = 3.4028234663852886e+38;
+    var max_enc_BC_val = -3.4028234663852886e+37;
+
+    // debugging diff
+    var spread = 1.;
+    var mid_i   = particleStateResolution * particleStateResolution / 2 + particleStateResolution / 2;
+    var mid_i_A = mid_i + spread * particleStateResolution;
+    var mid_i_B = mid_i - spread * particleStateResolution;
+    var mid_i_L = mid_i - spread * 1;
+    var mid_i_R = mid_i + spread * 1;
+
+    var mat_len = 5;
+    var lowerl_mat_ix = new Float32Array(mat_len * mat_len);
+    var center_mat_ix = new Float32Array(mat_len * mat_len);
+    var lowerl_mat_x = new Float32Array(mat_len * mat_len);
+    var lowerl_mat_y = new Float32Array(mat_len * mat_len);
+    var center_mat_x = new Float32Array(mat_len * mat_len);
+    var center_mat_y = new Float32Array(mat_len * mat_len);
+    var lowerl_mat_bc_val = new Float32Array(mat_len * mat_len);
+    var center_mat_bc_val = new Float32Array(mat_len * mat_len);
+    
+    // this data will be stored, in order of access (bottom row first)
+
+    for (let k = 0; k < mat_len; k ++) {
+      for (let j = 0; j < mat_len; j ++) {
+
+        var i = (k * particleStateResolution) + j;
+        var ic = (k * particleStateResolution) + j + (mid_i - 2 - 2 * particleStateResolution);
+
+        lowerl_mat_ix[k * mat_len + j] = i;
+        center_mat_ix[k * mat_len + j] = ic;
+
+        lowerl_mat_x[k * mat_len + j] = j;
+        lowerl_mat_y[k * mat_len + j] = k;
+
+        center_mat_x[k * mat_len + j] = j + (particleStateResolution / 2) - 2;
+        center_mat_y[k * mat_len + j] = k + (particleStateResolution / 2) - 2;
+
+        // lowerl_i_RGBA = pixelData.slice(i*4, i*4 + 4);
+        // center_i_RGBA = pixelData.slice(ic*4, ic*4 + 4);
+
+        // lowerl_i_val = decodeFloatRGBA(lowerl_i_RGBA[0], lowerl_i_RGBA[1], lowerl_i_RGBA[2], lowerl_i_RGBA[3]);
+        // center_i_val = decodeFloatRGBA(center_i_RGBA[0], center_i_RGBA[1], center_i_RGBA[2], center_i_RGBA[3]);
+        
+        // lowerl_mat[k * mat_len + j] = lowerl_i_val;
+        // center_mat[k * mat_len + j] = center_i_val;
+
+        // if (k == 2 || j == 1) {
+        //   lowerl_mat[k * mat_len + j] = 1.;
+        // }
+        // if (k == 4 && j == 1) {
+        //   center_mat[k * mat_len + j] = 1.;
+        // }
+
+        // need to verify index location
+        // then can verify values etc.
+
+      }
+    }
+
     for (var i = 0; i < numParticles; i++) {
 
       var flr_ix = Math.floor(i / particleStateResolution);
@@ -176,9 +237,10 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
         var bc_val = 3.4028234663852886e+38 // FIXME WAS: atm, ~largest 32-bit number, 10^38            
       }
       
-      if (i==0) {
+      if (i==0) { 
         console.log("First i, Before min/max, bc_val", bc_val)
       }
+      
 
       // var topmid_txture_i = particleStateResolution * particleStateResolution / 2;
 
@@ -211,34 +273,45 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
           bc_val = Math.min(decodeFloatRGBA(old_val_rgba[0], old_val_rgba[1], old_val_rgba[2], old_val_rgba[3]), bc_val);
         }
       }
-
-      // debugging diff
-      var spread = 1.;
-      var mid_i   = particleStateResolution * particleStateResolution / 2 + particleStateResolution / 2;
-      var mid_i_A = mid_i + spread * particleStateResolution;
-      var mid_i_B = mid_i - spread * particleStateResolution;
-      var mid_i_L = mid_i - spread * 1;
-      var mid_i_R = mid_i + spread * 1;
       
-      if (i == mid_i) {
-        console.log("mid_i  : bc_val", bc_val);
-        // bc_val = 0.;
-      }
-      if (i == mid_i_R) {
-        console.log("mid_i_R: bc_val", bc_val);
-        // bc_val = 0.;
-      }
-      if (i == mid_i_L) {
-        console.log("mid_i_L: bc_val", bc_val);
-        // bc_val = 0.;
-      }
-      if (i == mid_i_A) {
-        console.log("mid_i_A: bc_val", bc_val);
-        // bc_val = 0.;
-      }
-      if (i == mid_i_B) {
-        console.log("mid_i_B: bc_val", bc_val);
-        // bc_val = 0.;
+      // if (i == mid_i) {
+      //   console.log("mid_i  : bc_val", bc_val);
+      //   bc_val = 0.;
+      // }
+      // if (i == mid_i_R) {
+      //   console.log("mid_i_R: bc_val", bc_val);
+      //   bc_val = 0.;
+      // }
+      // if (i == mid_i_L) {
+      //   console.log("mid_i_L: bc_val", bc_val);
+      //   bc_val = 0.;
+      // }
+      // if (i == mid_i_A) {
+      //   console.log("mid_i_A: bc_val", bc_val);
+      //   bc_val = 0.;
+      // }
+      // if (i == mid_i_B) {
+      //   console.log("mid_i_B: bc_val", bc_val);
+      //   bc_val = 0.;
+      // }
+
+      for (let j = 0; j < mat_len*mat_len; j ++) {
+        if (i == lowerl_mat_ix[j]) {
+          // console.log('LOWERL matched i:', i)
+          // bc_val = 0.;
+          // console.log('i:', i, ", bc val:", bc_val)
+          lowerl_mat_x[j] = x;
+          lowerl_mat_y[j] = y;
+          lowerl_mat_bc_val[j] = bc_val;
+        }
+        if (i == center_mat_ix[j]) {
+          // console.log('CENTER matched i:', i)
+          // bc_val = 0.;
+          // console.log('i:', i, ", bc val:", bc_val)
+          center_mat_x[j] = x;
+          center_mat_y[j] = y;
+          center_mat_bc_val[j] = bc_val;
+        }
       }
 
       // insert value into temp array
@@ -247,6 +320,9 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       }
       encodeFloatRGBA(bc_val, valueReachRGBA, i * 4);
       encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4);
+
+      min_enc_BC_val = Math.min(min_enc_BC_val, bc_val);
+      max_enc_BC_val = Math.max(max_enc_BC_val, bc_val);
 
       // // encoding/decoding test, interestingly only accurate to 1e-6
       // if (i == 0) {
@@ -259,8 +335,63 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       valueIndices[i] = i;
     }
 
+    // data printed to match spatial (bottom row last)
+    console.log("\nLOWERL IX (1D)")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+        console.log(lowerl_mat_ix.slice(i, i + mat_len).join(' '));
+    }
+    console.log("\nCENTER IX (1D)")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+        console.log(center_mat_ix.slice(i, i + mat_len).join(' '));
+    }
+
+    var round_num = 7;
+    console.log("\nSTATES - LOWERL - X")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+      console.log(Array.from(lowerl_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    }
+    console.log("\nSTATES - LOWERL - Y")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+      console.log(Array.from(lowerl_mat_y.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    }
+    console.log("\nSTATES - CENTER - X")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+      console.log(Array.from(center_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    }
+    console.log("\nSTATES - CENTER - Y")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+      console.log(Array.from(center_mat_y.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    }
+    console.log("\nVALUES - LOWERL - BC")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+      console.log(Array.from(lowerl_mat_bc_val.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    }
+    console.log("\nVALUES - CENTER - BC")
+    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+      console.log(Array.from(center_mat_bc_val.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    }
+
+    // NEXT NEED TO CONSOLE LOG:
+    // LR grads (in uPP)
+    // Diss coeff (in uPP)
+    // Diss ham (in uPP)
+    // Ham (in uPP)
+    // Next value (in uPP)
+
+    console.log("")
+
+    console.log("BC Value Encoded cx:", bc.cx);
+    console.log("BC Value Encoded cy:", bc.cy);
+    console.log("BC Value Encoded qx:", bc.qx);
+    console.log("BC Value Encoded qy:", bc.qy);
+
+    console.log("Min BC Value Encoded:", min_enc_BC_val);
+    console.log("Max BC Value Encoded:", max_enc_BC_val);
+
     if (valueIndexBuffer) gl.deleteBuffer(valueIndexBuffer);
     valueIndexBuffer = util.createBuffer(gl, valueIndices);
+    ctx.valueIndexBuffer = valueIndexBuffer;
+    ctx.particleIndexBuffer = particleIndexBuffer;
 
     // only store new one, this assumes the grid fixed after first bc encoding...
     if (valueReachRGBA_enc || valueAvoidRGBA_enc) {
@@ -460,7 +591,11 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       } else if (keysPressed['v']) {
         console.log('Value erased.')
         ctx.value_mode = false;
-      }
+      } 
+      // else if (keysPressed['b']) {
+      //   console.log('Bounding box reset.')
+      // wont work because
+      // }
     } 
     if (keysPressed['Shift'] && (keysPressed['Return'] || keysPressed['Enter'])) {
       ctx.value_transfer = true;

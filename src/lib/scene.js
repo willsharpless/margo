@@ -59,10 +59,11 @@ export default function initScene(gl) {
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
-  var bc_drawing_mode = true;
+  var bc_drawing_mode = false;
   var value_mode = false;
   var value_transfer = false;
   var bc_flip_mode = false;
+  var bc_default_mode = true;
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
   // var bbox_at_bc_enc = appState.getBBox() || {};
@@ -171,6 +172,7 @@ export default function initScene(gl) {
   drawProgramBC.encodeBCValue()
 
   var api = {
+    ctx,
     start: nextFrame,
     stop,
     dispose,
@@ -223,7 +225,9 @@ export default function initScene(gl) {
   }
 
   var panzoom = initPanzoom();
+  console.log("bbox", bbox)
   restoreBBox();
+  // console.log("bbox after restore", bbox)
 
   setTimeout(() => {
     bus.fire('scene-ready', api);
@@ -447,9 +451,15 @@ export default function initScene(gl) {
     }
 
     // Boundary Condition Drawing
-    if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
+    // if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
+    if (ctx.bc_drawing_mode) {
       if (ctx.drawing_click_sum % 3 == 1) { // bc dynamic only after first click
         drawProgramBC.convertCursor2bcParams();
+      }
+      if (bc_default_mode) {
+        drawProgramBC.encodeBCValue();
+        console.log('default bc encoded');
+        bc_default_mode = false;
       }
       drawProgramBC.drawParticles(); // bc stays after second
     }
@@ -501,8 +511,13 @@ export default function initScene(gl) {
     var savedBBox = appState.getBBox();
     var {width, height} = canvasRect;
 
-    let sX = Math.PI * Math.E;
-    let sY = Math.PI * Math.E;
+    // let sX = Math.PI * Math.E;
+    // let sY = Math.PI * Math.E;
+
+    // WAS edit to simplify debug
+    let sX = 4.;
+    let sY = 4.;
+
     let tX = 0;
     let tY = 0;
     if (savedBBox) {
@@ -516,12 +531,23 @@ export default function initScene(gl) {
 
     var w2 = sX * width/2;
     var h2 = sY * height/2;
+    console.log("savedBBox", savedBBox)
+    console.log("ctx.bbox", bbox)
     panzoom.showRectangle({
       left: -w2 + tX,
       top: -h2 - tY,
       right: w2 + tX,
       bottom: h2 - tY ,
     });
+    // bizarre: cannot directly show, but the og fix isn't perfect and either way doesnt change Bbox
+    // if (savedBBox) {
+    //   panzoom.showRectangle({
+    //     left: savedBBox.minX,
+    //     top: savedBBox.maxY,
+    //     right: savedBBox.maxX,
+    //     bottom: savedBBox.minY,
+    //   });
+    // }
   }
 
   function updateBoundingBox(transform) {
@@ -561,8 +587,12 @@ export default function initScene(gl) {
   }
 
   function resetBoundingBox() {
-    var w = Math.PI * Math.E * 0.5;
-    var h = Math.PI * Math.E * 0.5;
+    // var w = Math.PI * Math.E * 0.5;
+    // var h = Math.PI * Math.E * 0.5;
+
+    // WAS edit to simplify for debug
+    var w = 4. * 0.5;
+    var h = 4. * 0.5;
 
     applyBoundingBox({
       minX: -w,

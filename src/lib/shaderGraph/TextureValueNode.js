@@ -34,6 +34,7 @@ precision highp float;
 uniform vec2 u_min;
 uniform vec2 u_max;
 uniform float value_transfer;
+uniform float diff_mag;
 
 uniform float spacing_x;
 uniform float spacing_y;
@@ -85,11 +86,11 @@ uniform float u_particles_res;
   // vec2 state = vec2(v_tex_index);
   // vec2 state = v_tex_pos;
   // vec2 state = 1. - v_tex_pos;
-
+  
   vec2 aligned_tex_pos = (1. - v_tex_pos) - vec2(0.5 / u_particles_res);
   vec2 state = vec2(
-      abs(u_max.x - u_min.x) * aligned_tex_pos.x + u_min.x,
-      abs(u_max.y - u_min.y) * aligned_tex_pos.y + u_max.y);
+      roundToPrecision(abs(u_max.x - u_min.x) * aligned_tex_pos.x + u_min.x, 1e-6),
+      roundToPrecision(abs(u_max.y - u_min.y) * aligned_tex_pos.y + u_max.y, 1e-6));
 
   // this will move to main body?
   float value;
@@ -227,12 +228,13 @@ uniform float u_particles_res;
 
      // NEW - 011525
     float diff_coeff_x = abs(sign(state.x)); // TODO: REPLACE WITH partialMaxMag fn based on system
-    float diff_coeff_y = abs(sign(state.y)); // TODO: REPLACE WITH partialMaxMag fn based on system
+    float diff_coeff_y = 0.; // TODO: REPLACE WITH partialMaxMag fn based on system
+    // float diff_coeff_y = abs(sign(state.y)); // TODO: REPLACE WITH partialMaxMag fn based on system
 
     vec2 diff_coeffs = vec2(diff_coeff_x, diff_coeff_y);
-    float diffusion = dot(diff_coeffs, 0.5 * abs(costate_R - costate_L));
+    float diffusion = dot(diff_mag * diff_coeffs, 0.5 * (costate_R - costate_L)); // CORRECT STATE 1/19/25
 
-    float ham = abs(costate_L.x + costate_R.x)/2.;
+    float ham = -abs(costate_L.x + costate_R.x)/2.;
     // float ham = abs(costate_L.x + costate_R.x)/2.;
     // float ham = abs(costate_L.x + costate_R.x)/2. + abs(costate_L.y + costate_R.y)/2.;
 
@@ -241,10 +243,10 @@ uniform float u_particles_res;
       
       newValue = value - time_step * (ham - diffusion);
 
-    } else {
+    } else if (frame < 2. + frameoi) {
 
       // States
-      // newValue = state.x;
+      newValue = state.x;
       // newValue = state.y;
 
       // L, R grads
@@ -259,8 +261,10 @@ uniform float u_particles_res;
       // newValue = diff_coeffs.y;
       // newValue = diffusion;
       // newValue = ham;
-      newValue = ham - diffusion; // dissipated hamiltonian
+      // newValue = ham - diffusion; // dissipated hamiltonian
 
+    } else {
+      newValue = value;
     }
 
     // Next Value

@@ -20,6 +20,10 @@ uniform float u_h;
 
 // Ty @ian-mitchell's toolboxLS and @schmrlng's hj_reachability
 
+float roundToPrecision(float value, float prec) {
+    return floor(value / prec + 0.5) * prec;
+}
+
 // SPATIAL BOUNDARY CONDITION
 
 vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {

@@ -165,24 +165,24 @@ ${main.join('\n')}
   //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
   // }
 
-  if (val > thresh && texture_type != 0) { //FIXME (last condit)
-    // nothing
-  } else if (val < -thresh && texture_type != 0) { //FIXME (last condit)
-    if (draw_fill) {
-      filler = 1.;
-      gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    
-    }
-    // nothing
-  } else {
-    filler = 0.;
-    gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
-  }
+  // if (val > thresh && texture_type != 0) { //FIXME (last condit)
+  //   // nothing
+  // } else if (val < -thresh && texture_type != 0) { //FIXME (last condit)
+  //   if (draw_fill) {
+  //     filler = 1.;
+  //     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    
+  //   }
+  //   // nothing
+  // } else {
+  //   filler = 0.;
+  //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
+  // }
   
   // level set plotting
   if ((val/1.2 - floor(val/1.2)) > thresh && texture_type != 0) { //FIXME (last condit)
     // nothing
   } else if (val < thresh && texture_type != 0) {
-    filler = 1.;
+    filler = 0.;
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
   } else {
     filler = 0.;

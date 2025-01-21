@@ -69,6 +69,7 @@ export default function initScene(gl) {
   // var bbox_at_bc_enc = appState.getBBox() || {};
   var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
   var thresh = 0.01; // TODO: make all this editable
+  var diff_mag = 1.0; // TODO: make all this editable
   var drawing_click_sum = 0;
 
   var field_mode = false;
@@ -98,6 +99,7 @@ export default function initScene(gl) {
     draw_fill,
     drawing_click_sum,
     thresh,
+    diff_mag,
 
     inputs: null,
 
@@ -591,10 +593,18 @@ export default function initScene(gl) {
     // var h = Math.PI * Math.E * 0.5;
 
     // WAS edit to simplify for debug
-    var w = 4. * 0.5;
-    var h = 4. * 0.5;
+    // var w = 4. * 0.5;
+    // var h = 4. * 0.5;
+    var w = 2.;
+    var h = 2.;
 
     applyBoundingBox({
+      // // OFFSET SQUARE
+      // minX: -w + w/2,
+      // minY: -h + h/2,
+      // maxX: w + w/2,
+      // maxY: h + h/2
+      // SQUARE
       minX: -w,
       minY: -h,
       maxX: w,

@@ -146,6 +146,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     gl.uniform1f(program.u_h, ctx.integrationTimeStep);
     gl.uniform1f(program.time_step, ctx.integrationTimeStep);
     gl.uniform1f(program.frame, ctx.frame);
+    gl.uniform1f(program.diff_mag, ctx.diff_mag);
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
     gl.uniform2f(program.u_min, bbox.minX, bbox.minY);
     gl.uniform2f(program.u_max, bbox.maxX, bbox.maxY);
@@ -242,8 +243,10 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
         for (let k = 0; k < mat_len; k ++) {
           for (let j = 0; j < mat_len; j ++) {
     
-            var i = (k * particleStateResolution) + j; // lower left indices
-            var ic = (k * particleStateResolution) + j + (mid_i - 2 - 2 * particleStateResolution); // center indices
+            var i = (k * particleStateResolution) + j; // LOWER LEFT
+            // var ic = (k * particleStateResolution) + j + (mid_i - 2 - 2 * particleStateResolution); // CENTER
+            // var ic = (k * particleStateResolution) + j + ((mid_i - particleStateResolution/4 - (particleStateResolution * particleStateResolution/4)) - 2 - 2 * particleStateResolution); // LOWER LEFT CENTER    
+            var ic = (k * particleStateResolution) + j + (particleStateResolution * particleStateResolution - 5 - 4 * particleStateResolution); // UPPER RIGHT
 
             lowerl_i_RGBA = pixelData.slice(i*4, i*4 + 4);
             center_i_RGBA = pixelData.slice(ic*4, ic*4 + 4);
@@ -256,7 +259,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
           }
         }
         
-        var round_num = 8;
+        var round_num = 7;
         console.log("\n(AT FRAME",ctx.frame,") LOWERL - MAT")
         for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
           console.log(Array.from(lowerl_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));

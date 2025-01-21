@@ -185,8 +185,10 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     for (let k = 0; k < mat_len; k ++) {
       for (let j = 0; j < mat_len; j ++) {
 
-        var i = (k * particleStateResolution) + j;
-        var ic = (k * particleStateResolution) + j + (mid_i - 2 - 2 * particleStateResolution);
+        var i = (k * particleStateResolution) + j; // LOWER LEFT
+        // var ic = (k * particleStateResolution) + j + (mid_i - 2 - 2 * particleStateResolution); // CENTER
+        // var ic = (k * particleStateResolution) + j + ((mid_i - particleStateResolution/4 - (particleStateResolution * particleStateResolution/4)) - 2 - 2 * particleStateResolution); // LOWER LEFT CENTER
+        var ic = (k * particleStateResolution) + j + (particleStateResolution * particleStateResolution - 5 - 4 * particleStateResolution); // UPPER RIGHT
 
         lowerl_mat_ix[k * mat_len + j] = i;
         center_mat_ix[k * mat_len + j] = ic;
@@ -219,12 +221,23 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       }
     }
 
+    // console.log("numParticles", numParticles)
+    // console.log("particleStateResolution", particleStateResolution)
     for (var i = 0; i < numParticles; i++) {
 
+      // // WAS: not me, ~works (defines upper lim to be slightly less than bBox maxX/Y)
       var flr_ix = Math.floor(i / particleStateResolution);
       var x = width * ((i / particleStateResolution) - flr_ix) + minX;
       var y = -height * (flr_ix / particleStateResolution) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)
-      
+
+      // WAS: corrected for upper box bds, ~works (defines upper lim to be slightly less than bBox maxX/Y)
+      // var flr_ix = Math.floor(i / particleStateResolution);
+      // var x = width * ((i-flr_ix*particleStateResolution) / (particleStateResolution-1)) + minX;
+      // var y = -height * (flr_ix / (particleStateResolution-1)) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)            
+      // if (i < 10 || i % 10 == 0 || x == y) {
+      //   console.log("i:(", i, "), x,y:(", x, ",", y, ")")
+      // }
+
       if (valueReachRGBA_enc && valueAvoidRGBA_enc) { // TODO WAS: walk thru cases!
         if (bc.shape == 1) { // square
           var bc_val = sign * 0.5 * (Math.max(Math.abs(x - bc.cx)/bc.qx, Math.abs(y - bc.cy)/bc.qy) - 1.);

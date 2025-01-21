@@ -144,7 +144,7 @@ function setDropProbability(dropProbability) {
 function getBC() {
   // Initial Shape!
   
-  // First Quadrant Sqr
+  // // First Quadrant Sqr
   // return {
   //   cx: 0.5,
   //   cy: 0.5,
@@ -154,15 +154,15 @@ function getBC() {
   // };
 
   // Center Circle
-  // return {
-  //   cx: 0.,
-  //   cy: 0.,
-  //   qx: 1.,
-  //   qy: 1.,
-  //   shape: 2, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
-  // };
+  return {
+    cx: 0.,
+    cy: 0.,
+    qx: 1.,
+    qy: 1.,
+    shape: 2, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+  };
 
-  // Center Sqr
+  // // Center Sqr
   // return {
   //   cx: 0.,
   //   cy: 0.,
@@ -171,14 +171,14 @@ function getBC() {
   //   shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
   // };
 
-    // Center Cyclinder
-    return {
-      cx: 0.,
-      cy: 0.,
-      qx: 0.5,
-      qy: 3.4028234663852886e+38,
-      shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
-    };
+    // // Center Cyclinder
+    // return {
+    //   cx: 0.,
+    //   cy: 0.,
+    //   qx: 0.5,
+    //   qy: 3.4028234663852886e+38,
+    //   shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+    // };
 }
 
 function getBBox() {

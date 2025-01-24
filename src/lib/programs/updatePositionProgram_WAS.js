@@ -128,9 +128,10 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     gl.uniform1i(program.texture_type, texture_type);
     gl.uniform1f(program.value_transfer, ctx.value_transfer);
-    gl.uniform1f(program.spacing_std, 1/ctx.particleStateResolution); //
-    gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution)); // TODO WAS: diff size for diff dims
-    gl.uniform1f(program.spacing_y, Math.abs(bbox_enc.maxY - bbox_enc.minY)/(ctx.particleStateResolution)); // TODO WAS: diff size for diff dims
+    gl.uniform1f(program.spacing_std, 1/(ctx.particleStateResolution-1.)); //
+    gl.uniform1f(program.pSR, ctx.particleStateResolution); //
+    gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1.)); // TODO WAS: diff size for diff dims
+    gl.uniform1f(program.spacing_y, Math.abs(bbox_enc.maxY - bbox_enc.minY)/(ctx.particleStateResolution-1.)); // TODO WAS: diff size for diff dims
     gl.uniform1f(program.u_particles_res, ctx.particleStateResolution)
 
     // Bind the external bc textures
@@ -259,7 +260,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
           }
         }
         
-        var round_num = 7;
+        var round_num = 12;
         console.log("\n(AT FRAME",ctx.frame,") LOWERL - MAT")
         for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
           console.log(Array.from(lowerl_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
@@ -276,8 +277,10 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
         // Ham (in uPP)
         // Next value (in uPP)
     
-        console.log("")
-      
+        // console.log("spacing_std", 1/(ctx.particleStateResolution-1.));
+        // console.log("spacing_x", Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1.));
+        // console.log("spacing_y", Math.abs(bbox_enc.maxY - bbox_enc.minY)/(ctx.particleStateResolution-1.));
+        // console.log("pSR", ctx.particleStateResolution);
       }
     }
     // bc doesn't use any textures!

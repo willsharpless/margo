@@ -47,7 +47,7 @@ vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {
   return vec2(L_pos, R_pos);
 }
   
-vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos) {
+vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos, vec2 state) {
   // given an L texture position, this fn returns the finite differences in x & y to the R counterpart in the grid
 
   float x_periodic = 0.; // TODO WAS: make global
@@ -68,6 +68,28 @@ vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos) {
 
   float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogy))) / spacing_x;
   float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogx))) / spacing_y;
+  
+  // extrapolate away from zero (maybe flip, wrt upper value sign)
+  // if (LR_tex_pos_x_L == 0. || LR_tex_pos_x_R == 1.) {
+  //   // diff_x = abs(diff_x) * sign(decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)));
+  //   // diff_x = abs(diff_x);
+  //   diff_x = sign(decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)));
+  //   // need to take this out of here into the loop to test
+  // }
+  // if (LR_tex_pos_y_L == 0. || LR_tex_pos_y_R == 1.) {
+  //   diff_y = abs(diff_y) * sign(decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)));
+  // }
+  
+  // extrapolate away from zero (maybe flip, wrt upper value sign)
+  if (LR_tex_pos_x_L <= 0.) {
+    diff_x = sign(state.x) * sign(diff_x) * diff_x;
+  } else if (LR_tex_pos_y_L <= 0.) {
+    diff_y = sign(state.y) * sign(diff_y) * diff_y;
+  } else if (LR_tex_pos_x_R >= 1.) {
+    diff_x = sign(state.x) * sign(diff_x) * diff_x;
+  } else if (LR_tex_pos_y_R >= 1.) {
+    diff_y = sign(state.y) * sign(diff_y) * diff_y;
+  }
 
   return vec2(diff_x, diff_y);
 }
@@ -100,18 +122,18 @@ vec2 weno_comp(vec2 v0, vec2 v1, vec2 v2, vec2 v3, vec2 v4) {
   return phi0 * w0 + phi1 * w1 + phi2 * w2;
 }
 
-mat2 WENO5(sampler2D values) {
+mat2 WENO5(sampler2D values, vec2 state) {
 
   vec2 v_tex_pos_f = 1. - v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
   
   // Compute Differences
 
-  vec2 diff_m3 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 3. * spacing_std);
-  vec2 diff_m2 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 2. * spacing_std);
-  vec2 diff_m1 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std);
-  vec2 diff_m0 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std);
-  vec2 diff_p1 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 1. * spacing_std);
-  vec2 diff_p2 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 2. * spacing_std);
+  vec2 diff_m3 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 3. * spacing_std, state);
+  vec2 diff_m2 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 2. * spacing_std, state);
+  vec2 diff_m1 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std, state);
+  vec2 diff_m0 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std, state);
+  vec2 diff_p1 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 1. * spacing_std, state);
+  vec2 diff_p2 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 2. * spacing_std, state);
 
   // Compute Weighting
 
@@ -122,14 +144,14 @@ mat2 WENO5(sampler2D values) {
   return costate_LR;
 }
 
-mat2 FO(sampler2D values) {
+mat2 FO(sampler2D values, vec2 state) {
 
   vec2 v_tex_pos_f = 1. - v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
 
   // Compute Differences
 
-  vec2 costate_L = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std); // diff_m1
-  vec2 costate_R = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std); // diff_m0
+  vec2 costate_L = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std, state); // diff_m1
+  vec2 costate_R = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std, state); // diff_m0
   mat2 costate_LR = mat2(costate_L, costate_R);
 
   return costate_LR;
@@ -149,8 +171,8 @@ vec2 locallocalLF(vec2 state, vec2 costate_L, vec2 costate_R, float time, float 
 }
 
 float dissipated_hamiltonian(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
-  vec2 alpha = locallocalLF(state, costate_L, costate_R, time, value);
-  return get_hamiltonian(state, 0.5 * (costate_L + costate_R), time, value) - dot(alpha, 0.5 * abs(costate_R - costate_L)); // for costate diff in diss, abs or not?
+  vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
+  return get_hamiltonian(state, 0.5 * (costate_L + costate_R), time, value) - dot(diff_coeffs, 0.5 * (costate_R - costate_L)); // for costate diff in diss, abs or not?
 }
 
 // STEP FUNCTION
@@ -161,7 +183,7 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
 
   // Compute the Upwind Gradients
   // mat2 costate_LR = mat2(state, state);
-  mat2 costate_LR = FO(u_particles_x);
+  mat2 costate_LR = FO(u_particles_x, state);
   // mat2 costate_LR = WENO5(u_particles_x);
   vec2 costate_L = costate_LR[0];
   vec2 costate_R = costate_LR[1];

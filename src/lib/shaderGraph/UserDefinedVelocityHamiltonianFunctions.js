@@ -86,12 +86,12 @@ float disturbance_bound_shape = 0.; // 0. for box, 1. for ball
 // FIXME autonomous for now (will test after upwind)
 
 vec2 get_control(vec2 x, vec2 p, float t) { 
-  vec2 optimal_control = vec2(0.);
+  vec2 optimal_control = vec2(0.); //FIXME
   return control_matrix * optimal_control;
 }
 
 vec2 get_disturbance(vec2 x, vec2 p, float t) { 
-  vec2 optimal_disturbance = vec2(0.);
+  vec2 optimal_disturbance = vec2(0.); //FIXME
   return disturbance_matrix * optimal_disturbance;
 }
 
@@ -107,20 +107,33 @@ mat2 disturbance_jacobian(vec2 x, float time) {
 
 ${this.updateHamiltonianCode ? this.updateHamiltonianCode : `
 
+// // WAS FIXME: user-defined in advanced cases
+// vec2 max_partial_hamiltonian_costate(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
+//   vec2 vel = get_velocity(state); // WAS FIXME: works for auto systems only!
+//   return vec2(abs(vel.x), abs(vel.y));
+// }
+
+// // WAS FIXME: only auto for now
+float get_hamiltonian(vec2 state, vec2 costate, float time, float value) {
+  vec2 vel = get_velocity(state); // WAS FIXME: works for auto systems only!
+  return -dot(costate, vel); // WAS FIXME: minus for backwards reach, could be user-defined
+}
+
 // Momentum ie Hamiltonian
 
-float get_hamiltonian(vec2 x, vec2 p, float t, float val) { 
-  // float h = 0.1 * cos(t); // debugging
-  float h = dot(p, get_velocity(x) + get_control(x, p, t) + get_disturbance(x, p, t));
-  return h;
-}
+// float get_hamiltonian(vec2 x, vec2 p, float t, float val) { 
+//   // float h = 0.1 * cos(t); // debugging
+//   float h = dot(p, get_velocity(x) + get_control(x, p, t) + get_disturbance(x, p, t));
+//   return h;
+// }
 
 // Max Hamiltonian Derivative (ignorable)
 
 vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float val) {
   mat2 control_jac = control_jacobian(x, t);
   mat2 disturbance_jac = disturbance_jacobian(x, t);
-  return abs(get_velocity(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
+  // return abs(get_velocity(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
+  return abs(get_velocity(x));
 }
 
 // if your hamiltonian is NOT solely defined wrt a flow,

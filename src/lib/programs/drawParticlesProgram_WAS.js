@@ -225,15 +225,15 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     // console.log("particleStateResolution", particleStateResolution)
     for (var i = 0; i < numParticles; i++) {
 
-      // // WAS: not me, ~works (defines upper lim to be slightly less than bBox maxX/Y)
-      var flr_ix = Math.floor(i / particleStateResolution);
-      var x = width * ((i / particleStateResolution) - flr_ix) + minX;
-      var y = -height * (flr_ix / particleStateResolution) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)
+      // // // WAS: not me, ~works (defines upper lim to be slightly less than bBox maxX/Y)
+      // var flr_ix = Math.floor(i / particleStateResolution);
+      // var x = width * ((i / particleStateResolution) - flr_ix) + minX;
+      // var y = -height * (flr_ix / particleStateResolution) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)
 
       // WAS: corrected for upper box bds, ~works (defines upper lim to be slightly less than bBox maxX/Y)
-      // var flr_ix = Math.floor(i / particleStateResolution);
-      // var x = width * ((i-flr_ix*particleStateResolution) / (particleStateResolution-1)) + minX;
-      // var y = -height * (flr_ix / (particleStateResolution-1)) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)            
+      var flr_ix = Math.floor(i / particleStateResolution);
+      var x = width * ((i-flr_ix*particleStateResolution) / (particleStateResolution-1)) + minX;
+      var y = -height * (flr_ix / (particleStateResolution-1)) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)            
       // if (i < 10 || i % 10 == 0 || x == y) {
       //   console.log("i:(", i, "), x,y:(", x, ",", y, ")")
       // }
@@ -254,7 +254,6 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
         console.log("First i, Before min/max, bc_val", bc_val)
       }
       
-
       // var topmid_txture_i = particleStateResolution * particleStateResolution / 2;
 
       // if (i == 0) {
@@ -358,7 +357,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
         console.log(center_mat_ix.slice(i, i + mat_len).join(' '));
     }
 
-    var round_num = 7;
+    var round_num = 12;
     console.log("\nSTATES - LOWERL - X")
     for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
       console.log(Array.from(lowerl_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));

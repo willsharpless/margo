@@ -453,8 +453,8 @@ export default function initScene(gl) {
     }
 
     // Boundary Condition Drawing
-    // if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
-    if (ctx.bc_drawing_mode) {
+    // if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) { // WAS FIXME: turn back on
+    if (ctx.bc_drawing_mode) { // WAS FIXME: turn off or rework
       if (ctx.drawing_click_sum % 3 == 1) { // bc dynamic only after first click
         drawProgramBC.convertCursor2bcParams();
       }

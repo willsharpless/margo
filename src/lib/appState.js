@@ -154,22 +154,22 @@ function getBC() {
   // };
 
   // Center Circle
-  return {
-    cx: 0.,
-    cy: 0.,
-    qx: 1.,
-    qy: 1.,
-    shape: 2, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
-  };
-
-  // // Center Sqr
   // return {
   //   cx: 0.,
   //   cy: 0.,
-  //   qx: 0.5,
-  //   qy: 0.5,
-  //   shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+  //   qx: 1.,
+  //   qy: 1.,
+  //   shape: 2, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
   // };
+
+  // Center Sqr
+  return {
+    cx: 0.,
+    cy: 0.,
+    qx: 0.5,
+    qy: 0.5,
+    shape: 1, // 1 : square, 2 : circle, TODO WAS 3 for free draw (gonna need some math)
+  };
 
     // // Center Cyclinder
     // return {

@@ -1,6 +1,6 @@
 <template>
   <div class='help'>
-    <p>Vector field is defined with GLSL language. This is a high level programming language for the graphic card.</p>
+    <p>The velocity is defined in GLSL. This is a high-level programming language for the graphics card.</p>
     <p>Two most important things you need to know:
       <ul>
         <li>GLSL is strictly typed. Each number <b>must have</b> a dot. E.g. "42" should be written as "42."</li>

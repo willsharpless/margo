@@ -5,7 +5,7 @@
     <div class='content'>
       <h3><a class='title'>Margo,</a></h3>
       <p>
-        is an interactive software for solving level-set evolutions (of Hamilton-Jacobi differential equations).
+        <a clas='highlighted'>is an interactive software for solving level-set evolutions</a> (of Hamilton-Jacobi differential equations).
       </p>
       <p>
         The set is a shape that matches the zero-level of a function, called the energy or value. 
@@ -15,11 +15,11 @@
         This shape and momentum are <a clas='highlighted'>your choice</a>; draw or define them.
       </p>
       <p>We often choose the momentum to match a flow (aka vector-field) which models a dynamic system, e.g. jet flight. 
-        This is the default definition, thus, the shape will move with the flow.
+        This is the default definition, thus, <a clas='highlighted'>the shape will move with the flow</a>.
       </p>
       <p>
-        The momentum may also be defined with respect to control of the flow such that the evolution reveals the best path, 
-        e.g. least time & most reward, to a future target and the inputs needed to achieve it.
+        The momentum may also be defined with respect to control of the flow so the evolution reveals the best path, 
+        e.g. least time & most reward, to a target and the necessary action.
         In fact, solving or learning this evolution is how a modern robot guides itself 
         (so maybe I am not the only one dreaming in shape).
       </p>
@@ -28,11 +28,11 @@
       </p>
       <p>
         Find the code and technical details <a href='https://github.com/willsharpless/margo' class='highlighted'> here</a>. Margo is a child of <a href='https://anvaka.github.io/fieldplay' class='highlighted'> Field Play</a>, from which things were added (and broken).
-        Many thanks to previous developers for the flow visualization &#8212 @anvaka, @mourner, @skeeto &#8212 and HJ-solver &#8212 @ian-mitchell, @schmrlng &#8212 without whom this wouldnt exist.
+        <a clas='highlighted'>Many thanks</a> to previous developers for the flow visualization &#8212 @anvaka, @mourner, @skeeto &#8212 and HJ-solver &#8212 @ian-mitchell, @schmrlng &#8212 without whom this wouldnt exist.
       </p>
       <p>
         Best, <br>
-        WAS
+        <a href='https://willsharpless.github.io/' class='highlighted'>WAS</a>
       </p>
       <a href='#' @click.prevent='close' class='large-close bold'>
         close

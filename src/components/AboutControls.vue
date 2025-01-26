@@ -3,7 +3,7 @@
   <div class='about-controls'>
     <div class='background absolute' @click.prevent='close'></div>
     <div class='content'>
-      <h3><a class='title'>Controls for Drawing and Evolution</a></h3>
+      <h3><a class='title'>Keys for Drawing and Evolution</a></h3>
 
       <p>
         Blah blah

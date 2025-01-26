@@ -139,6 +139,12 @@ vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float 
 // if your hamiltonian is NOT solely defined wrt a flow,
 // you must define max_partial_hamiltonian_costate or use a fixed LF parameter
 
+// Evolve Value // TODO: for post-processor def
+
+// vec2 evolve_value(vec2 state, vec2) {
+//   return newValue
+// }
+
 `}
 
 `

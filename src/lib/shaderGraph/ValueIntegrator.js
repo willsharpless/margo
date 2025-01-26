@@ -9,9 +9,6 @@ export default class ValueIntegrator extends BaseShaderNode {
     return `
 uniform float time_step;
 uniform float u_h;
-// uniform float spacing_x;
-// uniform float spacing_y;
-// uniform float spacing_std;
 `
   }
 
@@ -68,17 +65,6 @@ vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos, vec2 state) {
 
   float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogy))) / spacing_x;
   float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogx))) / spacing_y;
-  
-  // extrapolate away from zero (maybe flip, wrt upper value sign)
-  // if (LR_tex_pos_x_L == 0. || LR_tex_pos_x_R == 1.) {
-  //   // diff_x = abs(diff_x) * sign(decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)));
-  //   // diff_x = abs(diff_x);
-  //   diff_x = sign(decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)));
-  //   // need to take this out of here into the loop to test
-  // }
-  // if (LR_tex_pos_y_L == 0. || LR_tex_pos_y_R == 1.) {
-  //   diff_y = abs(diff_y) * sign(decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)));
-  // }
   
   // extrapolate away from zero (maybe flip, wrt upper value sign)
   if (LR_tex_pos_x_L <= 0.) {
@@ -166,13 +152,12 @@ mat2 FO(sampler2D values, vec2 state) {
 
 vec2 locallocalLF(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
   // TODO: for globalLF/localLF will need to compute max range
-  // e.g. max_partial_hamiltonian_costate(state, max_costate_L, max_costate_R, time, value);
   return max_partial_hamiltonian_costate(state, costate_L, costate_R, time, value);
 }
 
 float dissipated_hamiltonian(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
   vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
-  return get_hamiltonian(state, 0.5 * (costate_L + costate_R), time, value) - dot(diff_coeffs, 0.5 * (costate_R - costate_L)); // for costate diff in diss, abs or not?
+  return get_hamiltonian(state, (costate_L + costate_R)/2., time, value) - dot(diff_coeffs, 0.5 * (costate_R - costate_L));
 }
 
 // STEP FUNCTION
@@ -182,7 +167,6 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
   // fixed_or_max determines if the time step is a fixed step (==0.) or the max allowed (==1.)
 
   // Compute the Upwind Gradients
-  // mat2 costate_LR = mat2(state, state);
   mat2 costate_LR = FO(u_particles_x, state);
   // mat2 costate_LR = WENO5(u_particles_x);
   vec2 costate_L = costate_LR[0];
@@ -199,6 +183,8 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
   } else {
     t_step_c = time_step; 
     // FIXME FIXME FIXME: compute step based on spacing and LF
+    // this will split time scale of the particles and the value
+    // unless we alter the time variable globally and force particles to aadaptively step as well
   };
    
   vec2 tv_next = vec2(time + t_step_c, value + t_step_c * dvdt);

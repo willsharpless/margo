@@ -12,13 +12,13 @@
         This energy evolves based on a momentum, called the Hamiltonian. 
       </p>
       <p>
-        This shape and momentum are your choice; draw or define them.
+        This shape and momentum are <a clas='highlighted'>your choice</a>; draw or define them.
       </p>
-      <p>We often choose the momentum to match a flow (aka vector-field) which models a dynamic system, e.g. jet flight, 
-        options pricing or protein kinetics. This is the default definition, thus, the shape will move with the flow.
+      <p>We often choose the momentum to match a flow (aka vector-field) which models a dynamic system, e.g. jet flight. 
+        This is the default definition, thus, the shape will move with the flow.
       </p>
       <p>
-        Moreover, the momentum may be defined with respect to control of the flow such that the evolution reveals the best path, 
+        The momentum may also be defined with respect to control of the flow such that the evolution reveals the best path, 
         e.g. least time & most reward, to a future target and the inputs needed to achieve it.
         In fact, solving or learning this evolution is how a modern robot guides itself 
         (so maybe I am not the only one dreaming in shape).
@@ -27,8 +27,8 @@
         I built this because I wanted a faster way to test and discuss new ideas, but also because I wanted to share the beauty of these evolutions. 
       </p>
       <p>
-        Find the code and technical details <a href='https://github.com/willsharpless/margo' class='highlighted'> here</a>. 
-        Cheers to previous developers for the flow visualization &#8212 @anvaka, @mourner, @skeeto &#8212 and HJ-solver &#8212 @ian-mitchell, @schmrlng &#8212 without whom this wouldnt exist.
+        Find the code and technical details <a href='https://github.com/willsharpless/margo' class='highlighted'> here</a>. Margo is a child of <a href='https://anvaka.github.io/fieldplay' class='highlighted'> Field Play</a>, from which things were added (and broken).
+        Many thanks to previous developers for the flow visualization &#8212 @anvaka, @mourner, @skeeto &#8212 and HJ-solver &#8212 @ian-mitchell, @schmrlng &#8212 without whom this wouldnt exist.
       </p>
       <p>
         Best, <br>
@@ -93,7 +93,7 @@ export default {
     position: relative;
     background: window-background;
     top: 50px;
-    width: 600px;
+    width: 800px;
     padding: 14px;
     border: 1px solid primary-border;
     h3 {

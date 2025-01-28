@@ -479,40 +479,47 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     gl.uniform1i(program.draw_fill, ctx.draw_fill);
     gl.uniform1i(program.draw_levels, ctx.draw_levels);
     gl.uniform1f(program.level_step, ctx.draw_level_step);
+
+    var bc = ctx.bc;
+    gl.uniform1f(program.bc_cx, bc.cx);
+    gl.uniform1f(program.bc_cy, bc.cy);
+    gl.uniform1f(program.bc_qx, bc.qx);
+    gl.uniform1f(program.bc_qy, bc.qy);
+    gl.uniform1i(program.bc_shape, bc.shape); // TODO: Make string  
     
-    if (texture_type == 1) { // Boundary Condition Texture (value defined by implicit location)
+    // if (texture_type == 1) { // Boundary Condition Texture (value defined by implicit location)
 
-      // draw the fill partially transparent - doesn't integrate with screenProgram mechanics yet, coming soon
-      // if (ctx.draw_fill) {
-      //   gl.enable(gl.BLEND); 
-      //   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-      //   // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      //   // gl.clearColor(color[0], color[1], color[2], color[3]);
-      // }
+    //   // draw the fill partially transparent - doesn't integrate with screenProgram mechanics yet, coming soon
+    //   // if (ctx.draw_fill) {
+    //   //   gl.enable(gl.BLEND); 
+    //   //   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    //   //   // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    //   //   // gl.clearColor(color[0], color[1], color[2], color[3]);
+    //   // }
 
-      var bc = ctx.bc;
-      gl.uniform1f(program.bc_cx, bc.cx);
-      gl.uniform1f(program.bc_cy, bc.cy);
-      gl.uniform1f(program.bc_qx, bc.qx);
-      gl.uniform1f(program.bc_qy, bc.qy);
-      gl.uniform1i(program.bc_shape, bc.shape); // TODO: Make string  
+    //   var bc = ctx.bc;
+    //   gl.uniform1f(program.bc_cx, bc.cx);
+    //   gl.uniform1f(program.bc_cy, bc.cy);
+    //   gl.uniform1f(program.bc_qx, bc.qx);
+    //   gl.uniform1f(program.bc_qy, bc.qy);
+    //   gl.uniform1i(program.bc_shape, bc.shape); // TODO: Make string  
 
-    } else if (texture_type == 2) { // Value Texture (value encoded in texture RGBA data)
+    // } else if (texture_type == 2) { // Value Texture (value encoded in texture RGBA data)
 
-      // TODO: bind some things?
+    //   // TODO: bind some things?
     
-    } else {
+    // } else {
 
-      // TODO
+    //   // TODO
 
-    }
+    // }
 
     var cursor = ctx.cursor;
     gl.uniform4f(program.cursor, cursor.clickX, cursor.clickY, cursor.hoverX, cursor.hoverY);
     gl.drawArrays(gl.POINTS, 0, numParticles); 
-    // TODO: draw triangles between the points (shade)
+    // WAS TODO: draw triangles between the points (properly shade / interpolate)
 
-    // draw the fill partially transparent - doesn't integrate with screenProgram mechanics yet, coming soon
+    // WAS TODO: draw the fill partially transparent - doesn't integrate with screenProgram mechanics yet, coming soon
     // if (ctx.draw_fill) {
     //   gl.clear(gl.COLOR_BUFFER_BIT);
     //   gl.disable(gl.BLEND);

@@ -15,9 +15,9 @@ varying float filler;
 void main() {
   if (filler == 1.) {
     // gl_FragColor = v_particle_color * vec4(1., 1., 1., 0.1);  
-    // gl_FragColor = vec4(1., 1., 1., 0.05);  // gray
-    // color = [154/255, 103/255, 103/255, 0.9];  // gray-red
-    // color = [223/255, 28/255, 28/255, 0.05];  // gray-red v2
+    // gl_FragColor = vec4(1., 1., 1., 0.05);  // intended gray
+    // color = [154/255, 103/255, 103/255, 0.9];  // intended gray-red (no red)
+    // color = [223/255, 28/255, 28/255, 0.05];  // intended gray-red v2 (no red)
     gl_FragColor = vec4(154/255, 103/255, 103/255, 0.9); // weird, its always just gray to black?
   } else {
     gl_FragColor = v_particle_color;  

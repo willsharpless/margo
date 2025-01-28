@@ -91,6 +91,8 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       particleState: avoid
     }]; // WAS: somehow x and y are still the proper tags in shaders...?
 
+    // WAS TODO: update these, breaks a lot rn if I try (make unit tests first)
+
     if (readTextures) readTextures.dispose();
     readTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
 

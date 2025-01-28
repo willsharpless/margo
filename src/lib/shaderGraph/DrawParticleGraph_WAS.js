@@ -109,7 +109,7 @@ void main() {
     //       decodeFloatRGBA(texture2D(u_particles_y, state))
     // );
     
-    v_particle_pos_c = state; // Texture RGBA data is only for transfer
+    v_particle_pos_c = state;
     gl_PointSize = 2.0;
 
   }
@@ -140,6 +140,16 @@ ${main.join('\n')}
         val = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
       }
     }
+
+    // // display bc simultaneously to drawing (after init)
+    // bool avoid_mode = false;
+    // bool valueReachEncoded = true;
+    // bool valueAvoidEncoded = true;
+    // if (reach_mode && valueReachEncoded) {
+    //   val = min(val, decodeFloatRGBA(texture2D(u_particles_x, state_mag)));
+    // } else if (avoid_mode && valueAvoidEncoded) {
+    //   val = min(val, decodeFloatRGBA(texture2D(u_particles_y, state_mag)));
+    // }
 
   } else if (texture_type == 2) { // Value Texture
 

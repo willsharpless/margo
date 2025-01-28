@@ -1,16 +1,16 @@
 <template>
-  <div class='settings' :class='{collapsed: settingsPanel.collapsed}'>
+  <div class='settingsmomentum' :class='{collapsed: settingsmomentumPanel.collapsed}'>
     <div class='block vector-field'  v-if='vectorField'>
-      <div class='title'>Velocity <a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
+      <div class='title'>Hamiltonian <a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
       <syntax v-if='syntaxHelpVisible' @close='syntaxHelpVisible = false'></syntax>
       <code-editor :model='vectorField'></code-editor>
     </div>
-    <div class='block' v-if='showBindings'>
+    <!-- <div class='block' v-if='showBindings'>
       <Inputs :vm='inputsModel'></Inputs>
-    </div>
+    </div> -->
     <form class='block' @submit.prevent='onSubmit'>
-      <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
-      <div class='row'>
+      <div class='title'>Settings Momentum<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      <!-- <div class='row'>
         <div class='col'>Particle color</div>
         <div class='col'> 
           <select v-model='selectedColorMode' @change='changeColor'>
@@ -113,7 +113,7 @@
         <div class='row center'>
           <div class='col center'><input type='number' v-model.lazy='maxY' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
         </div>
-      </div>
+      </div> -->
     </form>
   </div>
 </template>
@@ -134,7 +134,7 @@ import Inputs from './Inputs';
 const soundAvailable = config.isAudioEnabled;
 
 export default {
-  name: 'Settings',
+  name: 'Settingsmomentum',
   props: ['scene'],
   components: {
     Syntax,
@@ -144,19 +144,21 @@ export default {
   },
   mounted() {
     bus.on('scene-ready', this.onSceneReady, this);
-    bus.on('bbox-change', this.updateBBox, this);
+    bus.on('vfcode-updated', this.handleCodeUpdate);
+    // bus.on('bbox-change', this.updateBBox, this);
 
-    if (soundAvailable) this.soundLoader = new SoundLoader(this.$refs.player);
+    // if (soundAvailable) this.soundLoader = new SoundLoader(this.$refs.player);
   },
   beforeDestroy() {
     bus.off('scene-ready', this.onSceneReady, this);
-    bus.off('bbox-change', this.updateBBox, this);
+    bus.off('vfcode-updated', this.handleCodeUpdate);
+    // bus.off('bbox-change', this.updateBBox, this);
   },
   data() {
     return {
       soundCloudLink: 'https://soundcloud.com/mrfijiwiji/yours-truly',
       vectorField: null,
-      settingsPanel: appState.settingsPanel,
+      settingsmomentumPanel: appState.settingsmomentumPanel,
       inputsModel: scene.inputsModel,
       showBindings: config.showBindings,
       particlesCount: 0,
@@ -177,134 +179,140 @@ export default {
     };
   },
   watch: {
-    'settingsPanel.collapsed': function(newValue) {
-      bus.fire('settings-collapsed', newValue);
+    'settingsmomentumPanel.collapsed': function(newValue) {
+      bus.fire('settingsmomentum-collapsed', newValue);
     },
-    particlesCount(newValue, oldValue) {
-      this.scene.setParticlesCount(parseInt(newValue, 10));
-    },
-    timeStep(newValue, oldValue) {
-      this.scene.setIntegrationTimeStep(newValue);
-    },
-    fadeOutSpeed(newValue, oldValue) {
-      this.scene.setFadeOutSpeed(newValue);
-    },
-    dropProbability(newValue, oldValue) {
-      this.scene.setDropProbability(newValue);
-    },
-    selectedColorMode(newValue) {
-      this.scene.setColorMode(newValue);
-    },
-    minX(newValue) { this.moveBoundingBox('minX', newValue) },
-    maxX(newValue) { this.moveBoundingBox('maxX', newValue) },
-    minY(newValue) { this.moveBoundingBox('minY', newValue) },
-    maxY(newValue) { this.moveBoundingBox('maxY', newValue) },
+    // particlesCount(newValue, oldValue) {
+    //   this.scene.setParticlesCount(parseInt(newValue, 10));
+    // },
+    // timeStep(newValue, oldValue) {
+    //   this.scene.setIntegrationTimeStep(newValue);
+    // },
+    // fadeOutSpeed(newValue, oldValue) {
+    //   this.scene.setFadeOutSpeed(newValue);
+    // },
+    // dropProbability(newValue, oldValue) {
+    //   this.scene.setDropProbability(newValue);
+    // },
+    // selectedColorMode(newValue) {
+    //   this.scene.setColorMode(newValue);
+    // },
+    // minX(newValue) { this.moveBoundingBox('minX', newValue) },
+    // maxX(newValue) { this.moveBoundingBox('maxX', newValue) },
+    // minY(newValue) { this.moveBoundingBox('minY', newValue) },
+    // maxY(newValue) { this.moveBoundingBox('maxY', newValue) },
   },
   computed: {
-    particleCountDelta() {
-      return exponentialStep(this.particlesCount);
-    },
-    integrationStepDelta() {
-      var timeStep = this.timeStep;
-      return exponentialStep(timeStep);
-    },
-    resetProbabilityDelta() {
-      return exponentialStep(this.dropProbability);
-    },
-    fadeoutDelta() {
-      var fadeOutSpeed = Number.parseFloat(this.fadeOutSpeed);
+    // particleCountDelta() {
+    //   return exponentialStep(this.particlesCount);
+    // },
+    // integrationStepDelta() {
+    //   var timeStep = this.timeStep;
+    //   return exponentialStep(timeStep);
+    // },
+    // resetProbabilityDelta() {
+    //   return exponentialStep(this.dropProbability);
+    // },
+    // fadeoutDelta() {
+    //   var fadeOutSpeed = Number.parseFloat(this.fadeOutSpeed);
 
-      var exp = Math.round(Math.log10(1 % fadeOutSpeed)) ;
-      var dt = Math.pow(10, exp);
-      if (dt + fadeOutSpeed >= 1) {
-        dt /= 10;
-      }
-      return dt;
-    }
+    //   var exp = Math.round(Math.log10(1 % fadeOutSpeed)) ;
+    //   var dt = Math.pow(10, exp);
+    //   if (dt + fadeOutSpeed >= 1) {
+    //     dt /= 10;
+    //   }
+    //   return dt;
+    // }
   },
   methods: {
-    moveBoundingBox(key, value) {
-      if (this.ignoreBbox) {
-        return;
-      } 
-      this.scene.moveBoundingBox({[key]: value});
+    handleCodeUpdate() {
+      console.log("HANDLING CODE UPDATE")
+      this.vectorField.setCode(this.vectorField.code);
     },
-    loadSound() {
-      if (!this.soundLoader) return;
-      this.soundLoader.loadStream(this.soundCloudLink).then(e => {
-        if (!this.audioSource) {
-          this.audioSource = new SoundCloudAudioSource(this.$refs.player); 
-        }
-        this.audioSource.playStream(this.soundLoader.streamUrl())
-      });
-      // TODO: Error handling
-    },
-    goToOrigin() {
-      this.scene.resetBoundingBox();
-    },  
-    onSubmit() {
-      if (isSmallScreen()) {
-        appState.settingsPanel.collapsed = true;
-      }
-    },
-    changeColor(e) {
-      this.selectedColorMode = e.target.value;
-    },
+    // moveBoundingBox(key, value) {
+    //   if (this.ignoreBbox) {
+    //     return;
+    //   } 
+    //   this.scene.moveBoundingBox({[key]: value});
+    // },
+    // loadSound() {
+    //   if (!this.soundLoader) return;
+    //   this.soundLoader.loadStream(this.soundCloudLink).then(e => {
+    //     if (!this.audioSource) {
+    //       this.audioSource = new SoundCloudAudioSource(this.$refs.player); 
+    //     }
+    //     this.audioSource.playStream(this.soundLoader.streamUrl())
+    //   });
+    //   // TODO: Error handling
+    // },
+    // goToOrigin() {
+    //   this.scene.resetBoundingBox();
+    // },  
+    // onSubmit() {
+    //   if (isSmallScreen()) {
+    //     appState.settingsmomentumPanel.collapsed = true;
+    //   }
+    // },
+    // changeColor(e) {
+    //   this.selectedColorMode = e.target.value;
+    // },
 
-    updateBackground(rgba) {
-      this.scene.setBackgroundColor(rgba);
-    },
+    // updateBackground(rgba) {
+    //   this.scene.setBackgroundColor(rgba);
+    // },
 
     onSceneReady(scene) {
-      this.vectorField = scene.vectorFieldEditorState;
+      // this.vectorField = scene.vectorFieldEditorState;
+      // this.vectorField = scene.bcEditorState;
+      this.vectorField = scene.valueEditorState;
       this.particlesCount = scene.getParticlesCount();
       this.fadeOutSpeed = scene.getFadeOutSpeed();
       this.dropProbability = scene.getDropProbability();
       this.timeStep = scene.getIntegrationTimeStep();
       this.selectedColorMode = scene.getColorMode();
-      this.updateBBox();
+      // this.updateBBox();
     },
 
-    updateBBox() {
-      this.ignoreBbox = true;
-      var bbox = scene.getBoundingBox();
-      this.minX = bbox.minX;
-      this.maxX = bbox.maxX;
+    // updateBBox() {
+    //   this.ignoreBbox = true;
+    //   var bbox = scene.getBoundingBox();
+    //   this.minX = bbox.minX;
+    //   this.maxX = bbox.maxX;
 
-      // Y is weird in my implementation. I know..
-      this.minY = bbox.minY;
-      this.maxY = bbox.maxY;
-      if (this.prevBboxReset) clearTimeout(this.prevBboxReset);
+    //   // Y is weird in my implementation. I know..
+    //   this.minY = bbox.minY;
+    //   this.maxY = bbox.maxY;
+    //   if (this.prevBboxReset) clearTimeout(this.prevBboxReset);
 
-      this.prevBboxReset = setTimeout(() => {
-        this.ignoreBbox = false
-        this.prevBboxReset = 0
-      }, 50);
-    },
+    //   this.prevBboxReset = setTimeout(() => {
+    //     this.ignoreBbox = false
+    //     this.prevBboxReset = 0
+    //   }, 50);
+    // },
   }
 }
 
-function exponentialStep(value) {
-  var dt = Math.pow(10, Math.floor(Math.log10(value)));
-  if (value - dt === 0) {
-    // This is odd case when you are increasing number, but otherwise it's a good adjustment.
-    return dt/10;
-  }
-  return dt;
-}
+// function exponentialStep(value) {
+//   var dt = Math.pow(10, Math.floor(Math.log10(value)));
+//   if (value - dt === 0) {
+//     // This is odd case when you are increasing number, but otherwise it's a good adjustment.
+//     return dt/10;
+//   }
+//   return dt;
+// }
 
-function toColorString({r, g, b, a}) {
-  if (a === 1.0) {
-    return `#${hex(r)}${hex(g)}${hex(b)}`;
-  }
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
+// function toColorString({r, g, b, a}) {
+//   if (a === 1.0) {
+//     return `#${hex(r)}${hex(g)}${hex(b)}`;
+//   }
+//   return `rgba(${r}, ${g}, ${b}, ${a})`;
+// }
 
-function hex(x) {
-  let value = x.toString(16).toUpperCase();
-  if (value.length === 1) value = '0' + value;
-  return value;
-}
+// function hex(x) {
+//   let value = x.toString(16).toUpperCase();
+//   if (value.length === 1) value = '0' + value;
+//   return value;
+// }
 </script>
 
 <style lang='stylus'>
@@ -313,7 +321,7 @@ function hex(x) {
 
 help-background = rgb(7, 12, 23);
 
-.settings {
+.settingsmomentum {
   color: secondary-text;
   left: 0;
   overflow-y: auto;
@@ -322,7 +330,7 @@ help-background = rgb(7, 12, 23);
   width: 100%;
   padding: 7px 7px 7px 7px;
 }
-.settings.collapsed {
+.settingsmomentum.collapsed {
   display: none;
 }
 
@@ -415,7 +423,7 @@ form.block {
     margin-top: 14px;
     padding: 0;
     padding-left: 14px;
-    width: settings-width - 14px;
+    width: settingsmomentum-width - 14px;
     font-size: 14px;
     border: 1px solid transparent;
     &:focus {
@@ -507,7 +515,7 @@ a.help-icon {
 }
 
 @media (max-width: small-screen) {
-  .settings {
+  .settingsmomentum {
     .title {
       font-size: 14px;
       text-align: left;

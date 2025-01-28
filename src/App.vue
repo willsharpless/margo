@@ -13,10 +13,11 @@
       <vector-view v-if='vectorLinesEnabled'></vector-view>
       <ruler></ruler>
       <a href='#' @click.prevent='aboutVisible = !aboutVisible' class='about-link' title='click to learn more about this website'>about...</a>
-      <a href='#' @click.prevent='aboutcontrolsVisible = !aboutcontrolsVisible' class='aboutcontrols-link' title='click to learn how to draw and evolve'>controls...</a>
+      <a href='#' @click.prevent='aboutcontrolsVisible = !aboutcontrolsVisible' class='aboutcontrols-link' title='click to learn how to draw and evolve'>keys...</a>
       <div class='controls-container' :style='getControlsContainerStyle()' ref='controls'>
         <controls></controls>
         <settings :scene='scene'></settings>
+        <settingsmomentum :scene='scene'></settingsmomentum>
         <div ref='left' class='left resize'></div>
       </div>
       <share></share>
@@ -30,6 +31,7 @@
 import Controls from './components/Controls';
 import Ruler from './components/Ruler';
 import Settings from './components/Settings';
+import Settingsmomentum from './components/Settingsmomentum';
 import Share from './components/Share';
 import About from './components/About';
 import AboutControls from './components/AboutControls'; // only new
@@ -40,7 +42,7 @@ import config from './lib/config';
 import createDrag from './lib/utils/drag.js';
 import appState from './lib/appState';
 
-const MIN_SETTINGS_WIDTH = 395;
+const MIN_SETTINGS_WIDTH = 595;
 
 export default {
   name: 'app',
@@ -78,6 +80,7 @@ export default {
     Controls,
     Ruler,
     Settings,
+    Settingsmomentum,
     Share,
     About,
     AboutControls,
@@ -120,6 +123,9 @@ export default {
   .settings {
     flex: 1;
   }
+  .settingsmomentum {
+    flex: 1;
+  }
 }
 .resize {
   position: absolute;
@@ -139,7 +145,7 @@ a {
 }
 a.highlighted {
   color: white;
-  border-bottom: 1px dashed white;
+  /* border-bottom: 1px dashed white; */
 }
 .no-webgl {
   width: 100%;

@@ -6,21 +6,21 @@ export default class UserDefinedVelocityHamiltonianFunctions extends BaseShaderN
   constructor(updateCode, updateHamiltonianCode, updateInputCode) {
     super();
     this.updateCode = updateCode || '';
-    this.updateHamiltonianCode = updateHamiltonianCode || '';
-    this.updateInputCode = updateInputCode || '';
+    // this.updateHamiltonianCode = updateHamiltonianCode || '';
+    // this.updateInputCode = updateInputCode || '';
   }
 
   setNewUpdateCode(newUpdateCode) {
     this.updateCode = newUpdateCode;
   }
 
-  setNewUpdateHamiltonianCode(newUpdateHamiltonianCode) {
-    this.updateHamiltonianCode = newUpdateHamiltonianCode;
-  }
+  // setNewUpdateHamiltonianCode(newUpdateHamiltonianCode) {
+  //   this.updateHamiltonianCode = newUpdateHamiltonianCode;
+  // }
 
-  setNewUpdateInputCode(newUpdateInputCode) {
-    this.updateInputCode = newUpdateInputCode;
-  }
+  // setNewUpdateInputCode(newUpdateInputCode) {
+  //   this.updateInputCode = newUpdateInputCode;
+  // }
 
   getDefines() {
     return `
@@ -65,10 +65,6 @@ float audio(float index) {
   return rgba[3];
 }
 
-${this.updateCode ? this.updateCode : 'vec2 get_velocity(vec2 x, float t) { return vec2(0.003); }'} // FIXME wrapped get_vel needs time
-
-${this.updateInputCode ? this.updateInputCode : `
-
 // Input Parameters (Linear By Default)
 
 float game = 0.; // 0. for reach, 1. for avoid
@@ -103,9 +99,11 @@ mat2 control_jacobian(vec2 x, float time) {
 
 mat2 disturbance_jacobian(vec2 x, float time) {
   return disturbance_matrix;
-}`}
+}
 
-${this.updateHamiltonianCode ? this.updateHamiltonianCode : `
+${this.updateCode ? this.updateCode : `
+
+vec2 get_velocity(vec2 x) { return vec2(0.1); }
 
 // // WAS FIXME: user-defined in advanced cases
 // vec2 max_partial_hamiltonian_costate(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
@@ -127,15 +125,6 @@ float get_hamiltonian(vec2 state, vec2 costate, float time, float value) {
 //   return h;
 // }
 
-// Max Hamiltonian Derivative (ignorable)
-
-vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float val) {
-  mat2 control_jac = control_jacobian(x, t);
-  mat2 disturbance_jac = disturbance_jacobian(x, t);
-  // return abs(get_velocity(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
-  return abs(get_velocity(x));
-}
-
 // if your hamiltonian is NOT solely defined wrt a flow,
 // you must define max_partial_hamiltonian_costate or use a fixed LF parameter
 
@@ -146,6 +135,15 @@ vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float 
 // }
 
 `}
+
+// Max Hamiltonian Derivative (// FIXME, should be user-defined)
+
+vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float val) {
+  mat2 control_jac = control_jacobian(x, t);
+  mat2 disturbance_jac = disturbance_jacobian(x, t);
+  // return abs(get_velocity(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
+  return abs(get_velocity(x));
+}
 
 `
   }

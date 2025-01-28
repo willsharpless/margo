@@ -19,6 +19,7 @@ import createDrawParticlesProgram from './programs/drawParticlesProgram';
 import createDrawParticlesProgram_WAS from './programs/drawParticlesProgram_WAS';
 import createCursorUpdater from './utils/cursorUpdater';
 import createVectorFieldEditorState from './editor/vectorFieldState';
+import createGeneralEditorState from './editor/codeState';
 import createInputsModel from './createInputsModel';
 
 /**
@@ -156,16 +157,23 @@ export default function initScene(gl) {
 
   // screen rendering;
   var screenProgram = createScreenProgram(ctx);
+
   // var drawProgram = createDrawParticlesProgram_WAS(ctx, 0, );
   var drawProgramField = createDrawParticlesProgram_WAS(ctx, 0, field_color, field_color_second);
   // var drawProgramField2 = createDrawParticlesProgram_WAS(ctx, 0, field_color_second, field_color_second);
   var drawProgramBC = createDrawParticlesProgram_WAS(ctx, 1, reach_color, avoid_color); // Boundary Condition Program
   var drawProgramValue = createDrawParticlesProgram_WAS(ctx, 2, value_color, value_color); // Value Program
+
   var cursorUpdater = createCursorUpdater(ctx);
-  var vectorFieldEditorState = createVectorFieldEditorState(drawProgramField);
+
+  // var vectorFieldEditorState = createVectorFieldEditorState(drawProgramField);
   // var vectorField2EditorState = createVectorFieldEditorState(drawProgramField2);
-  var vectorFieldEditorStateBC = createVectorFieldEditorState(drawProgramBC);
-  var vectorFieldEditorStateValue = createVectorFieldEditorState(drawProgramValue);
+  var vectorFieldEditorState = createGeneralEditorState(drawProgramField, 0);
+
+  // var bcEditorState = createVectorFieldEditorState(drawProgramBC);
+  var bcEditorState = createGeneralEditorState(drawProgramBC, 1);
+  // var valueEditorState = createVectorFieldEditorState(drawProgramValue);
+  var valueEditorState = createGeneralEditorState(drawProgramValue, 2);
 
   // particles
   updateParticlesCount(particleCount);
@@ -205,8 +213,8 @@ export default function initScene(gl) {
 
     vectorFieldEditorState,
     // vectorField2EditorState,
-    vectorFieldEditorStateBC,
-    vectorFieldEditorStateValue,
+    bcEditorState,
+    valueEditorState,
 
     inputsModel,
 
@@ -405,8 +413,8 @@ export default function initScene(gl) {
       drawProgramValue.dispose();
       vectorFieldEditorState.dispose();
       // vectorField2EditorState.dispose();
-      vectorFieldEditorStateBC.dispose();
-      vectorFieldEditorStateValue.dispose();
+      bcEditorState.dispose();
+      valueEditorState.dispose();
   }
 
   function nextFrame() {

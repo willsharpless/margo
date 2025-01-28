@@ -37,7 +37,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
   };
 
   function updateCode(vectorField) {
-    particlePositionShaderCodeBuilder.setCustomVectorField(vectorField);
+    particlePositionShaderCodeBuilder.setCustomVectorField(vectorField, texture_type);
     let fragment = particlePositionShaderCodeBuilder.getFragmentShader(texture_type);
     let vertex = particlePositionShaderCodeBuilder.getVertexShader();
 

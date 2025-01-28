@@ -9,6 +9,7 @@
 </svg>
     </a>
     <a href='#' @click.prevent='toggleSettings' class='action'>{{(settingsPanel.collapsed ? "Flow..." : "Hide flow")}}</a>
+    <a href='#' @click.prevent='toggleSettingsmomentum' class='action'>{{(settingsmomentumPanel.collapsed ? "Momentum..." : "Hide momentum")}}</a>
     <a href='#' @click.prevent='generateNewFunction'>Randomize</a>
     <a href='#' @click.prevent='openShareDialog' class='share-btn' title='Share'>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18" height="18" viewBox="0 0 12 14">
@@ -36,7 +37,8 @@ export default {
         paused: false,
         bcDrawing: false,
         field: false,
-        settingsPanel: appState.settingsPanel
+        settingsPanel: appState.settingsPanel,
+        settingsmomentumPanel: appState.settingsmomentumPanel,
     }
   },
 
@@ -85,6 +87,11 @@ export default {
     },
     toggleSettings() {
       this.settingsPanel.collapsed = !this.settingsPanel.collapsed;
+      this.settingsmomentumPanel.collapsed = true;
+    },
+    toggleSettingsmomentum() {
+      this.settingsmomentumPanel.collapsed = !this.settingsmomentumPanel.collapsed;
+      this.settingsPanel.collapsed = true;
     },
     openShareDialog() {
       bus.fire('open-share-dialog');

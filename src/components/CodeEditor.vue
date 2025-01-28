@@ -37,6 +37,7 @@ export default {
   },
   mounted() {
     bus.on('settings-collapsed', refreshEditor, this);
+    bus.on('settingsmomentum-collapsed', refreshEditor, this);
     this.$refs.editor.editor.setOption('extraKeys', {
       'Cmd-/': toggleGLSLComment,
       'Ctrl-/': toggleGLSLComment
@@ -44,6 +45,7 @@ export default {
   },
   beforeDestroy() {
     bus.off('settings-collapsed', refreshEditor, this);
+    bus.off('settingsmomentum-collapsed', refreshEditor, this);
   },
   watch: {
     'model.code': function() {
@@ -56,6 +58,10 @@ export default {
       this.pendingSetCode = setTimeout(() => {
         this.model.setCode(this.model.code);
         this.pendingSetCode = 0;
+        // console.log("FIRE vfcode update");
+        this.pendingUpdate = setTimeout(() => {
+          bus.fire('vfcode-updated');
+        }, 100);
       }, 300);
     },
   }

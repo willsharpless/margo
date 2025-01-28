@@ -33,9 +33,15 @@ export default class UpdatePositionGraph_WAS {
     // this.colorMode = options && options.colorMode;
   }
 
-  setCustomVectorField(velocityCode) {
-    this.udfVelocity.setNewUpdateCode(velocityCode);
-    this.udfVelocityHamiltonian.setNewUpdateCode(velocityCode);
+  setCustomVectorField(velocityCode, texture_type) {
+    if (texture_type == 0) {
+      this.udfVelocity.setNewUpdateCode(velocityCode);
+    } else if (texture_type == 1) {
+      //
+    } else if (texture_type == 2) {
+      console.log("velocityCode IN VAL TEX: \n\n", velocityCode)
+      this.udfVelocityHamiltonian.setNewUpdateCode(velocityCode);
+    }
   }
 
   // setCustomHamiltonian(hamiltonianCode) {

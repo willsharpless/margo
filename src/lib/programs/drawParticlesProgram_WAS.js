@@ -11,7 +11,7 @@ import createAudioProgram from './audioProgram';
  * and initiates drawing them on screen.
  * 
  * @param {Object} ctx rendering context. Holds WebGL state
- * @param {Int} texture_type gives the type: 1 = bc texture (no tex enc/dec), 2 = value texture
+ * @param {Int} texture_type gives the type: 0 = particle field, 1 = bc texture, 2 = value texture
  * @param {Float32Array} color_start gives the color of the texture
  * @param {Float32Array} color_start2 gives second color of the texture
  */
@@ -592,7 +592,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     if (keysPressed['Backspace']) {
       if (keysPressed['r']) {
         console.log('Reach drawings erased.');
-        eraseBC(true, false); // BUG WAS: if field going, both bc & field die and cant turn on w/o refresh
+        eraseBC(true, false); // BUG WAS: if field going, both bc & field die and cant turn on w/o refresh (but only happens w BC erase not val?)
       } else if (keysPressed['a']) {
         console.log('Avoid drawings erased.');
         eraseBC(false, true);
@@ -612,7 +612,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     if (keysPressed['Shift'] && (keysPressed['Return'] || keysPressed['Enter'])) {
       ctx.value_transfer = true;
       ctx.value_mode = true;
-      updateCode(currentVectorField) // resets frame and shaders
+      updateCode(currentVectorField) // resets frame and shaders //FIXME: is there a better way? does this cause field bug?
       console.log('Value evolution beginning :)');
     } 
     // if (ctx.bc_drawing_mode && texture_type == 2) {

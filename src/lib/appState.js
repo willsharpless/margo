@@ -2,6 +2,7 @@ import queryState from 'query-state';
 import bus from './bus';
 import ColorModes from './programs/colorModes';
 import wrapVectorField from './wrapVectorField';
+import wrapBoundaryCondition from './wrapBoundaryCondition';
 import isSmallScreen from './isSmallScreen';
 
 /**
@@ -21,12 +22,34 @@ var qs = queryState({}, {
 
 var currentState = qs.get();
 
-var defaultVectorField = wrapVectorField(`v.x = -0.2 * s.x + 0.1 * s.y;
+var defaultVectorFieldCode = wrapVectorField(`v.x = -0.2 * s.x + 0.1 * s.y;
   v.y = -0.1 * s.x - 0.2 * s.y;`);
+
+var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = 0.5 * (max(abs(s.x), abs(s.y)) - 1.); // unit box
+  // float bc_val = 0.5 * (length(s) - 1.); // unit ball`);
+
+var defaultValueCode = `
+// Hamiltonian
+float get_hamiltonian(vec2 state, vec2 costate, float time, float value) {
+  float ham = -dot(costate, get_velocity(state));
+  return ham;
+}
+
+// Value Alteration (after update)
+float value_alteration(float newValue, float reach_bc, float avoid_bc) {
+  float newValueAltered = newValue; // BRS
+  // float newValueAltered = min(reach_bc, newValue); // BRT
+  // float newValueAltered = max(min(reach_bc, newValue), avoid_bc); // BRAT
+  return newValueAltered;
+}
+
+`;
+
+var texture_type;
 
 var pendingSave;
 var defaults = {
-  timeStep: 0.003,
+  timeStep: 0.001,
   dropProbability: 0.000125,
   particleCount: 1000000, // FIXME WAS: Separate particle count for value textures
   fadeout: .999,
@@ -40,8 +63,14 @@ let settingsPanel = {
   collapsed: true,
 };
 
+let settingsmomentumPanel = {
+  // collapsed: isSmallScreen(),
+  collapsed: true,
+};
+
 export default {
   settingsPanel,
+  settingsmomentumPanel,
   saveBBox,
   getBBox,
   makeBBox,
@@ -233,34 +262,84 @@ function saveBBox(bbox, immediate = false) {
   }
 }
 
-function getCode() {
-  var vfCode = qs.get('vf');
-  if (vfCode) return vfCode;
+function getCode(texture_type=0) {
+  var anyCode
+  if (texture_type == 0) {
+    anyCode = qs.get('vf');
+  } else if (texture_type == 1) {
+    anyCode = false;
+    // anyCode = qs.get('bc');
+  } else if (texture_type == 2) {
+    anyCode = false;
+    // anyCode = qs.get('val');
+  }
+  if (anyCode) return anyCode;
 
   // If we didn't get code yet, let's try read to read it from previous version
   // of the API.
   // TODO: Need to figure out how to develop this in backward/future compatible way.
-  var oldCode = qs.get('code');
-  if (oldCode) {
-    vfCode = wrapVectorField(oldCode);
-    // side effect - let's clean the old URL
-    delete(currentState.code);
-    qs.set('vf', vfCode);
-    return vfCode;
+  if (texture_type == 0) {
+    var oldCode = qs.get('code');
+    if (oldCode) {
+      vfCode = wrapVectorField(oldCode);
+      // side effect - let's clean the old URL
+      delete(currentState.code);
+      qs.set('vf', vfCode);
+      return vfCode;
+    }
+  } else if (texture_type == 1) {
+    // var oldCode = qs.get('codeham');
+    // if (oldCode) {
+    //   hamCode = wrapHam(oldCode);
+    //   // side effect - let's clean the old URL
+    //   delete(currentState.hamcode);
+    //   qs.set('ham', hamCode);
+    //   return hamCode;
+    // }
+  } else if (texture_type == 2) {
+    // var oldCode = qs.get('codeval');
+    // if (oldCode) {
+    //   valCode = wrapVal(oldCode);
+    //   // side effect - let's clean the old URL
+    //   delete(currentState.valcode);
+    //   qs.set('val', valCode);
+    //   return valCode;
+    // }
   }
 
-  return defaultVectorField;
+  return getDefaultCode(texture_type);
 }
 
-function getDefaultCode() {
-  return defaultVectorField;
+function getDefaultCode(texture_type=0) {
+  var defaultCode;
+  if (texture_type == 0) {
+    defaultCode = defaultVectorFieldCode;
+  } else if (texture_type == 1) {
+    defaultCode = defaultBoundaryConditionCode;
+  } else if (texture_type == 2) {
+    // defaultCode = defaultVectorFieldCode + '\n\n' + defaultValueCode;
+    defaultCode = defaultValueCode;
+  }
+  return defaultCode;
 }
 
-function saveCode(code) {
-  qs.set({
-    vf: code
-  });
-  currentState.code = code;
+function saveCode(code, texture_type=0) {
+  if (texture_type == 0) {
+    qs.set({
+      vf: code
+    });
+    currentState.code = code;
+  } else if (texture_type == 1) { // dont do anything for now
+    // qs.set({
+    //   ham: code
+    // });
+    // currentState.code = code;
+  } else if (texture_type == 2) {
+    // qs.set({
+    //   val: code
+    // });
+    // currentState.code = code;
+  }
 }
 
 function defined(number) {

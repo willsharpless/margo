@@ -13,5 +13,8 @@ vec2 get_velocity(vec2 s) {
   ${field}
 
   return v;
-}`
+}
+  
+// see it,
+// [click screen, 'f']`
 }

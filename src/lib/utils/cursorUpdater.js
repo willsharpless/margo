@@ -33,7 +33,7 @@ export default function createCursorUpdater(ctx) {
     var firstTouch = e.touches[0];
     if (!firstTouch) return;
 
-    setClick(firstTouch.clientX, firstTouch.clientY);
+    setClick(firstTouch.clientX, firstTouch.clientY, e);
     setHover(firstTouch.clientX, firstTouch.clientY);
   }
 
@@ -45,7 +45,7 @@ export default function createCursorUpdater(ctx) {
 
   function onMouseMove(e) { setHover(e.clientX, e.clientY); }
 
-  function onMouseClick(e) { setClick(e.clientX, e.clientY); }
+  function onMouseClick(e) { setClick(e.clientX, e.clientY, e); }
 
   function onMouseClick2(e) { setClick2(e.clientX, e.clientY); }
 
@@ -54,10 +54,11 @@ export default function createCursorUpdater(ctx) {
     ctx.cursor.hoverY = getSceneYFromClientY(clientY);
   }
 
-  function setClick(clientX, clientY) {
-    if (ctx.bc_drawing_mode) {
+  function setClick(clientX, clientY, e) {
+    const controlsContainer = document.querySelector('.controls-container');
+    if (ctx.bc_drawing_mode && !controlsContainer.contains(e.target)) {
       ctx.drawing_click_sum += 1;
-      // console.log("Click Sum % 3:", ctx.drawing_click_sum % 3) // DELETE ME
+      console.log("Click Sum % 3:", ctx.drawing_click_sum % 3) // DELETE ME
     }
     ctx.cursor.clickX = getSceneXFromClientX(clientX);
     ctx.cursor.clickY = getSceneYFromClientY(clientY);

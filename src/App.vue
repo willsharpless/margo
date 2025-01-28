@@ -18,6 +18,7 @@
         <controls></controls>
         <settings :scene='scene'></settings>
         <settingsmomentum :scene='scene'></settingsmomentum>
+        <settingsshape :scene='scene'></settingsshape>
         <div ref='left' class='left resize'></div>
       </div>
       <share></share>
@@ -32,6 +33,7 @@ import Controls from './components/Controls';
 import Ruler from './components/Ruler';
 import Settings from './components/Settings';
 import Settingsmomentum from './components/Settingsmomentum';
+import Settingsshape from './components/Settingsshape';
 import Share from './components/Share';
 import About from './components/About';
 import AboutControls from './components/AboutControls'; // only new
@@ -42,7 +44,7 @@ import config from './lib/config';
 import createDrag from './lib/utils/drag.js';
 import appState from './lib/appState';
 
-const MIN_SETTINGS_WIDTH = 595;
+const MIN_SETTINGS_WIDTH = 795;
 
 export default {
   name: 'app',
@@ -81,6 +83,7 @@ export default {
     Ruler,
     Settings,
     Settingsmomentum,
+    Settingsshape,
     Share,
     About,
     AboutControls,
@@ -124,6 +127,9 @@ export default {
     flex: 1;
   }
   .settingsmomentum {
+    flex: 1;
+  }
+  .settingsshape {
     flex: 1;
   }
 }

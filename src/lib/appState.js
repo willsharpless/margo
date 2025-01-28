@@ -22,34 +22,41 @@ var qs = queryState({}, {
 
 var currentState = qs.get();
 
-var defaultVectorFieldCode = wrapVectorField(`v.x = -0.2 * s.x + 0.1 * s.y;
-  v.y = -0.1 * s.x - 0.2 * s.y;`);
+// var defaultVectorFieldCode = wrapVectorField(`v.x = -0.2 * s.x + 0.1 * s.y;
+//   v.y = -0.1 * s.x - 0.2 * s.y;`);
+
+var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
+  v.y = s.y * s.y - s.x * s.x;`);
+
+  // var defaultVectorFieldCode = wrapVectorField(`v.x = length(s);
+//   v.y = sin(cos(s.y)) - sin(sin(s.x));`);
 
 var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = 0.5 * (max(abs(s.x), abs(s.y)) - 1.); // unit box
   // float bc_val = 0.5 * (length(s) - 1.); // unit ball`);
 
-var defaultValueCode = `
-// Hamiltonian
-float get_hamiltonian(vec2 state, vec2 costate, float time, float value) {
-  float ham = -dot(costate, get_velocity(state));
+var defaultValueCode = `// Given any point, we decide the momentum (hamiltonian),
+// defining how the value evolves.
+
+float get_hamiltonian(vec2 s, vec2 p, float time, float val) {
+  float ham = -dot(p, get_velocity(s));
   return ham;
 }
 
-// Value Alteration (after update)
-float value_alteration(float newValue, float reach_bc, float avoid_bc) {
-  float newValueAltered = newValue; // BRS
-  // float newValueAltered = min(reach_bc, newValue); // BRT
-  // float newValueAltered = max(min(reach_bc, newValue), avoid_bc); // BRAT
-  return newValueAltered;
+// we may also alter it after each step
+float value_alteration(float newval, float val, float reach_bc, float avoid_bc) {
+  float vala = min(val, newval);
+  return vala;
 }
 
+// to see it,
+// [click screen, 'shift' + 'enter']
 `;
 
 var texture_type;
 
 var pendingSave;
 var defaults = {
-  timeStep: 0.001,
+  timeStep: 0.0005,
   dropProbability: 0.000125,
   particleCount: 1000000, // FIXME WAS: Separate particle count for value textures
   fadeout: .999,
@@ -68,9 +75,15 @@ let settingsmomentumPanel = {
   collapsed: true,
 };
 
+let settingsshapePanel = {
+  // collapsed: isSmallScreen(),
+  collapsed: true,
+};
+
 export default {
   settingsPanel,
   settingsmomentumPanel,
+  settingsshapePanel,
   saveBBox,
   getBBox,
   makeBBox,

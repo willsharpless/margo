@@ -15,6 +15,6 @@ vec2 get_velocity(vec2 s) {
   return v;
 }
   
-// see it,
+// to see it,
 // [click screen, 'f']`
 }

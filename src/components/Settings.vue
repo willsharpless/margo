@@ -1,7 +1,7 @@
 <template>
   <div class='settings' :class='{collapsed: settingsPanel.collapsed}'>
     <div class='block vector-field'  v-if='vectorField'>
-      <div class='title'>Velocity <a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
+      <div class='title'> <a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
       <syntax v-if='syntaxHelpVisible' @close='syntaxHelpVisible = false'></syntax>
       <code-editor :model='vectorField'></code-editor>
     </div>
@@ -9,7 +9,7 @@
       <Inputs :vm='inputsModel'></Inputs>
     </div>
     <form class='block' @submit.prevent='onSubmit'>
-      <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      <div class='title'><a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
       <div class='row'>
         <div class='col'>Particle color</div>
         <div class='col'> 

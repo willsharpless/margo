@@ -15,12 +15,12 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
 
   // What is the current code?
   var currentVectorFieldCode = appState.getCode(texture_type);
-  console.log("PROGRAM", texture_type, "INIT currentVectorFieldCode\n\n", currentVectorFieldCode)
+  // console.log("PROGRAM", texture_type, "INIT currentVectorFieldCode\n\n", currentVectorFieldCode)
   
   // Need get_velocity for hamiltonian (FIXME names are backward due to artifact)
-  if (texture_type == 2) {
+  if (texture_type > 0) {
     var currentVectorFieldCodeForValueCode = appState.getCode(0);
-    console.log("PROGRAM", texture_type, "INIT combined\n\n", currentVectorFieldCodeForValueCode + "\n\n" + currentVectorFieldCode)
+    // console.log("PROGRAM", texture_type, "INIT combined\n\n", currentVectorFieldCodeForValueCode + "\n\n" + currentVectorFieldCode)
   }
 
   // For delayed parsing result verification (e.g. when vue is loaded it
@@ -60,7 +60,7 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
       // If field hasn't changed, let's make sure that there was no previous
       // error
       if (parserResult && parserResult.error) {
-        console.log("error for same code") 
+        console.log("error from same code") 
         // And if there was error, let's revalidate code:
         parseCode();
       }
@@ -86,7 +86,7 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
       api.error = parserResult.error;
       api.errorDetail = parserResult.errorDetail;
       api.isFloatError = parserResult.isFloatError;
-      console.log("PROGRAM", texture_type, "ERROR:", parserResult.errorDetail)
+      // console.log("PROGRAM", texture_type, "ERROR:", parserResult.errorDetail)
     } else {
       api.error = '';
       api.errorDetail = '';
@@ -121,17 +121,10 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
 
   function trySetNewCode(vectorFieldCode) {
 
-    if (texture_type == 2) {
-      // this.currentVectorFieldCodeForValueCode = appState.getCode(0)
-      // console.log(currentVectorFieldCodeForValueCode)
-      // vectorFieldCode = appState.getCode(0) + "\n\n" + this.currentVectorFieldCode
-      // vectorFieldCode = appState.getCode(0) + '\n\n' + vectorFieldCode
+    // WAS: Value program also needs get_velocity
+    if (texture_type > 0) {
       vectorFieldCode = appState.getCode(0) + "\n\n" + vectorFieldCode
-      console.log("PROGRAM", texture_type, "CODE IN trySetNewCode\n", vectorFieldCode)
-    }
-
-    if (texture_type == 0) {
-
+      // console.log("PROGRAM", texture_type, "CODE IN trySetNewCode\n", vectorFieldCode)
     }
 
     currentVectorFieldVersion += 1;
@@ -145,8 +138,8 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
       }
 
       if (parserResult.error) {
-        console.log("PARSER ERROR", parserResult.error)
-        console.log("PARSER CODE\n", vectorFieldCode)
+        // console.log("PARSER ERROR", parserResult.error)
+        // console.log("PARSER CODE\n", vectorFieldCode)
         return parserResult;
       }
       // step 2 - run through real webgl
@@ -155,8 +148,8 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
           drawProgram.updateCode(parserResult.code);
           // console.log("parserResult.code", parserResult.code)
         } else if (texture_type == 1) {
-          drawProgram.updateCode(appState.getDefaultCode(0)); // TODO also dynamic update
-          // can replace with appState.getCode(0) to retrive get_vel;
+          // console.log("parserResult.code\n\n", parserResult.code)
+          drawProgram.updateCode(parserResult.code); // TODO also dynamic update
         } else if (texture_type == 2) {
           drawProgram.updateCode(parserResult.code);
         }

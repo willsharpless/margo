@@ -468,7 +468,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     gl.uniform2f(program.u_max_enc, bbox_enc.maxX, bbox_enc.maxY);
 
     gl.uniform1i(program.texture_type, texture_type);
-    gl.uniform1f(program.thresh, ctx.thresh);
+    gl.uniform1f(program.thresh, ctx.draw_thresh);
     gl.uniform1f(program.drawing_click_sum, ctx.drawing_click_sum);
     gl.uniform1i(program.bc_drawing_mode, ctx.bc_drawing_mode);
     gl.uniform1i(program.reach_mode, ctx.bc_reach_mode);
@@ -477,6 +477,8 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     gl.uniform1f(program.sign, (2 * !ctx.bc_flip_mode - 1))
     // console.log("program.sign", (2 * ctx.bc_reach_mode - 1) * (2 * !ctx.bc_flip_mode - 1))
     gl.uniform1i(program.draw_fill, ctx.draw_fill);
+    gl.uniform1i(program.draw_levels, ctx.draw_levels);
+    gl.uniform1f(program.level_step, ctx.draw_level_step);
     
     if (texture_type == 1) { // Boundary Condition Texture (value defined by implicit location)
 
@@ -532,13 +534,17 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     // ctx.bc.cy = cursor.clickY
     // var w = 2 * Math.abs(ctx.bc.cx - cursor.hoverX);
     // var h = 2 * Math.abs(ctx.bc.cy - cursor.hoverY);
+    var maxw = Math.abs(ctx.bbox.maxX - ctx.bbox.minX);
+    var maxh = Math.abs(ctx.bbox.maxY - ctx.bbox.minY);
+    var minmax = Math.min(maxw, maxh); // to prevent screen cover before moving
 
     if (ctx.bc.shape == 1) { // square
-      ctx.bc.qx = 0.5 * w;
-      ctx.bc.qy = 0.5 * h;
+      ctx.bc.qx = Math.max(0.5 * w, 0.005 * minmax);
+      ctx.bc.qy = Math.max(0.5 * h, 0.005 * minmax);
+      // console.log("ctx.bc.qx",ctx.bc.qx)
     } else if (ctx.bc.shape == 2) { // circle
-      ctx.bc.qx = 2 * Math.pow(0.5 * w, 2);
-      ctx.bc.qy = 2 * Math.pow(0.5 * h, 2); // 2x for better Ux
+      ctx.bc.qx = Math.max(2 * Math.pow(0.5 * w, 2), 0.0005 * minmax);
+      ctx.bc.qy = Math.max(2 * Math.pow(0.5 * h, 2), 0.0005 * minmax); // 2x for better Ux
     } else {
       console.log("Drawing mode ", ctx.bc.shape, " not possible yet!")
     }

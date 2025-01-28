@@ -9,6 +9,7 @@
 </svg>
     </a>
     <a href='#' @click.prevent='toggleSettings' class='action'>{{(settingsPanel.collapsed ? "Flow..." : "Hide flow")}}</a>
+    <a href='#' @click.prevent='toggleSettingsshape' class='action'>{{(settingsshapePanel.collapsed ? "Shape..." : "Hide shape")}}</a>
     <a href='#' @click.prevent='toggleSettingsmomentum' class='action'>{{(settingsmomentumPanel.collapsed ? "Momentum..." : "Hide momentum")}}</a>
     <a href='#' @click.prevent='generateNewFunction'>Randomize</a>
     <a href='#' @click.prevent='openShareDialog' class='share-btn' title='Share'>
@@ -39,6 +40,7 @@ export default {
         field: false,
         settingsPanel: appState.settingsPanel,
         settingsmomentumPanel: appState.settingsmomentumPanel,
+        settingsshapePanel: appState.settingsshapePanel,
     }
   },
 
@@ -88,10 +90,17 @@ export default {
     toggleSettings() {
       this.settingsPanel.collapsed = !this.settingsPanel.collapsed;
       this.settingsmomentumPanel.collapsed = true;
+      this.settingsshapePanel.collapsed = true;
     },
     toggleSettingsmomentum() {
       this.settingsmomentumPanel.collapsed = !this.settingsmomentumPanel.collapsed;
       this.settingsPanel.collapsed = true;
+      this.settingsshapePanel.collapsed = true;
+    },
+    toggleSettingsshape() {
+      this.settingsshapePanel.collapsed = !this.settingsshapePanel.collapsed;
+      this.settingsPanel.collapsed = true;
+      this.settingsmomentumPanel.collapsed = true;
     },
     openShareDialog() {
       bus.fire('open-share-dialog');

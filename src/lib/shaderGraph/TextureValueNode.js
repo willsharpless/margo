@@ -154,7 +154,7 @@ uniform float u_particles_res;
     // vec2 next_tv = tvd_rk_3o(state, time, value, time_step, ts_fxd_or_adp); // gives new time and val
     // newValue = next_tv.y;
     newValue = value - time_step * diss_ham;
-    newValue = value_alteration(newValue, reach_value, avoid_value);
+    newValue = value_alteration(newValue, value, reach_value, avoid_value);
 
     // // float frameoi = 3.;
     // float frameoi = 100000.;

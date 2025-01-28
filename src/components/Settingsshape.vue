@@ -1,7 +1,7 @@
 <template>
-  <div class='settingsmomentum' :class='{collapsed: settingsmomentumPanel.collapsed}'>
+  <div class='settingsshape' :class='{collapsed: settingsshapePanel.collapsed}'>
     <div class='block vector-field'  v-if='vectorField'>
-      <div class='title'><a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
+      <div class='title'> <a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
       <syntax v-if='syntaxHelpVisible' @close='syntaxHelpVisible = false'></syntax>
       <code-editor :model='vectorField'></code-editor>
     </div>
@@ -9,7 +9,7 @@
       <Inputs :vm='inputsModel'></Inputs>
     </div> -->
     <form class='block' @submit.prevent='onSubmit'>
-      <div class='title'>Settings Momentum<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
       <!-- <div class='row'>
         <div class='col'>Particle color</div>
         <div class='col'> 
@@ -134,7 +134,7 @@ import Inputs from './Inputs';
 const soundAvailable = config.isAudioEnabled;
 
 export default {
-  name: 'Settingsmomentum',
+  name: 'Settingsshape',
   props: ['scene'],
   components: {
     Syntax,
@@ -144,21 +144,21 @@ export default {
   },
   mounted() {
     bus.on('scene-ready', this.onSceneReady, this);
-    bus.on('vfcode-updated', this.handleCodeUpdate);
+    // bus.on('vfcode-updated', this.handleCodeUpdate);
     // bus.on('bbox-change', this.updateBBox, this);
 
     // if (soundAvailable) this.soundLoader = new SoundLoader(this.$refs.player);
   },
   beforeDestroy() {
     bus.off('scene-ready', this.onSceneReady, this);
-    bus.off('vfcode-updated', this.handleCodeUpdate);
+    // bus.off('vfcode-updated', this.handleCodeUpdate);
     // bus.off('bbox-change', this.updateBBox, this);
   },
   data() {
     return {
       soundCloudLink: 'https://soundcloud.com/mrfijiwiji/yours-truly',
       vectorField: null,
-      settingsmomentumPanel: appState.settingsmomentumPanel,
+      settingsshapePanel: appState.settingsshapePanel,
       inputsModel: scene.inputsModel,
       showBindings: config.showBindings,
       particlesCount: 0,
@@ -179,8 +179,8 @@ export default {
     };
   },
   watch: {
-    'settingsmomentumPanel.collapsed': function(newValue) {
-      bus.fire('settingsmomentum-collapsed', newValue);
+    'settingsshapePanel.collapsed': function(newValue) {
+      bus.fire('settingsshape-collapsed', newValue);
     },
     // particlesCount(newValue, oldValue) {
     //   this.scene.setParticlesCount(parseInt(newValue, 10));
@@ -225,10 +225,10 @@ export default {
     // }
   },
   methods: {
-    handleCodeUpdate() {
-      console.log("HANDLING CODE UPDATE")
-      this.vectorField.setCode(this.vectorField.code);
-    },
+    // handleCodeUpdate() {
+    //   console.log("HANDLING CODE UPDATE")
+    //   this.vectorField.setCode(this.vectorField.code);
+    // },
     // moveBoundingBox(key, value) {
     //   if (this.ignoreBbox) {
     //     return;
@@ -250,7 +250,7 @@ export default {
     // },  
     // onSubmit() {
     //   if (isSmallScreen()) {
-    //     appState.settingsmomentumPanel.collapsed = true;
+    //     appState.settingsshapePanel.collapsed = true;
     //   }
     // },
     // changeColor(e) {
@@ -263,8 +263,8 @@ export default {
 
     onSceneReady(scene) {
       // this.vectorField = scene.vectorFieldEditorState;
-      // this.vectorField = scene.bcEditorState;
-      this.vectorField = scene.valueEditorState;
+      this.vectorField = scene.bcEditorState;
+      // this.vectorField = scene.valueEditorState;
       this.particlesCount = scene.getParticlesCount();
       this.fadeOutSpeed = scene.getFadeOutSpeed();
       this.dropProbability = scene.getDropProbability();
@@ -321,7 +321,7 @@ export default {
 
 help-background = rgb(7, 12, 23);
 
-.settingsmomentum {
+.settingsshape {
   color: secondary-text;
   left: 0;
   overflow-y: auto;
@@ -330,7 +330,7 @@ help-background = rgb(7, 12, 23);
   width: 100%;
   padding: 7px 7px 7px 7px;
 }
-.settingsmomentum.collapsed {
+.settingsshape.collapsed {
   display: none;
 }
 
@@ -423,7 +423,7 @@ form.block {
     margin-top: 14px;
     padding: 0;
     padding-left: 14px;
-    width: settingsmomentum-width - 14px;
+    width: settingsshape-width - 14px;
     font-size: 14px;
     border: 1px solid transparent;
     &:focus {
@@ -515,7 +515,7 @@ a.help-icon {
 }
 
 @media (max-width: small-screen) {
-  .settingsmomentum {
+  .settingsshape {
     .title {
       font-size: 14px;
       text-align: left;

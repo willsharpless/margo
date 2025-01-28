@@ -39,7 +39,6 @@ export default class UpdatePositionGraph_WAS {
     } else if (texture_type == 1) {
       //
     } else if (texture_type == 2) {
-      console.log("velocityCode IN VAL TEX: \n\n", velocityCode)
       this.udfVelocityHamiltonian.setNewUpdateCode(velocityCode);
     }
   }

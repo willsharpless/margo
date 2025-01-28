@@ -57,6 +57,8 @@ uniform bool reach_mode;
 uniform bool flip_mode;
 uniform float sign;
 uniform bool draw_fill;
+uniform bool draw_levels;
+uniform float level_step;
 varying float filler;
 
 ${decodePositions.getVariables() || ''}
@@ -79,6 +81,13 @@ void main() {
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
         abs(u_max.y - u_min.y) * (floor(a_index / u_particles_res) / u_particles_res) + u_max.y); // max bcuz col major
   // WAS: note, this dynamically fluctuates w/ the box but the value is defined for a fixed box!
+
+  state_mag = vec2( // unit coding - fixed w/o respect to bbox!
+    fract(a_index / u_particles_res),
+    (floor(a_index / u_particles_res) / u_particles_res)
+  );
+  // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt default bbox
+  // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc encoding loc (small bug in yloc still smh)
 
   if (texture_type == 0) { // Field Texture
 
@@ -123,15 +132,8 @@ ${main.join('\n')}
       val = 0.;
     }
     
-    // for testing bc encoding
+    // for testing/observing bc encoding
     if (mod(drawing_click_sum, 3.) == 2.) {
-      state_mag = vec2( // unit coding - fixed w/o respect to bbox!
-        fract(a_index / u_particles_res),
-        (floor(a_index / u_particles_res) / u_particles_res)
-      );
-      // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt default bbox
-      // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc encoding loc (small bug in yloc still smh)
-
       if (reach_mode) {
         val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
       } else {
@@ -142,48 +144,34 @@ ${main.join('\n')}
   } else if (texture_type == 2) { // Value Texture
 
     // always draw me after ENTER?
-    
-    state_mag = vec2( // unit coding - fixed w/ respect to window not bbox (grid loc)
-        fract(a_index / u_particles_res),
-        (floor(a_index / u_particles_res) / u_particles_res)
-      );
-    // state_mag = (state - vec2(-4.1, -2.45)) / vec2(8., 5.); // dynamic wrt default bbox
-    // state_mag = (state - (u_min_enc * vec2(1., -1.))) / (du_enc * vec2(1., -1.)) ; // dynamic wrt bbox based on bc encoding loc (small bug in yloc still smh)
-    
     val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
     // val = 1.0
 
   }
   
-  // TODO WAS: draw more than zero-level? with different colors?
-  // distinguishing reach and avoid might call for drawing, epsilon above and below with diff colors 
   // TODO WAS: color mode for Vf, changes over timef
 
-  // if (abs(val) > thresh && texture_type != 0) { 
-  //   // nothing
-  // } else {
-  //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
+  // float thresh_mag = 1.;
+  // if (bc_shape == 2) {
+  //   thresh_mag = 1.; // doesn't work right bc doubles existing squares... TODO std grad
   // }
 
-  // if (val > thresh && texture_type != 0) { //FIXME (last condit)
-  //   // nothing
-  // } else if (val < -thresh && texture_type != 0) { //FIXME (last condit)
-  //   if (draw_fill) {
-  //     filler = 1.;
-  //     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    
-  //   }
-  //   // nothing
-  // } else {
-  //   filler = 0.;
-  //   gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
-  // }
-  
-  // level set plotting
-  if ((val/1.2 - floor(val/1.2)) > thresh && texture_type != 0) { //FIXME (last condit)
-    // nothing
-  } else if (val < thresh && texture_type != 0) {
-    filler = 0.;
-    gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
+  bool draw_level_cond;
+  if (draw_levels) {
+    draw_level_cond = (val/level_step - floor(val/level_step) > thresh/level_step) && (val > thresh);
+    // float(draw_fill) * floor(val/level_step) // colors border color rather than black
+  } else {
+    draw_level_cond = val > thresh;
+  }
+
+  if (draw_level_cond && texture_type != 0) {
+    // draw nothing
+  } else if (val < - thresh && texture_type != 0) {
+    if (draw_fill) {
+      filler = 1.;
+      gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    
+    }
+    // draw nothing
   } else {
     filler = 0.;
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);

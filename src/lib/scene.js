@@ -60,7 +60,7 @@ export default function initScene(gl) {
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
-  var bc_drawing_mode = false;
+  var bc_drawing_mode = true;
   var value_mode = false;
   var value_transfer = false;
   var bc_flip_mode = false;
@@ -69,7 +69,9 @@ export default function initScene(gl) {
   var bc_reach_mode = true; // if false, then avoid
   // var bbox_at_bc_enc = appState.getBBox() || {};
   var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
-  var thresh = 0.01; // TODO: make all this editable
+  var draw_thresh = 0.015; // TODO: make all this editable
+  var draw_levels = false;
+  var draw_level_step = 0.75;
   var diff_mag = 1.0; // TODO: make all this editable
   var drawing_click_sum = 0;
 
@@ -99,7 +101,9 @@ export default function initScene(gl) {
     bc_flip_mode,
     draw_fill,
     drawing_click_sum,
-    thresh,
+    draw_thresh,
+    draw_levels,
+    draw_level_step,
     diff_mag,
 
     inputs: null,
@@ -128,6 +132,14 @@ export default function initScene(gl) {
     // Information about mouse cursor. Could be useful to simplify
     // exploration
     cursor: {
+      // Where mouse was last time clicked (or tapped)
+      clickX: 0, clickY: 0,
+      // where mouse was last time moved. If this is a touch device
+      // this is the same as clickX, clickY
+      hoverX: 0, hoverY: 0
+    },
+
+    cursor_last: {
       // Where mouse was last time clicked (or tapped)
       clickX: 0, clickY: 0,
       // where mouse was last time moved. If this is a touch device

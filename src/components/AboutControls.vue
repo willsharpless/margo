@@ -6,7 +6,7 @@
       <h3><a class='title'>Keys for Drawing and Evolution</a></h3>
 
       <p>
-        Blah blah
+        Will get to this soon.
       </p>
 
       <a href='#' @click.prevent='close' class='large-close bold'>

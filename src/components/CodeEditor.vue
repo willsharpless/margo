@@ -38,6 +38,7 @@ export default {
   mounted() {
     bus.on('settings-collapsed', refreshEditor, this);
     bus.on('settingsmomentum-collapsed', refreshEditor, this);
+    bus.on('settingsshape-collapsed', refreshEditor, this);
     this.$refs.editor.editor.setOption('extraKeys', {
       'Cmd-/': toggleGLSLComment,
       'Ctrl-/': toggleGLSLComment
@@ -46,6 +47,7 @@ export default {
   beforeDestroy() {
     bus.off('settings-collapsed', refreshEditor, this);
     bus.off('settingsmomentum-collapsed', refreshEditor, this);
+    bus.off('settingsshape-collapsed', refreshEditor, this);
   },
   watch: {
     'model.code': function() {

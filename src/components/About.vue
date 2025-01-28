@@ -8,18 +8,18 @@
         <a clas='highlighted'>is an interactive software for solving level-set evolutions</a> (of Hamilton-Jacobi differential equations).
       </p>
       <p>
-        The set is a shape that matches the zero-level of a function, called the energy or value. 
-        This energy evolves based on a momentum, called the Hamiltonian. 
+        The set is a shape that matches the zero-level of a function, called the value or energy. 
+        This value evolves based on a momentum, called the Hamiltonian. 
       </p>
       <p>
-        This shape and momentum are <a clas='highlighted'>your choice</a>; draw or define them.
+        The flow, shape and momentum are <a clas='highlighted'>your choice</a>; draw or define them.
       </p>
       <p>We often choose the momentum to match a flow (aka vector-field) which models a dynamic system, e.g. jet flight. 
-        This is the default definition, thus, <a clas='highlighted'>the shape will move with the flow</a>.
+        Thus, <a clas='highlighted'>the shape will move with the flow by default</a>.
       </p>
       <p>
-        The momentum may also be defined with respect to control of the flow so the evolution reveals the best path, 
-        e.g. least time & most reward, to a target and the necessary action.
+        The momentum may be defined optimally with respect to control of the flow. The value evolution then reveals the best path, 
+        e.g. least time & most reward, to/from the shape and the necessary control actions.
         In fact, solving or learning this evolution is how a modern robot guides itself 
         (so maybe I am not the only one dreaming in shape).
       </p>
@@ -27,7 +27,7 @@
         I built this because I wanted a faster way to test and discuss new ideas, but also because I wanted to share the beauty of these evolutions. 
       </p>
       <p>
-        Find the code and technical details <a href='https://github.com/willsharpless/margo' class='highlighted'> here</a>. Margo is a child of <a href='https://anvaka.github.io/fieldplay' class='highlighted'> Field Play</a>, from which things were added (and broken).
+        The GLSL/js/vue <a href='https://github.com/willsharpless/margo' class='highlighted'> code</a> and technical details are open source. Margo was built on <a href='https://anvaka.github.io/fieldplay' class='highlighted'> Field Play</a>, during which things were added (and broken).
         <a clas='highlighted'>Many thanks</a> to previous developers for the flow visualization &#8212 @anvaka, @mourner, @skeeto &#8212 and HJ-solver &#8212 @ian-mitchell, @schmrlng &#8212 without whom this wouldnt exist.
       </p>
       <p>

@@ -29,10 +29,17 @@ export default class TextureBoundary extends BaseShaderNode {
     return `
 precision highp float;
 
+uniform float time_step;
+
 uniform vec2 u_min;
 uniform vec2 u_max;
 uniform float value_transfer;
 uniform float diff_mag;
+uniform float first_pass;
+uniform float reach_mode;
+uniform float avoid_mode;
+uniform float first_pass_reach;
+uniform float first_pass_avoid;
 
 uniform float spacing_x;
 uniform float spacing_y;
@@ -57,6 +64,8 @@ uniform float u_particles_res;
   if (this.isDecode) {
     return `
   
+  float time = frame * time_step;
+
   float lastReachValue = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos)); // works when flipped, interesting
   float lastAvoidValue = decodeFloatRGBA(texture2D(u_particles_y, 1.-v_tex_pos));
   
@@ -66,12 +75,12 @@ uniform float u_particles_res;
       roundToPrecision(abs(u_max.y - u_min.y) * aligned_tex_pos.y + u_max.y, 1e-6));
 
   float lastValue;
-  if (first_pass > 0.) {
+  if ((first_pass_reach > 0. && u_out_coordinate == 0) || (first_pass_avoid > 0. && u_out_coordinate == 1)) {
     lastValue = 3.4028234663852886e+38;
   } else {
     // lastValue = lastReachValue;
-    if (u_out_coordinate == 0) lastValue = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos)); // decode reach
-    else if (u_out_coordinate == 1) lastValue = decodeFloatRGBA(texture2D(u_particles_y, 1.-v_tex_pos)); // decode avoid
+    if (u_out_coordinate == 0) lastValue = lastReachValue; // decode reach
+    else if (u_out_coordinate == 1) lastValue = lastAvoidValue; // decode avoid
   }
   
 `
@@ -80,6 +89,19 @@ uniform float u_particles_res;
     // if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newValue); // write to x only
     // else if (u_out_coordinate == 1) gl_FragColor = encodeFloatRGBA(newValue);
     gl_FragColor = encodeFloatRGBA(newValue);
+    if (u_out_coordinate == 0) {
+      if (reach_mode > 0.) {
+        gl_FragColor = encodeFloatRGBA(newValue);
+      } else {
+        gl_FragColor = encodeFloatRGBA(lastReachValue);
+      }
+    } else if (u_out_coordinate == 1) {
+      if (avoid_mode > 0.) {
+        gl_FragColor = encodeFloatRGBA(newValue);
+      } else {
+        gl_FragColor = encodeFloatRGBA(lastAvoidValue);
+      }
+    }
 `
   }
 }

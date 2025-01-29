@@ -19,7 +19,7 @@
       </p>
       <p>
         The momentum may be defined optimally with respect to control of the flow. The value evolution then reveals the best path, 
-        e.g. least time & most reward, to/from the shape and the necessary control actions.
+        e.g. least time & most reward, to/from the shape and the corresponding optimal control actions.
         In fact, solving or learning this evolution is how a modern robot guides itself 
         (so maybe I am not the only one dreaming in shape).
       </p>

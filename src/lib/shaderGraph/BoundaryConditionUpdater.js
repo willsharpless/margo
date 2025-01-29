@@ -7,14 +7,23 @@ export default class BoundaryConditionUpdater extends BaseShaderNode {
 
   getDefines() {
     return `
-uniform float time_step;
 uniform float u_h;
-uniform int drawing;
+uniform float drawing;
+uniform int bc_shape;
+uniform float bc_cx;
+uniform float bc_cy;
+uniform float bc_qx;
+uniform float bc_qy;
+uniform float sign;
 `
   }
 
   getFunctions() {
     return `
+
+float roundToPrecision(float value, float prec) {
+  return floor(value / prec + 0.5) * prec;
+}
 
 // Box Function
 float box_bc(vec2 state, float bc_cx, float bc_cy, float bc_qx, float bc_qy, float sign) {
@@ -34,7 +43,7 @@ float ball_bc(vec2 state, float bc_cx, float bc_cy, float bc_qx, float bc_qy, fl
   getMainBody() {
     return `
   float updateValue;
-  if (drawing) {
+  if (drawing > 0.) {
     if (bc_shape == 1) { // square
       updateValue = box_bc(state, bc_cx, bc_cy, bc_qx, bc_qy, sign);
     } else if (bc_shape == 2) { // circle

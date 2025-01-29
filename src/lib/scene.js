@@ -33,6 +33,10 @@ export default function initScene(gl) {
   setWidthHeight(gl.canvas.width, gl.canvas.height);
   window.addEventListener('resize', onResize, true);
 
+  let keysPressed = {};
+  window.addEventListener('keydown', onKeyDown, true);
+  window.addEventListener('keyup', onKeyUp, true);
+
   // Video capturing is available in super advanced mode. You'll need to install
   // and start https://github.com/greggman/ffmpegserver.js
   // Then type in the console: window.startRecord();
@@ -60,20 +64,24 @@ export default function initScene(gl) {
 
   // Boundary Condition, i.e. Target
   var bc = appState.getBC() || {};
-  var bc_drawing_mode = true;
+  var bc_showing_mode = true;
+  var bc_drawing_mode = false;
   var value_mode = false;
   var value_transfer = false;
   var bc_flip_mode = false;
-  var bc_default_mode = true;
+  var bc_default_mode = false;
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
   // var bbox_at_bc_enc = appState.getBBox() || {};
   var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
-  var draw_thresh = 0.015; // TODO: make all this editable
+  var draw_thresh = 0.015; // TODO: make all this editabdle
   var draw_levels = false;
-  var draw_level_step = 0.75;
+  var draw_level_step = 0.25;
   var diff_mag = 1.0; // TODO: make all this editable
   var drawing_click_sum = 0;
+  var no_bc_encoded = true;
+  var no_reach_bc_encoded = true;
+  var no_avoid_bc_encoded = true;
 
   var field_mode = false;
 
@@ -94,15 +102,19 @@ export default function initScene(gl) {
 
     bc,
     bbox_at_bc_enc,
+    bc_showing_mode,
     bc_drawing_mode,
+    no_bc_encoded,
+    no_reach_bc_encoded,
+    no_avoid_bc_encoded,
     value_mode,
     value_transfer,
     bc_reach_mode,
     bc_flip_mode,
     draw_fill,
+    draw_levels,
     drawing_click_sum,
     draw_thresh,
-    draw_levels,
     draw_level_step,
     diff_mag,
 
@@ -189,9 +201,10 @@ export default function initScene(gl) {
 
   // particles
   updateParticlesCount(particleCount);
+  drawProgramValue.updateColorMode(3);
 
   // values
-  drawProgramBC.encodeBCValue()
+  // drawProgramBC.encodeBCValue()
 
   var api = {
     ctx,
@@ -205,7 +218,9 @@ export default function initScene(gl) {
 
     setPaused,
     setBCDrawingMode,
+    setBCShowingMode,
     setDrawFill,
+    setDrawLevels,
     setFieldMode,
 
     getParticlesCount,
@@ -303,7 +318,7 @@ export default function initScene(gl) {
     drawProgramField.updateColorMode(mode);
     // drawProgramField2.updateColorMode(mode);
     drawProgramBC.updateColorMode(mode);
-    drawProgramValue.updateColorMode(mode);
+    // drawProgramValue.updateColorMode(mode);
   }
 
   function getColorMode() {
@@ -332,11 +347,22 @@ export default function initScene(gl) {
     ctx.cursor.clickX = 0.;
     ctx.cursor.clickY = 0.;
     ctx.bc_drawing_mode = shouldBCDrawingMode;
+    console.log("DRAWING MODE", ctx.bc_drawing_mode)
+    // nextFrame(); // do I need this?
+  }
+
+  function setBCShowingMode(shouldBCShowingMode) {
+    ctx.bc_showing_mode = shouldBCShowingMode;
     // nextFrame(); // do I need this?
   }
 
   function setDrawFill(shouldDrawFill) {
     ctx.draw_fill = shouldDrawFill;
+    // nextFrame(); // do I need this?
+  }
+
+  function setDrawLevels(shouldDrawLevels) {
+    ctx.draw_levels = shouldDrawLevels;
     // nextFrame(); // do I need this?
   }
 
@@ -418,6 +444,8 @@ export default function initScene(gl) {
       stop();
       panzoom.dispose();
       window.removeEventListener('resize', onResize, true);
+      window.removeEventListener('keydown', onKeyUp, true);
+      window.removeEventListener('keyup', onKeyUp, true);
       cursorUpdater.dispose();
       drawProgramBC.dispose();
       drawProgramField.dispose();
@@ -473,16 +501,23 @@ export default function initScene(gl) {
     }
 
     // Boundary Condition Drawing
-    // if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) { // WAS FIXME: turn back on
-    if (ctx.bc_drawing_mode) { // WAS FIXME: turn off or rework
-      if (ctx.drawing_click_sum % 3 == 1) { // bc dynamic only after first click
+    if (ctx.bc_drawing_mode) {
+      
+      if (ctx.cursor.clickX == 0. && ctx.cursor.clickY == 0.) {
+        ctx.cursor.clickX = ctx.cursor.hoverX;
+        ctx.cursor.clickY = ctx.cursor.hoverY;
+      }
+
+      if (ctx.drawing_click_sum % 2 == 0) { // bc dynamic only after first click
         drawProgramBC.convertCursor2bcParams();
       }
-      if (bc_default_mode) {
-        drawProgramBC.encodeBCValue();
-        console.log('default bc encoded');
-        bc_default_mode = false;
-      }
+      // if (bc_default_mode) {
+      //   drawProgramBC.encodeBCValue();
+      //   console.log('default bc encoded');
+      //   bc_default_mode = false;
+      // }
+    }
+    if (ctx.bc_showing_mode) {
       drawProgramBC.drawParticles(); // bc stays after second
     }
 
@@ -493,9 +528,9 @@ export default function initScene(gl) {
       drawProgramField.updateParticlesPositions();
       // drawProgramField2.updateParticlesPositions();
     }
-    if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
-      // drawProgramBC.updateParticlesPositions();
-    }
+    // if (ctx.bc_drawing_mode && ctx.drawing_click_sum % 3 != 0) {
+    //   drawProgramBC.updateParticlesPositions();
+    // }
     
     if (ctx.value_mode) {
       drawProgramValue.updateParticlesPositions(drawProgramBC.updatePositionProgram.getTextures());
@@ -516,7 +551,7 @@ export default function initScene(gl) {
     ctx.particleStateResolution = Math.ceil(Math.sqrt(numParticles));
     drawProgramField.updateParticlesCount();
     // drawProgramField2.updateParticlesCount();
-    // drawProgramBC.updateParticlesCount(); // don't think needed
+    drawProgramBC.updateParticlesCount(); // don't think needed
     drawProgramValue.updateParticlesCount(); // don't think needed
     //TODO WAS: two separate user-defined params for particle count and value grid size
   }
@@ -637,5 +672,19 @@ export default function initScene(gl) {
     restoreBBox();
     // a hack to trigger panzoom event
     panzoom.moveBy(0, 0, false);
+  }
+
+  function onKeyDown(e) {
+    keysPressed[e.key] = true;
+    if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
+      drawProgramBC.updateParticlesPositions()
+      drawProgramBC.updateParticlesPositions()
+      e.preventDefault(); // do I need this?
+      console.log("bc encoded")
+    }
+  }
+
+  function onKeyUp(e) {
+    delete keysPressed[e.key];
   }
 }

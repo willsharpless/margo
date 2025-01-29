@@ -63,7 +63,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
   function initDrawProgram() {
     if (drawProgram) drawProgram.unload();
 
-    const drawGraph = new DrawParticleGraph_WAS(ctx);
+    const drawGraph = new DrawParticleGraph_WAS(ctx, texture_type);
     const vertexShaderCode = drawGraph.getVertexShader(currentVectorField, color, color2);
     drawProgram = util.createProgram(gl, vertexShaderCode, drawGraph.getFragmentShader());
   }
@@ -447,11 +447,12 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     var program = drawProgram;
     gl.useProgram(program.program);
     
-    if (texture_type == 0 || texture_type == 2) {
-      util.bindAttribute(gl, particleIndexBuffer, program.a_index, 1);
-    } else {
-      util.bindAttribute(gl, valueIndexBuffer, program.a_index, 1);
-    }
+    // if (texture_type == 0 || texture_type == 2) {
+    //   util.bindAttribute(gl, particleIndexBuffer, program.a_index, 1);
+    // } else {
+    //   util.bindAttribute(gl, valueIndexBuffer, program.a_index, 1);
+    // }
+    util.bindAttribute(gl, particleIndexBuffer, program.a_index, 1);
     
     updatePositionProgram.prepareToDraw(program);
     ctx.inputs.updateBindings(program);
@@ -471,14 +472,17 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     gl.uniform1f(program.thresh, ctx.draw_thresh);
     gl.uniform1f(program.drawing_click_sum, ctx.drawing_click_sum);
     gl.uniform1i(program.bc_drawing_mode, ctx.bc_drawing_mode);
+    gl.uniform1i(program.no_bc_encoded, ctx.no_bc_encoded);
+    gl.uniform1i(program.no_reach_bc_encoded, ctx.no_reach_bc_encoded);
+    gl.uniform1i(program.no_avoid_bc_encoded, ctx.no_avoid_bc_encoded);
     gl.uniform1i(program.reach_mode, ctx.bc_reach_mode);
     gl.uniform1i(program.flip_mode, ctx.bc_flip_mode);
-    // gl.uniform1f(program.sign, (2 * ctx.bc_reach_mode - 1) * (2 * !ctx.bc_flip_mode - 1))
     gl.uniform1f(program.sign, (2 * !ctx.bc_flip_mode - 1))
-    // console.log("program.sign", (2 * ctx.bc_reach_mode - 1) * (2 * !ctx.bc_flip_mode - 1))
     gl.uniform1i(program.draw_fill, ctx.draw_fill);
     gl.uniform1i(program.draw_levels, ctx.draw_levels);
     gl.uniform1f(program.level_step, ctx.draw_level_step);
+    gl.uniform1f(program.frame, ctx.frame);
+    gl.uniform1f(program.time_step, ctx.integrationTimeStep);
 
     var bc = ctx.bc;
     gl.uniform1f(program.bc_cx, bc.cx);
@@ -558,13 +562,14 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
   }
 
   function onKeyDown(e) {
+    // WAS TODO: should all go to top level controls
     keysPressed[e.key] = true;
-    if (ctx.bc_drawing_mode && texture_type == 1) {
-      if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
-        encodeBCValue(); // I get a violation(warning?) saying this takes too long
-        e.preventDefault(); // do I need this?
-        console.log("bc encoded")
-      }
+    if (ctx.bc_showing_mode && texture_type == 1) {
+      // if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
+      //   encodeBCValue(); // I get a violation(warning?) saying this takes too long
+      //   e.preventDefault(); // do I need this?
+      //   console.log("bc encoded")
+      // }
       if (e.which === 49 && e.target === document.body) { // 1 for square drawing
         ctx.bc.shape = 1;
         e.preventDefault();

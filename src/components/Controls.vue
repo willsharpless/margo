@@ -37,7 +37,10 @@ export default {
     return {
         paused: false,
         bcDrawing: false,
-        field: false,
+        bcShowing: true,
+        field: true,
+        drawFill: false,
+        drawLevels: true,
         settingsPanel: appState.settingsPanel,
         settingsmomentumPanel: appState.settingsmomentumPanel,
         settingsshapePanel: appState.settingsshapePanel,
@@ -50,20 +53,24 @@ export default {
         this.togglePaused();
         e.preventDefault();
       }
-      if (e.which === 87 && e.target === document.body) { // w for bc drawing
+      if (e.which === 68 && e.target === document.body) { // d for bc drawing
         this.toggleBCDrawing();
+        e.preventDefault();
+      }
+      if (e.which === 87 && e.target === document.body) { // w for bc showing
+        this.toggleBCShowing();
         e.preventDefault();
       }
       if (e.which === 70 && e.target === document.body) { // f for field
         this.toggleField();
         e.preventDefault();
       }
-      // if (e.which === 13 && e.target === document.body) { // Enter for BC Drawing Transfer
-      //   // this.toggleField();
-      //   e.preventDefault();
-      // }
       if (e.which === 67 && e.target === document.body) { // c for draw fill
         this.toggleDrawFill();
+        e.preventDefault();
+      }
+      if (e.which === 76 && e.target === document.body) { // c for draw fill
+        this.toggleDrawLevels();
         e.preventDefault();
       }
       // note, some of these live inside drawParticlesProgram_WAS
@@ -79,9 +86,17 @@ export default {
       this.bcDrawing = !this.bcDrawing;
       window.scene.setBCDrawingMode(this.bcDrawing);
     },
+    toggleBCShowing() {
+      this.bcShowing = !this.bcShowing;
+      window.scene.setBCShowingMode(this.bcShowing);
+    },
     toggleDrawFill() {
       this.drawFill = !this.drawFill;
       window.scene.setDrawFill(this.drawFill);
+    },
+    toggleDrawLevels() {
+      this.drawLevels = !this.drawLevels;
+      window.scene.setDrawLevels(this.drawLevels);
     },
     toggleField() {
       this.field = !this.field;

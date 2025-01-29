@@ -73,7 +73,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     if (readTextures) readTextures.dispose();
     readTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
     // if (texture_type == 1) {console.log("readTextures (inside uPP)", readTextures)} // DELETE ME
-
+ 
     if (writeTextures) writeTextures.dispose();
     writeTextures = textureCollection_WAS(gl, dimensions, particleStateResolution);
 
@@ -128,8 +128,35 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     readTextures.bindTextures(gl, program);
 
+    // BC Program
+    var bc = ctx.bc;
+    gl.uniform1f(program.bc_cx, bc.cx);
+    gl.uniform1f(program.bc_cy, bc.cy);
+    gl.uniform1f(program.bc_qx, bc.qx);
+    gl.uniform1f(program.bc_qy, bc.qy);
+    gl.uniform1i(program.bc_shape, bc.shape); // TODO: Make string
+    gl.uniform1f(program.sign, (2 * !ctx.bc_flip_mode - 1))
+    // if (texture_type == 1) console.log("PROGRAM", texture_type, "program.drawing:", ctx.bc_drawing_mode);
+    gl.uniform1f(program.drawing, ctx.bc_drawing_mode)
+    
+    gl.uniform1f(program.first_pass, ctx.no_bc_encoded)
+    if (texture_type == 1) ctx.no_bc_encoded = false;
+
+    gl.uniform1f(program.reach_mode, ctx.bc_reach_mode)
+    gl.uniform1f(program.avoid_mode, !ctx.bc_reach_mode)
+    gl.uniform1f(program.first_pass_reach, ctx.no_reach_bc_encoded)
+    gl.uniform1f(program.first_pass_avoid, ctx.no_avoid_bc_encoded)
+    if (texture_type == 1 && ctx.bc_reach_mode) ctx.no_reach_bc_encoded = false;
+    if (texture_type == 1 && !ctx.bc_reach_mode) ctx.no_avoid_bc_encoded = false;
+
+    // Value Program
     gl.uniform1i(program.texture_type, texture_type);
     gl.uniform1f(program.value_transfer, ctx.value_transfer);
+    gl.uniform1f(program.no_reach_bc_encoded, ctx.no_reach_bc_encoded)
+    gl.uniform1f(program.no_avoid_bc_encoded, ctx.no_avoid_bc_encoded)
+    if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "reach_mode", ctx.bc_reach_mode);
+    if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "no_reach_bc_encoded", ctx.no_reach_bc_encoded);
+    if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "no_avoid_bc_encoded", ctx.no_avoid_bc_encoded);
     gl.uniform1f(program.spacing_std, 1/(ctx.particleStateResolution-1.)); //
     gl.uniform1f(program.pSR, ctx.particleStateResolution); //
     gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1.)); // TODO WAS: diff size for diff dims
@@ -157,7 +184,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     gl.uniform1f(program.u_drop_rate, ctx.dropProbability);
 
     // Draw each coordinate individually
-    if (texture_type == 0) {
+    if (texture_type == 0 || texture_type == 1) {
       for(var i = 0; i < writeTextures.length; ++i) {
         var writeInfo = writeTextures.get(i);
         gl.uniform1i(program.u_out_coordinate, i);
@@ -165,6 +192,21 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
         gl.viewport(0, 0, particleStateResolution, particleStateResolution);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }
+
+      // debugging
+      if (texture_type == 1) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, ctx.framebuffer);
+        var pixelData = new Uint8Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
+        gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
+        var spread = 1.;
+        var mid_i = particleStateResolution * particleStateResolution / 2 + particleStateResolution / 2;
+        var mid_i_RGBA = pixelData.slice(mid_i*4, mid_i*4 + 4);
+        var mid_i_val = decodeFloatRGBA(mid_i_RGBA[0], mid_i_RGBA[1], mid_i_RGBA[2], mid_i_RGBA[3]);
+        if (ctx.frame < 10) {
+          console.log("PROGRAM", texture_type, "FRAME", ctx.frame, " mid i (after uPP draw)", mid_i_val)
+        }
+      }
+
     } else if (texture_type == 2) { // value only uses one texture atm
       var writeInfo = writeTextures.get(0);
       util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
@@ -176,22 +218,6 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       var pixelData = new Uint8Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
       gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
       
-      // og attempts at this
-      // var pixelData = new Float32Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
-      // gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
-      // console.log("Raw output texture data:", pixelData);
-      // var mid_txture_i = particleStateResolution * particleStateResolution / 2 + 500;
-      // // console.log("mid_txture_i", mid_txture_i)
-      // var mid_texture_RGBA = pixelData.slice(mid_txture_i*4, mid_txture_i*4 + 4);
-      // var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
-      // console.log("mid_texture_value (decoded)", mid_texture_value)
-      // var mid_texture_RGBA = pixelData.slice((mid_txture_i-1)*4, (mid_txture_i-1)*4 + 4);
-      // var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
-      // console.log("mid_texture_value @ - 1y_pos (decoded)", mid_texture_value)
-      // var mid_texture_RGBA = pixelData.slice((mid_txture_i-1)*4, (mid_txture_i-1)*4 + 4);
-      // var mid_texture_value = decodeFloatRGBA(mid_texture_RGBA[0], mid_texture_RGBA[1], mid_texture_RGBA[2], mid_texture_RGBA[3]);
-      // console.log("mid_texture_value @ + 1y_pos (decoded)", mid_texture_value)
-
       var spread = 1.;
       var mid_i   = particleStateResolution * particleStateResolution / 2 + particleStateResolution / 2;
       var mid_i_A = mid_i + spread * particleStateResolution;
@@ -211,14 +237,18 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       var mid_iL_val = decodeFloatRGBA(mid_iL_RGBA[0], mid_iL_RGBA[1], mid_iL_RGBA[2], mid_iL_RGBA[3]);
       var mid_iR_val = decodeFloatRGBA(mid_iR_RGBA[0], mid_iR_RGBA[1], mid_iR_RGBA[2], mid_iR_RGBA[3]);
 
+      if (ctx.frame < 5) {
+        console.log("PROGRAM", texture_type, "FRAME", ctx.frame, " mid i (after uPP draw)", mid_i_val)
+      }
+
       // console.log("frame", ctx.frame)
       if (ctx.frame == 1 || ctx.frame == 2) {
-        console.log("writeTextures.length", writeTextures.length)
-        console.log("At f", ctx.frame, ", mid_iB data  : ", mid_iB_val);
-        console.log("At f", ctx.frame, ", mid_iL data  : ", mid_iL_val);
-        console.log("At f", ctx.frame, ", mid_i  data  : ", mid_i_val);
-        console.log("At f", ctx.frame, ", mid_iR data  : ", mid_iR_val);
-        console.log("At f", ctx.frame, ", mid_iA data  : ", mid_iA_val);
+        // console.log("writeTextures.length", writeTextures.length)
+        // console.log("At f", ctx.frame, ", mid_iB data  : ", mid_iB_val);
+        // console.log("At f", ctx.frame, ", mid_iL data  : ", mid_iL_val);
+        // console.log("At f", ctx.frame, ", mid_i  data  : ", mid_i_val);
+        // console.log("At f", ctx.frame, ", mid_iR data  : ", mid_iR_val);
+        // console.log("At f", ctx.frame, ", mid_iA data  : ", mid_iA_val);
 
         // console.log("At f", ctx.frame, ", mid_i Ly diff  : ", mid_i_val - mid_iB_val);
         // console.log("At f", ctx.frame, ", mid_i Lx diff  : ", mid_i_val - mid_iL_val);
@@ -262,22 +292,15 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
           }
         }
         
-        var round_num = 12;
-        console.log("\n(AT FRAME",ctx.frame,") LOWERL - MAT")
-        for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-          console.log(Array.from(lowerl_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-        }
-        console.log("\n(AT FRAME",ctx.frame,") CENTER - MAT")
-        for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-          console.log(Array.from(center_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-        }
-    
-        // NEXT NEED TO CONSOLE LOG:
-        // LR grads (in uPP)
-        // Diss coeff (in uPP)
-        // Diss ham (in uPP)
-        // Ham (in uPP)
-        // Next value (in uPP)
+        // var round_num = 12;
+        // console.log("\n(AT FRAME",ctx.frame,") LOWERL - MAT")
+        // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+        //   console.log(Array.from(lowerl_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+        // }
+        // console.log("\n(AT FRAME",ctx.frame,") CENTER - MAT")
+        // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+        //   console.log(Array.from(center_mat.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+        // }
     
         // console.log("spacing_std", 1/(ctx.particleStateResolution-1.));
         // console.log("spacing_x", Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1.));
@@ -309,45 +332,6 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     readTextures = writeTextures;
     writeTextures = temp;
   }
-
-  // // WAS: programBC for transferring BC to Value texture data
-  // function transferValue(valueUpdatePositionProgram) {
-  //   var programBC = updateProgram;
-  //   var programVal = valueUpdatePositionProgram;
-
-  //   gl.useProgram(programBC.programBC);
-    
-  //   // old bindings
-  //   util.bindAttribute(gl, ctx.quadBuffer, programBC.a_pos, 2);
-  //   ctx.inputs.updateBindings(programBC);
-  //   readTextures.bindTextures(gl, programBC); // this old fn hides all the binding
-  //   gl.uniform2f(programBC.u_min, ctx.bbox.minX, ctx.bbox.minY);
-  //   gl.uniform2f(programBC.u_max, ctx.bbox.maxX, ctx.bbox.maxY);
-  
-  //   // WAS: For BC-Value Transfer, bind target texture (value) to buffer
-  //   gl.useProgram(programVal.program);
-  //   util.bindFramebuffer(gl, ctx.framebuffer, programVal.writeTextures.get(0).texture); // WAS: maybe reads?
-
-  //   // WAS: For BC-Value Transfer, switch back to use TransferNode shader
-  //   gl.useProgram(programBC.program);
-  //   gl.viewport(0, 0, particleStateResolution, particleStateResolution);
-  //   gl.drawArrays(gl.TRIANGLES, 0, 6);
-  //   // if fails, plan b: move this inside value program & swap roles?
-
-  //   // Draw each coordinate individually (OLD)
-  //   // for(var i = 0; i < writeTextures.length; ++i) {
-  //   //   var writeInfo = writeTextures.get(i);
-  //   //   gl.uniform1i(programBC.u_out_coordinate, i);
-  //   //   util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
-  //   //   gl.viewport(0, 0, particleStateResolution, particleStateResolution);
-  //   //   gl.drawArrays(gl.TRIANGLES, 0, 6);
-  //   // }
-
-  //   // swap the particle state textures so the new one becomes the current one
-  //   // var temp = readTextures;
-  //   // readTextures = writeTextures;
-  //   // writeTextures = temp;
-  // }
 
   // function putVectorLinesRequestIntoQueue(request) {
   //   pendingVectorLines = request;

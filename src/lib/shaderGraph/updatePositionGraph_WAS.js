@@ -95,17 +95,17 @@ void main() {
       
     } else if (texture_type == 1) { // Boundary Condition
       var nodes = [
-        // this.readStoredBoundaryCondition,
-        // this.udfBoundaryCondition,
-        // this.updateBoundaryCondition, 
-        // {
-        //   getMainBody() {
-        //     return `
-        //     vec2 newValue = min(updateValue, lastValue);
-        //     `
-        //   }
-        // },
-        // this.writeStoredBoundaryCondition
+        this.readStoredBoundaryCondition,
+        this.udfBoundaryCondition,
+        this.updateBoundaryCondition, 
+        {
+          getMainBody() {
+            return `
+            float newValue = min(updateValue, lastValue);
+            `
+          }
+        },
+        this.writeStoredBoundaryCondition
       ];
     } else if (texture_type == 2) { // Value
       var nodes = [

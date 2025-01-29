@@ -44,17 +44,17 @@ vec2 get_LRpos_inbound(float L_pos, float LRstep, float periodic) {
   return vec2(L_pos, R_pos);
 }
   
-vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos, vec2 state) {
+vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos, vec2 spacings, vec2 state) {
   // given an L texture position, this fn returns the finite differences in x & y to the R counterpart in the grid
 
   float x_periodic = 0.; // TODO WAS: make global
   float y_periodic = 0.; // TODO WAS: make global
 
-  vec2 LR_tex_pos_x = get_LRpos_inbound(L_tex_pos.x, spacing_std, x_periodic);
+  vec2 LR_tex_pos_x = get_LRpos_inbound(L_tex_pos.x, spacings.x, x_periodic);
   float LR_tex_pos_x_L = LR_tex_pos_x.x;
   float LR_tex_pos_x_R = LR_tex_pos_x.y;
   
-  vec2 LR_tex_pos_y = get_LRpos_inbound(L_tex_pos.y, spacing_std, y_periodic);
+  vec2 LR_tex_pos_y = get_LRpos_inbound(L_tex_pos.y, spacings.y, y_periodic);
   float LR_tex_pos_y_L = LR_tex_pos_y.x;
   float LR_tex_pos_y_R = LR_tex_pos_y.y;
 
@@ -63,8 +63,8 @@ vec2 get_diff(sampler2D values, vec2 og_tex_pos, vec2 L_tex_pos, vec2 state) {
   vec2 R_tex_pos_ogx = vec2(og_tex_pos.x, LR_tex_pos_y_R);
   vec2 L_tex_pos_ogx = vec2(og_tex_pos.x, LR_tex_pos_y_L);
 
-  float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogy))) / spacing_x;
-  float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogx))) / spacing_y;
+  float diff_x = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogy)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogy))) / spacings.x;
+  float diff_y = (decodeFloatRGBA(texture2D(u_particles_x, R_tex_pos_ogx)) - decodeFloatRGBA(texture2D(u_particles_x, L_tex_pos_ogx))) / spacings.y;
   
   // extrapolate away from zero (maybe flip, wrt upper value sign)
   if (LR_tex_pos_x_L <= 0.) {
@@ -108,18 +108,18 @@ vec2 weno_comp(vec2 v0, vec2 v1, vec2 v2, vec2 v3, vec2 v4) {
   return phi0 * w0 + phi1 * w1 + phi2 * w2;
 }
 
-mat2 WENO5(sampler2D values, vec2 state) {
+mat2 WENO5(sampler2D values, vec2 v_tex_pos, vec2 spacings, vec2 state) {
 
   vec2 v_tex_pos_f = 1. - v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
   
   // Compute Differences
 
-  vec2 diff_m3 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 3. * spacing_std, state);
-  vec2 diff_m2 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 2. * spacing_std, state);
-  vec2 diff_m1 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std, state);
-  vec2 diff_m0 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std, state);
-  vec2 diff_p1 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 1. * spacing_std, state);
-  vec2 diff_p2 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 2. * spacing_std, state);
+  vec2 diff_m3 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 3. * spacings, spacings, state);
+  vec2 diff_m2 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 2. * spacings, spacings, state);
+  vec2 diff_m1 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacings, spacings, state);
+  vec2 diff_m0 = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacings, spacings, state);
+  vec2 diff_p1 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 1. * spacings, spacings, state);
+  vec2 diff_p2 = get_diff(values, v_tex_pos_f, v_tex_pos_f + 2. * spacings, spacings, state);
 
   // Compute Weighting
 
@@ -130,14 +130,14 @@ mat2 WENO5(sampler2D values, vec2 state) {
   return costate_LR;
 }
 
-mat2 FO(sampler2D values, vec2 state) {
+mat2 FO(sampler2D values, vec2 v_tex_pos, vec2 spacings, vec2 state) {
 
   vec2 v_tex_pos_f = 1. - v_tex_pos; // loc in the texture (flipped en/decoding, prior to WAS)
 
   // Compute Differences
 
-  vec2 costate_L = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacing_std, state); // diff_m1
-  vec2 costate_R = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacing_std, state); // diff_m0
+  vec2 costate_L = get_diff(values, v_tex_pos_f, v_tex_pos_f - 1. * spacings, spacings, state); // diff_m1
+  vec2 costate_R = get_diff(values, v_tex_pos_f, v_tex_pos_f - 0. * spacings, spacings, state); // diff_m0
   mat2 costate_LR = mat2(costate_L, costate_R);
 
   return costate_LR;
@@ -162,13 +162,13 @@ float dissipated_hamiltonian(vec2 state, vec2 costate_L, vec2 costate_R, float t
 
 // STEP FUNCTION
 
-vec2 euler_step(vec2 state, float time, float value, float time_step, float fixed_or_max) {
+vec2 euler_step(sampler2D values, vec2 v_tex_pos, vec2 spacings, vec2 state, float time, float value, float time_step, float fixed_or_max) {
 
   // fixed_or_max determines if the time step is a fixed step (==0.) or the max allowed (==1.)
 
   // Compute the Upwind Gradients
-  mat2 costate_LR = FO(u_particles_x, state);
-  // mat2 costate_LR = WENO5(u_particles_x);
+  mat2 costate_LR = FO(values, v_tex_pos, spacings, state);
+  // mat2 costate_LR = WENO5(values, v_tex_pos, spacings, state);
   vec2 costate_L = costate_LR[0];
   vec2 costate_R = costate_LR[1];
   
@@ -193,11 +193,11 @@ vec2 euler_step(vec2 state, float time, float value, float time_step, float fixe
 
 // RUNGE KUTTA
 
-vec2 tvd_rk_3o(vec2 state, float time, float value, float target_time_step, float ts_fxd_or_adp) {
+vec2 tvd_rk_3o(sampler2D values, vec2 state, vec2 v_tex_pos, vec2 spacings, float time, float value, float target_time_step, float ts_fxd_or_adp) {
   
   // ts_fxd_or_adp determines if the target time step is a fixed step (==0.) or the max allowed (==1.)
 
-  vec2 tv_1 = euler_step(state, time, value, target_time_step, ts_fxd_or_adp); // vec2(next time, next value)
+  vec2 tv_1 = euler_step(values, v_tex_pos, spacings, state, time, value, target_time_step, ts_fxd_or_adp); // vec2(next time, next value)
   float time_1 = tv_1.x;
   float value_1 = tv_1.y;
   
@@ -208,13 +208,13 @@ vec2 tvd_rk_3o(vec2 state, float time, float value, float target_time_step, floa
     actual_time_step = tv_1.x - time; 
   };
 
-  vec2 tv_2 = euler_step(state, time_1, value_1, actual_time_step, 0.);
+  vec2 tv_2 = euler_step(values, v_tex_pos, spacings, state, time_1, value_1, actual_time_step, 0.);
   float value_2 = tv_2.y;
 
   float time_0_5 = time + actual_time_step/2.;
   float value_0_5 = 0.75 * value + 0.25 * value_2;
 
-  vec2 tv_1_5 = euler_step(state, time_0_5, value_0_5, actual_time_step, 0.);
+  vec2 tv_1_5 = euler_step(values, v_tex_pos, spacings, state, time_0_5, value_0_5, actual_time_step, 0.);
   float value_1_5 = tv_1_5.y;
   float val_out = (1. / 3.) * value + (2. / 3.) * value_1_5;
   

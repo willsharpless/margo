@@ -3,9 +3,15 @@ import shaderBasedColor_WAS from './shaderBasedColor_WAS';
 
 // TODO: this duplicates code from texture position.
 export default class DrawParticleGraph_WAS {
-  constructor(ctx) {
-    this.colorMode = ctx.colorMode;
+  constructor(ctx, texture_type) {
+    if (texture_type != 2) {
+      this.colorMode = ctx.colorMode;
+    } else {
+      this.colorMode = 3;
+    }
+    console.log("PROGRAM", texture_type, "colorMode", this.colorMode)
     this.colorFunction = ctx.colorFunction || '';
+    this.texture_type = texture_type;
   }
 
   getFragmentShader() {
@@ -27,7 +33,7 @@ void main() {
 
   getVertexShader(vfCode, color, color2) {
     let decodePositions = textureBasedPosition();
-    let colorParts = shaderBasedColor_WAS(this.colorMode, vfCode, this.colorFunction, color, color2);
+    let colorParts = shaderBasedColor_WAS(this.colorMode, vfCode, this.colorFunction, color, color2, this.texture_type);
     let methods = []
     addMethods(decodePositions, methods);
     addMethods(colorParts, methods);
@@ -45,6 +51,7 @@ uniform vec2 u_max_enc;
 
 uniform int texture_type;
 uniform float thresh;
+uniform float time_step;
 
 uniform float bc_cx;
 uniform float bc_cy;
@@ -52,7 +59,10 @@ uniform float bc_qx;
 uniform float bc_qy;
 uniform int bc_shape;
 uniform float drawing_click_sum; // for debugging
-uniform bool bc_drawing_mode; // for debugging
+uniform bool bc_drawing_mode;
+uniform bool no_bc_encoded;
+uniform bool no_reach_bc_encoded;
+uniform bool no_avoid_bc_encoded;
 uniform bool reach_mode;
 uniform bool flip_mode;
 uniform float sign;
@@ -76,6 +86,7 @@ void main() {
   vec2 vals;
   float val;
   vec2 state_mag;
+  float time = frame * time_step;
   
   vec2 state = vec2( // same as txPos externally
         abs(u_max.x - u_min.x) * fract(a_index / u_particles_res) + u_min.x,
@@ -121,25 +132,61 @@ ${main.join('\n')}
 
   if (texture_type == 1) { // Boundary Condition Texture
 
-    if (bc_shape == 1) { // square
-      val = sign * 0.5 * (max(abs(state.x - bc_cx)/bc_qx, abs(state.y - bc_cy)/bc_qy) - 1.);
+    if (bc_drawing_mode) {
+      if (bc_shape == 1) { // square
+        val = sign * 0.5 * (max(abs(state.x - bc_cx)/bc_qx, abs(state.y - bc_cy)/bc_qy) - 1.);
 
-    } else if (bc_shape == 2) { // circle
-      val = sign * 0.5 * ((state.x - bc_cx)*(state.x - bc_cx)/bc_qx + (state.y - bc_cy)*(state.y - bc_cy)/bc_qy - 1.);
+      } else if (bc_shape == 2) { // circle
+        val = sign * 0.5 * ((state.x - bc_cx)*(state.x - bc_cx)/bc_qx + (state.y - bc_cy)*(state.y - bc_cy)/bc_qy - 1.);
 
-    } else { // free draw?
-      // TODO WAS: not implemented yet
-      val = 0.;
+      } else { // free draw?
+        // TODO WAS: not implemented yet
+        val = 0.;
+      }
+    } else { // bc from code box definition
+      val = get_boundary_condition(state, sign, time);
     }
     
     // for testing/observing bc encoding
-    if (mod(drawing_click_sum, 3.) == 2.) {
-      if (reach_mode) {
-        val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
-      } else {
-        val = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
-      }
+    // if (mod(drawing_click_sum, 3.) == 2.) {
+    //   if (reach_mode) {
+    //     val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
+    //   } else {
+    //     val = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
+    //   }
+    // }
+
+    // if (!no_bc_encoded) {
+    //   float valDecoded;
+    //   if (reach_mode) {
+    //     valDecoded = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
+    //   } else {
+    //     valDecoded = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
+    //   }
+    //   val = min(val, valDecoded);
+
+    //   // WAS TODO: make this better (diff colors for new level vs encoded)
+    //   // if (val == valDecoded) {
+    //   //   // encoded level keep color
+    //   // } else {
+    //   //   v_particle_color = 1.5 * v_particle_color; // new level 
+    //   // }
+    // }
+
+    float valDecoded = val;
+    if (reach_mode && !no_reach_bc_encoded) {
+      valDecoded = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
+    } else if (!reach_mode && !no_avoid_bc_encoded) {
+      valDecoded = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
     }
+    val = min(val, valDecoded);
+
+    // WAS TODO: make this better (diff colors for new level vs encoded)
+    // if (val == valDecoded) {
+    //   // encoded level keep color
+    // } else {
+    //   v_particle_color = 1.5 * v_particle_color; // new level 
+    // }
 
     // // display bc simultaneously to drawing (after init)
     // bool avoid_mode = false;
@@ -153,9 +200,7 @@ ${main.join('\n')}
 
   } else if (texture_type == 2) { // Value Texture
 
-    // always draw me after ENTER?
     val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
-    // val = 1.0
 
   }
   

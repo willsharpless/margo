@@ -58,7 +58,7 @@ export default function createCursorUpdater(ctx) {
     const controlsContainer = document.querySelector('.controls-container');
     if (ctx.bc_drawing_mode && !controlsContainer.contains(e.target)) {
       ctx.drawing_click_sum += 1;
-      console.log("Click Sum % 3:", ctx.drawing_click_sum % 3) // DELETE ME
+      // console.log("Click Sum % 2:", ctx.drawing_click_sum % 2) // DELETE ME
     }
     ctx.cursor.clickX = getSceneXFromClientX(clientX);
     ctx.cursor.clickY = getSceneYFromClientY(clientY);

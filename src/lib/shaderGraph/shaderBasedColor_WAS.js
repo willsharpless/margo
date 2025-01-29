@@ -1,9 +1,14 @@
 import UserDefinedVelocityFunction from './UserDefinedVelocityFunction';
+import UserDefinedBoundaryCondition from './UserDefinedBoundaryCondition';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 import ColorModes from '../programs/colorModes';
 
-export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode, color, color2) {
-  var udf = new UserDefinedVelocityFunction(vfCode);
+export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode, color, color2, texture_type) {
+  if (texture_type != 1) {
+    var udf = new UserDefinedVelocityFunction(vfCode);
+  } else {
+    var udf = new UserDefinedBoundaryCondition(vfCode);
+  }
   var integrate = new RungeKuttaIntegrator();
   const [r, g, b, a] = color;
   const [r2, g2, b2, a2] = color2;
@@ -25,6 +30,15 @@ ${integrate.getDefines()}
   }
 
   function getMethods() {
+    var udffunctions = udf.getFunctions();
+    
+    if (texture_type != 1) { // bc fn must be defined in all (dummy here)
+      udffunctions = udffunctions + `
+float get_boundary_condition(vec2 s, float sign, float time) {
+  return max(abs(s.x), abs(s.y)) - 0.5;
+}
+`
+    }
     return `
 // https://github.com/hughsk/glsl-hsv2rgb
 vec3 hsv2rgb(vec3 c) {
@@ -33,7 +47,7 @@ vec3 hsv2rgb(vec3 c) {
   return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-${udf.getFunctions()}
+${udffunctions}
 ${integrate.getFunctions()}
 ${getColorFunctionBody()}
 `

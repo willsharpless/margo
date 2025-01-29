@@ -34,6 +34,9 @@ precision highp float;
 uniform vec2 u_min;
 uniform vec2 u_max;
 uniform float value_transfer;
+uniform float reach_mode;
+uniform float no_reach_bc_encoded;
+uniform float no_avoid_bc_encoded;
 uniform float diff_mag;
 
 uniform float spacing_x;
@@ -65,6 +68,8 @@ uniform float u_particles_res;
   float avoid_value = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
   float last_value = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
   float last_value_ = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
+  vec2 spacings = vec2(spacing_x, spacing_y);
+  // vec2 spacings = vec2(spacing_std);
   
   vec2 aligned_tex_pos = ((1. - v_tex_pos) - vec2(0.5 / u_particles_res)) / (1. - 1./pSR); // WAS FIXME: if pSR varies for x/y -> vec2(pSRx, pSRy)?
   vec2 state = vec2(
@@ -75,9 +80,15 @@ uniform float u_particles_res;
   float value;
   float value_;
   if (value_transfer > 0.) {
-    value = reach_value;
-    value_ = reach_value;
-    // value = min(reach_value, avoid_value); // (applied after, was for testing)
+    // TODO WAS: think harder abt this and fix
+    if (reach_mode > 0. && no_avoid_bc_encoded > 0.) {
+      value = reach_value;
+    } else if (reach_mode <= 1. && no_reach_bc_encoded > 0.) {
+      value = avoid_value;
+    } else {
+      value = max(reach_value, -avoid_value);
+    }
+    // value = reach_value;
   } else {
     value = last_value;
     value_ = last_value_;
@@ -121,7 +132,7 @@ uniform float u_particles_res;
   // still debugging
   // TODO: put this in fn so we can save/export all of it for comp (for unit tests)
 
-  mat2 costate_LR_FO = FO(u_particles_x, state);
+  mat2 costate_LR_FO = FO(u_particles_x, v_tex_pos, spacings, state);
   vec2 costate_L_FO = costate_LR_FO[0];
   vec2 costate_R_FO = costate_LR_FO[1];
 
@@ -138,12 +149,18 @@ uniform float u_particles_res;
   // float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
   // float target_time_step = time_step;
 
+  vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
+  float diss = dot(diff_coeffs, 0.5 * (costate_R - costate_L));
+  float ham = get_hamiltonian(state, (costate_L + costate_R)/2., time, value);
+  float diss_ham = ham - diss;
+
   // vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
-  // float diss = dot(diff_mag * diff_coeffs, 0.5 * (costate_R - costate_L)); // CORRECT STATE 1/19/25
-  // float ham = get_hamiltonian(state, (costate_L + costate_R)/2., time, value);
+  // // float diss = dot(diff_coeffs, vec2(0.5));
+  // float diss = dot(diff_coeffs, 0.5 * (costate_R - costate_L));
+  // float ham = 1.;
   // float diss_ham = ham - diss;
 
-  float diss_ham = dissipated_hamiltonian(state, costate_L, costate_R, time, value);
+  // float diss_ham = dissipated_hamiltonian(state, costate_L, costate_R, time, value);
 
   float newValue;
   if (value_transfer > 0.) {
@@ -153,11 +170,15 @@ uniform float u_particles_res;
     // TODO:
     // vec2 next_tv = tvd_rk_3o(state, time, value, time_step, ts_fxd_or_adp); // gives new time and val
     // newValue = next_tv.y;
+    // newValue = costate_L.x;
+    // newValue = diss_ham;
+    // float nextValue = ham;
+    // float nextValue = value - time_step * diss_ham;
     newValue = value - time_step * diss_ham;
     newValue = value_alteration(newValue, value, reach_value, avoid_value);
 
-    // // float frameoi = 3.;
-    // float frameoi = 100000.;
+    // float frameoi = 3.;
+    // // float frameoi = 100000.;
     // if (frame < frameoi) {
       
     //   newValue = nextValue;
@@ -183,13 +204,13 @@ uniform float u_particles_res;
 
     //   // L, R grads
     //   // newValue = costate_L.x; // left grad  - x component
-    //   newValue = costate_R.x; // right grad - x component
+    //   // newValue = costate_R.x; // right grad - x component
     //   // newValue = costate_L.y; // left grad  - y component
     //   // newValue = costate_R.y; // right grad - y component
     //   // newValue = 0.5 * (costate_L.x + costate_R.x); // LR avg grad (fed to ham)
 
     //   // Diss, Ham, Diss Ham
-    //   // newValue = ham;
+    //   newValue = ham;
     //   // newValue = diff_coeffs.x;
     //   // newValue = diff_coeffs.y;
     //   // newValue = diss;

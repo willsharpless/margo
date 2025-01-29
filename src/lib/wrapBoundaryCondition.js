@@ -10,10 +10,10 @@ float get_boundary_condition(vec2 s, float sign, float time) {
 
   ${bcCode}
 
-  return bc_val;
+  return sign * bc_val;
 }
 
 // or, to draw it,
-// [click screen, click around, 'enter']
+// [click screen, 'd', click around, 'enter']
 `
 }

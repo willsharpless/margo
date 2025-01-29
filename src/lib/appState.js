@@ -31,8 +31,8 @@ var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
   // var defaultVectorFieldCode = wrapVectorField(`v.x = length(s);
 //   v.y = sin(cos(s.y)) - sin(sin(s.x));`);
 
-var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = 0.5 * (max(abs(s.x), abs(s.y)) - 1.); // unit box
-  // float bc_val = 0.5 * (length(s) - 1.); // unit ball`);
+var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = max(abs(s.x), abs(s.y)) - 0.5; // box
+  // float bc_val = length(s) - 0.5; // ball`);
 
 var defaultValueCode = `// Given any point, we decide the momentum (hamiltonian),
 // defining how the value evolves.
@@ -43,8 +43,9 @@ float get_hamiltonian(vec2 s, vec2 p, float time, float val) {
 }
 
 // we may also alter it after each step
-float value_alteration(float newval, float val, float reach_bc, float avoid_bc) {
+float value_alteration(float newval, float val, float reach_bc_val, float avoid_bc_val) {
   float vala = min(val, newval);
+  // float vala = max(-avoid_bc_val, min(val, newval));
   return vala;
 }
 

@@ -7,6 +7,10 @@ import PanzoomTransform from './PanzoomTransform';
 import RungeKuttaIntegrator from './RungeKuttaIntegrator';
 
 // import TextureTransferNode from './TextureTransferNode';
+import BoundaryConditionUpdater from './BoundaryConditionUpdater'
+import UserDefinedBoundaryCondition from './UserDefinedBoundaryCondition';
+import TextureBoundaryNode from './TextureBoundaryNode'
+
 import TextureValueNode from './TextureValueNode';
 import ValueIntegrator from './ValueIntegrator';
 
@@ -23,6 +27,11 @@ export default class UpdatePositionGraph_WAS {
     this.colorMode = options && options.colorMode;
 
     // BC Texture
+    this.readStoredBoundaryCondition = new TextureBoundaryNode(/* isDecode = */ true);
+    this.udfBoundaryCondition = new UserDefinedBoundaryCondition(); // user defined boundary condition
+    this.updateBoundaryCondition = new BoundaryConditionUpdater();
+    this.writeStoredBoundaryCondition = new TextureBoundaryNode(/* isDecode = */ false);
+
     // this.transferValue = new TextureTransferNode(/* isDecode = */ false);
 
     // Value Texture
@@ -37,7 +46,7 @@ export default class UpdatePositionGraph_WAS {
     if (texture_type == 0) {
       this.udfVelocity.setNewUpdateCode(velocityCode);
     } else if (texture_type == 1) {
-      //
+      this.udfBoundaryCondition.setNewUpdateCode(velocityCode);
     } else if (texture_type == 2) {
       this.udfVelocityHamiltonian.setNewUpdateCode(velocityCode);
     }
@@ -86,18 +95,17 @@ void main() {
       
     } else if (texture_type == 1) { // Boundary Condition
       var nodes = [
-        // this.readStoredPosition,
-        // this.dropParticles,
-        // this.udfVelocity,
-        // this.integratePositions, 
+        // this.readStoredBoundaryCondition,
+        // this.udfBoundaryCondition,
+        // this.updateBoundaryCondition, 
         // {
         //   getMainBody() {
         //     return `
-        //     vec2 newPos = pos;
+        //     vec2 newValue = min(updateValue, lastValue);
         //     `
         //   }
         // },
-        // this.writeComputedPosition
+        // this.writeStoredBoundaryCondition
       ];
     } else if (texture_type == 2) { // Value
       var nodes = [

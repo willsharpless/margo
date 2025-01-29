@@ -207,6 +207,7 @@ uniform float u_particles_res;
     }
     return `
     if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newValue); // write to x only
+    // else if (u_out_coordinate == 1) gl_FragColor = encodeFloatRGBA(newValue);
 `
   }
 }

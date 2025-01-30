@@ -281,11 +281,9 @@ function getCode(texture_type=0) {
   if (texture_type == 0) {
     anyCode = qs.get('vf');
   } else if (texture_type == 1) {
-    anyCode = false;
-    // anyCode = qs.get('bc');
+    anyCode = qs.get('bc');
   } else if (texture_type == 2) {
-    anyCode = false;
-    // anyCode = qs.get('val');
+    anyCode = qs.get('val');
   }
   if (anyCode) return anyCode;
 
@@ -295,30 +293,33 @@ function getCode(texture_type=0) {
   if (texture_type == 0) {
     var oldCode = qs.get('code');
     if (oldCode) {
-      vfCode = wrapVectorField(oldCode);
+      anyCode = wrapVectorField(oldCode);
       // side effect - let's clean the old URL
       delete(currentState.code);
-      qs.set('vf', vfCode);
-      return vfCode;
+      qs.set('vf', anyCode);
+      console.log("PROGRAM", texture_type, "qs-set:", anyCode);
+      return anyCode;
     }
   } else if (texture_type == 1) {
-    // var oldCode = qs.get('codeham');
-    // if (oldCode) {
-    //   hamCode = wrapHam(oldCode);
-    //   // side effect - let's clean the old URL
-    //   delete(currentState.hamcode);
-    //   qs.set('ham', hamCode);
-    //   return hamCode;
-    // }
+    var oldCode = qs.get('bccode');
+    if (oldCode) {
+      anyCode = wrapBoundaryCondition(oldCode);
+      // side effect - let's clean the old URL
+      delete(currentState.bcCode);
+      qs.set('bc', anyCode);
+      console.log("PROGRAM", texture_type, "qs-set:", anyCode);
+      return anyCode;
+    }
   } else if (texture_type == 2) {
-    // var oldCode = qs.get('codeval');
-    // if (oldCode) {
-    //   valCode = wrapVal(oldCode);
-    //   // side effect - let's clean the old URL
-    //   delete(currentState.valcode);
-    //   qs.set('val', valCode);
-    //   return valCode;
-    // }
+    var oldCode = qs.get('valcode');
+    if (oldCode) {
+      anyCode = oldCode;
+      // side effect - let's clean the old URL
+      delete(currentState.valcode);
+      qs.set('val', anyCode);
+      console.log("PROGRAM", texture_type, "qs-set:", anyCode);
+      return anyCode;
+    }
   }
 
   return getDefaultCode(texture_type);
@@ -331,7 +332,6 @@ function getDefaultCode(texture_type=0) {
   } else if (texture_type == 1) {
     defaultCode = defaultBoundaryConditionCode;
   } else if (texture_type == 2) {
-    // defaultCode = defaultVectorFieldCode + '\n\n' + defaultValueCode;
     defaultCode = defaultValueCode;
   }
   return defaultCode;
@@ -344,15 +344,15 @@ function saveCode(code, texture_type=0) {
     });
     currentState.code = code;
   } else if (texture_type == 1) { // dont do anything for now
-    // qs.set({
-    //   ham: code
-    // });
-    // currentState.code = code;
+    qs.set({
+      bc: code
+    });
+    currentState.bccode = code;
   } else if (texture_type == 2) {
-    // qs.set({
-    //   val: code
-    // });
-    // currentState.code = code;
+    qs.set({
+      val: code
+    });
+    currentState.valcode = code;
   }
 }
 

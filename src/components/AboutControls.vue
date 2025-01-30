@@ -6,7 +6,36 @@
       <h3><a class='title'>Keys for Drawing and Evolution</a></h3>
 
       <p>
-        Will get to this soon.
+        click the screen before applying any of the following,
+        <p></p>
+        <a class='title'>Flow</a>
+        <p></p>
+        'f' - displays flow
+
+        <p></p>
+        <a class='title'>Boundary Condition (BC)</a>
+        <p></p>
+
+        'w' - displays coded or drawn BC <br>
+        'd' - switches between drawing/coding BC (click to draw) <br>
+        '1'/'2' - switches between drawing box/ball BC <br>
+        <br>
+        'Enter' - saves a coded or drawn BC (combining w/ existing) <br>
+        'delete' + 'r' - deletes the saved bc <br>
+        <br>
+        'i'/'o' - switches defining in/out BC (sign flip) <br>
+        'r'/'a' - switches defining reach/avoid BC<br>
+
+        <p></p>
+        <a class='title'>Value</a>
+        <p></p>
+
+        'c' - fills BC & value interior <br>
+        'l' - displays BC & value levels <br>
+        <br>
+        'Shift' + 'Enter' - begins the value evolution <br>
+        'delete' + 'v' - deletes the value <br>
+
       </p>
 
       <a href='#' @click.prevent='close' class='large-close bold'>

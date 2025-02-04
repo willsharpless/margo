@@ -13,7 +13,7 @@
         'f' - displays flow
 
         <p></p>
-        <a class='title'>Boundary Condition (BC)</a>
+        <a class='title'>Shape ie. Boundary Condition (BC)</a>
         <p></p>
 
         'w' - displays coded or drawn BC <br>
@@ -23,11 +23,11 @@
         'Enter' - saves a coded or drawn BC (combining w/ existing) <br>
         'delete' + 'r' - deletes the saved bc <br>
         <br>
-        'i'/'o' - switches defining in/out BC (sign flip) <br>
+        'i'/'o' - switches defining in/out BC (use 'c' to see) <br>
         'r'/'a' - switches defining reach/avoid BC<br>
 
         <p></p>
-        <a class='title'>Value</a>
+        <a class='title'>Momentum & Value</a>
         <p></p>
 
         'c' - fills BC & value interior <br>

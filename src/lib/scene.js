@@ -83,7 +83,7 @@ export default function initScene(gl) {
   var no_reach_bc_encoded = true;
   var no_avoid_bc_encoded = true;
 
-  var field_mode = false;
+  var field_mode = true;
 
   // How many particles do we want?
   var particleCount = appState.getParticleCount();

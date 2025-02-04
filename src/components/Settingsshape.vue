@@ -1,7 +1,7 @@
 <template>
   <div class='settingsshape' :class='{collapsed: settingsshapePanel.collapsed}'>
     <div class='block vector-field'  v-if='vectorField'>
-      <div class='title'> <a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
+      <div class='title'>Shape Definition<a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
       <syntax v-if='syntaxHelpVisible' @close='syntaxHelpVisible = false'></syntax>
       <code-editor :model='vectorField'></code-editor>
     </div>

@@ -151,7 +151,7 @@ uniform float u_particles_res;
 
   vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
   float diss = dot(diff_coeffs, 0.5 * (costate_R - costate_L));
-  float ham = get_hamiltonian(state, (costate_L + costate_R)/2., time, value);
+  float ham = get_hamiltonian(state, (costate_L + costate_R)/2., time);
   float diss_ham = ham - diss;
 
   // vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
@@ -175,7 +175,7 @@ uniform float u_particles_res;
     // float nextValue = ham;
     // float nextValue = value - time_step * diss_ham;
     newValue = value - time_step * diss_ham;
-    newValue = value_alteration(newValue, value, reach_value, avoid_value);
+    newValue = filter_value(newValue, value, reach_value, avoid_value);
 
     // float frameoi = 3.;
     // // float frameoi = 100000.;

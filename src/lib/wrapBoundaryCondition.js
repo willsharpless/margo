@@ -14,6 +14,5 @@ float get_boundary_condition(vec2 s, float sign, float time) {
 }
 
 // or, to draw it,
-// [click screen, 'd', click around, 'enter']
-`
+// [click screen, 'd', click around, 'enter']`
 }

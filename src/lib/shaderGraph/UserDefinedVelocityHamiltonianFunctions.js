@@ -112,14 +112,14 @@ vec2 get_velocity(vec2 x) { return vec2(0.1); }
 // }
 
 // // WAS FIXME: only auto for now
-float get_hamiltonian(vec2 state, vec2 costate, float time, float value) {
+float get_hamiltonian(vec2 state, vec2 costate, float time) {
   vec2 vel = get_velocity(state); // WAS FIXME: works for auto systems only!
   return -dot(costate, vel); // WAS FIXME: minus for backwards reach, could be user-defined
 }
 
 // Momentum ie Hamiltonian
 
-// float get_hamiltonian(vec2 x, vec2 p, float t, float val) { 
+// float get_hamiltonian(vec2 x, vec2 p, float t) { 
 //   // float h = 0.1 * cos(t); // debugging
 //   float h = dot(p, get_velocity(x) + get_control(x, p, t) + get_disturbance(x, p, t));
 //   return h;

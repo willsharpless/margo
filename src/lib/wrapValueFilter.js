@@ -57,5 +57,5 @@ float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVa
   }
 }
 
-// float filterValue = min(val, newval);
-// float filterValue = max(-avoid_bc_val, min(val, newval));
+// float filterVal = min(newVal, oldVal); // BRT
+// float filterVal = max(-avoidBCVal, min(oldVal, newVal)); // BRAT

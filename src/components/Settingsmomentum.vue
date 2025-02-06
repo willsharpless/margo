@@ -11,13 +11,17 @@
     <form class='block' @submit.prevent='onSubmit'>
       <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
       <!-- <div class='row'>
-        <div class='col'>Particle color</div>
+        <div class='col'>Preset Filters</div>
         <div class='col'> 
           <select v-model='selectedColorMode' @change='changeColor'>
-              <option value='1'>Uniform</option>
-              <option value='2'>Velocity</option>
-              <option value='3'>Angle</option>
-              <option value='4'>Dual</option>
+              <option value='0'>Custom</option>
+              <option value='1'>BRS</option>
+              <option value='2'>BAS</option>
+              <option value='3'>BRT</option>
+              <option value='4'>BAT</option>
+              <option value='5'>BRAT</option>
+              <option value='6'>CLVF</option>
+              <option value='7'>CBVF</option>
 	        </select>
         </div>
         <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
@@ -33,8 +37,8 @@
           </ul>
           <p>Default value is "Uniform"</p>
         </div>
-      </div>
-      <div class='row' v-if='soundAvailable'>
+      </div> -->
+      <!-- <div class='row' v-if='soundAvailable'>
         <div class='col'>SoundCloud track</div>
         <div class='col'>
           <input type='text' v-model='soundCloudLink'>

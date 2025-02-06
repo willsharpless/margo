@@ -250,9 +250,9 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
         var bc_val = 3.4028234663852886e+38 // FIXME WAS: atm, ~largest 32-bit number, 10^38            
       }
       
-      if (i==0) { 
-        console.log("First i, Before min/max, bc_val", bc_val)
-      }
+      // if (i==0) { 
+      //   console.log("First i, Before min/max, bc_val", bc_val)
+      // }
       
       // var topmid_txture_i = particleStateResolution * particleStateResolution / 2;
 
@@ -327,9 +327,9 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       }
 
       // insert value into temp array
-      if (i==0) {
-        console.log("First i, After min/max, bc_val", bc_val)
-      }
+      // if (i==0) {
+      //   console.log("First i, After min/max, bc_val", bc_val)
+      // }
       encodeFloatRGBA(bc_val, valueReachRGBA, i * 4);
       encodeFloatRGBA(bc_val, valueAvoidRGBA, i * 4);
 
@@ -348,40 +348,40 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     }
 
     // data printed to match spatial (bottom row last)
-    console.log("\nLOWERL IX (1D)")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-        console.log(lowerl_mat_ix.slice(i, i + mat_len).join(' '));
-    }
-    console.log("\nCENTER IX (1D)")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-        console.log(center_mat_ix.slice(i, i + mat_len).join(' '));
-    }
+    // console.log("\nLOWERL IX (1D)")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //     console.log(lowerl_mat_ix.slice(i, i + mat_len).join(' '));
+    // }
+    // console.log("\nCENTER IX (1D)")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //     console.log(center_mat_ix.slice(i, i + mat_len).join(' '));
+    // }
 
-    var round_num = 12;
-    console.log("\nSTATES - LOWERL - X")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-      console.log(Array.from(lowerl_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-    }
-    console.log("\nSTATES - LOWERL - Y")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-      console.log(Array.from(lowerl_mat_y.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-    }
-    console.log("\nSTATES - CENTER - X")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-      console.log(Array.from(center_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-    }
-    console.log("\nSTATES - CENTER - Y")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-      console.log(Array.from(center_mat_y.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-    }
-    console.log("\nVALUES - LOWERL - BC")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-      console.log(Array.from(lowerl_mat_bc_val.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-    }
-    console.log("\nVALUES - CENTER - BC")
-    for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
-      console.log(Array.from(center_mat_bc_val.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
-    }
+    // var round_num = 12;
+    // console.log("\nSTATES - LOWERL - X")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //   console.log(Array.from(lowerl_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    // }
+    // console.log("\nSTATES - LOWERL - Y")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //   console.log(Array.from(lowerl_mat_y.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    // }
+    // console.log("\nSTATES - CENTER - X")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //   console.log(Array.from(center_mat_x.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    // }
+    // console.log("\nSTATES - CENTER - Y")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //   console.log(Array.from(center_mat_y.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    // }
+    // console.log("\nVALUES - LOWERL - BC")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //   console.log(Array.from(lowerl_mat_bc_val.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    // }
+    // console.log("\nVALUES - CENTER - BC")
+    // for (let i = mat_len*(mat_len-1); i >= 0; i -= mat_len) {
+    //   console.log(Array.from(center_mat_bc_val.slice(i, i + mat_len)).map(num => parseFloat(num.toFixed(round_num)).toFixed(round_num-1)).join(' '));
+    // }
 
     // NEXT NEED TO CONSOLE LOG:
     // LR grads (in uPP)
@@ -390,15 +390,15 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     // Ham (in uPP)
     // Next value (in uPP)
 
-    console.log("")
+    // console.log("")
 
-    console.log("BC Value Encoded cx:", bc.cx);
-    console.log("BC Value Encoded cy:", bc.cy);
-    console.log("BC Value Encoded qx:", bc.qx);
-    console.log("BC Value Encoded qy:", bc.qy);
+    // console.log("BC Value Encoded cx:", bc.cx);
+    // console.log("BC Value Encoded cy:", bc.cy);
+    // console.log("BC Value Encoded qx:", bc.qx);
+    // console.log("BC Value Encoded qy:", bc.qy);
 
-    console.log("Min BC Value Encoded:", min_enc_BC_val);
-    console.log("Max BC Value Encoded:", max_enc_BC_val);
+    // console.log("Min BC Value Encoded:", min_enc_BC_val);
+    // console.log("Max BC Value Encoded:", max_enc_BC_val);
 
     if (valueIndexBuffer) gl.deleteBuffer(valueIndexBuffer);
     valueIndexBuffer = util.createBuffer(gl, valueIndices);
@@ -421,7 +421,6 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     // console.log("valueAvoidRGBA", valueAvoidRGBA)
     updatePositionProgram.updateParticlesCount(valueReachRGBA, valueAvoidRGBA); // this works as intended for some rzn...
     // updatePositionProgram.encodeBCValue(valueReachRGBA, valueAvoidRGBA); // doesn't show the textures for some rzn... something in uPP/uPG_WAS.js
-    if (texture_type == 1) {console.log("uPP.readTextures UPDATED", updatePositionProgram.getTextures())} // DELETE ME
 
     valueReachRGBA_enc = valueReachRGBA
     valueAvoidRGBA_enc = valueAvoidRGBA

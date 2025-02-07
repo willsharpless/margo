@@ -9,11 +9,11 @@
       <Inputs :vm='inputsModel'></Inputs>
     </div> -->
     <form class='block' @submit.prevent='onSubmit'>
-      <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
-      <!-- <div class='row'>
-        <div class='col'>Preset Filters</div>
+      <!-- <div class='title'>Hamiltonian & Control Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      <div class='row'>
+        <div class='col'>Preset Value Filters</div>
         <div class='col'> 
-          <select v-model='selectedColorMode' @change='changeColor'>
+          <select v-model='selectedPresetFilter' @change='changePresetFilter'>
               <option value='0'>Custom</option>
               <option value='1'>BRS</option>
               <option value='2'>BAS</option>
@@ -28,16 +28,36 @@
       </div>
       <div class='row help' v-if='selectedColorHelp'>
         <div>
-          <p>Defines background color for a vector field zone. Each particle entering into this zone wll be colored accordingly</p>
-          <ul>
-            <li><i>Uniform color</i> gives all particles the same color</li>
-            <li><i>Velocity color</i>  makes particles "hotter" if they move faster, and "colder" if they move slower. Notable exception is when you have singularities in field. Then all colors are the same.</li>
-            <li><i>Angle color</i> highlights zones based on velocity vector angle.</li>
-            <li><i>Dual color</i> adds a second color to distinguish the particles.</li>
-          </ul>
-          <p>Default value is "Uniform"</p>
+          <p>Set a preset value filter to match popular HJ alterations or variational inequalities.</p>
+          <p>These include the Backwards Reachable Set, the Backwards Reachable Tube, Backwards Reach-Avoid Tube and the Control Lyapunov Value Function.</p>
+          <p>Default value is "Custom" (which may be anything).</p>
         </div>
       </div> -->
+      <div><p></p></div>
+      <div class='title'>Value Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      <div class='row'>
+        <div class='col'>Preset Value Filters</div>
+        <div class='col'> 
+          <select v-model='selectedPresetFilter' @change='changePresetFilter'>
+              <option value='0'>Custom</option>
+              <option value='1'>BRS</option>
+              <option value='2'>BAS</option>
+              <option value='3'>BRT</option>
+              <option value='4'>BAT</option>
+              <option value='5'>BRAT</option>
+              <option value='6'>CLVF</option>
+              <option value='7'>CBVF</option>
+	        </select>
+        </div>
+        <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
+      </div>
+      <div class='row help' v-if='selectedColorHelp'>
+        <div>
+          <p>Set a preset value filter to match popular HJ alterations or variational inequalities.</p>
+          <p>These include the Backwards Reachable Set, the Backwards Reachable Tube, Backwards Reach-Avoid Tube and the Control Lyapunov Value Function.</p>
+          <p>Default value is "Custom" (which may be anything).</p>
+        </div>
+      </div>
       <!-- <div class='row' v-if='soundAvailable'>
         <div class='col'>SoundCloud track</div>
         <div class='col'>
@@ -179,12 +199,17 @@ export default {
       resetProbabilityHelp: false,
       integrationStepHelp: false,
       minX: 0, minY: 0,
-      maxX: 0, maxY: 0
+      maxX: 0, maxY: 0,
+      selectedPresetFilter: 0,
     };
   },
   watch: {
     'settingsmomentumPanel.collapsed': function(newValue) {
       bus.fire('settingsmomentum-collapsed', newValue);
+    },
+    selectedPresetFilter(newValue) {
+      console.log("updating filter preset")
+      this.vectorField.setPresetFilterCode(newValue);
     },
     // particlesCount(newValue, oldValue) {
     //   this.scene.setParticlesCount(parseInt(newValue, 10));
@@ -230,7 +255,7 @@ export default {
   },
   methods: {
     handleCodeUpdate() {
-      console.log("HANDLING CODE UPDATE")
+      console.log("updating hidden vectorField code (in momentum box)")
       this.vectorField.setCode(this.vectorField.code);
     },
     // moveBoundingBox(key, value) {
@@ -257,18 +282,17 @@ export default {
     //     appState.settingsmomentumPanel.collapsed = true;
     //   }
     // },
-    // changeColor(e) {
-    //   this.selectedColorMode = e.target.value;
-    // },
+    changePresetFilter(e) {
+      this.selectedPresetFilter = e.target.value;
+    },
 
     // updateBackground(rgba) {
     //   this.scene.setBackgroundColor(rgba);
     // },
 
-    onSceneReady(scene) {
-      // this.vectorField = scene.vectorFieldEditorState;
-      // this.vectorField = scene.bcEditorState;
+    onSceneReady(scene) {// called on refresh
       this.vectorField = scene.valueEditorState;
+      this.selectedPresetFilter = 0; // always declares custom
       this.particlesCount = scene.getParticlesCount();
       this.fadeOutSpeed = scene.getFadeOutSpeed();
       this.dropProbability = scene.getDropProbability();

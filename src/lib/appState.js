@@ -5,7 +5,7 @@ import wrapVectorField from './wrapVectorField';
 import wrapBoundaryCondition from './wrapBoundaryCondition';
 import isSmallScreen from './isSmallScreen';
 import wrapHamiltonian from './wrapHamiltonian';
-import wrapValueFilter from './wrapValueFilter';
+import presetValueFilter from './presetValueFilter';
 
 /**
  * The state of the fieldplay is stored in the query string. This is the
@@ -36,7 +36,8 @@ var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
 var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = max(abs(s.x), abs(s.y)) - 0.5; // box
   // float bc_val = length(s) - 0.5; // ball`);
 
-var defaultValueCode = wrapHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + wrapValueFilter(`float filterVal = min(newVal, oldVal);`);
+// var defaultValueCode = wrapHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + wrapValueFilter(`float filterVal = min(newVal, oldVal);`);
+var defaultValueCode = wrapHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + presetValueFilter(3, true);
 
 var texture_type;
 

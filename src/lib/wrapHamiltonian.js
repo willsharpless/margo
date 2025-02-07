@@ -25,7 +25,8 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
   var endCode = `
   
   return ham;
-}`; 
+}
+`; 
   var ctrlCode = ``;
   var ctrlOptCode = ``;
   var distCode = ``;

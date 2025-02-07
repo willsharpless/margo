@@ -1,6 +1,8 @@
 import bus from '../bus';
 import appState from '../appState';
 import getParsedVectorFieldFunction from './getParsedVectorFieldFunction';
+import wrapHamiltonian from '../wrapHamiltonian';
+import presetValueFilter from '../presetValueFilter';
 
 /**
  * A text editor state for the vector field equation. Manages vector field
@@ -33,6 +35,8 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     getCode,
     setCode,
     dispose,
+    setPresetHamiltonianCode,
+    setPresetFilterCode,
 
     // These properties are for UI only
     code: currentVectorFieldCode,
@@ -50,6 +54,23 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
   function getCode() {
     return appState.getCode(texture_type);
   }
+
+  function setPresetHamiltonianCode(hamiltonianKey) {
+    if (texture_type != 2) {
+      return
+    }
+    return;
+    // FIXME
+    // return setCode(currentVectorFieldCode.replace(/float get_hamiltonian\([\s\S]*?\}\s*\n?/, presetValueFilter(hamiltonianKey, false)));
+  } 
+
+  function setPresetFilterCode(filterKey) {
+    if (texture_type != 2) {
+      return
+    }
+    var modifiedCode = currentVectorFieldCode.replace(/float filter_value\([\s\S]*?\}\s*\n?/, presetValueFilter(filterKey, false));
+    return setCode(modifiedCode);
+  } 
 
   function setCode(vectorFieldCode) {
 

@@ -133,6 +133,7 @@ ${main.join('\n')}
   if (texture_type == 1) { // Boundary Condition Texture
 
     if (bc_drawing_mode) {
+
       if (bc_shape == 1) { // square
         val = sign * 0.5 * (max(abs(state.x - bc_cx)/bc_qx, abs(state.y - bc_cy)/bc_qy) - 1.);
 
@@ -143,7 +144,11 @@ ${main.join('\n')}
         // TODO WAS: not implemented yet
         val = 0.;
       }
+
+      v_particle_color = 1.5 * v_particle_color;
+
     } else { // bc from code box definition
+     
       val = get_boundary_condition(state, sign, time);
     }
     
@@ -219,15 +224,22 @@ ${main.join('\n')}
     draw_level_cond = val > thresh;
   }
 
+  // Draw
   if (draw_level_cond && texture_type != 0) {
+
     // draw nothing
-  } else if (val < - thresh && texture_type != 0) {
+  
+  } else if (val < - thresh && texture_type != 0) { // Interior
+
     if (draw_fill) {
       filler = 1.;
       gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);    
     }
+
     // draw nothing
-  } else {
+ 
+  } else { // Boundary
+   
     filler = 0.;
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, (1. - 2. * (v_particle_pos.y)),  0., 1.);
   }

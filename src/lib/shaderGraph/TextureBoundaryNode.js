@@ -88,17 +88,28 @@ uniform float u_particles_res;
     return `
     // if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newValue); // write to x only
     // else if (u_out_coordinate == 1) gl_FragColor = encodeFloatRGBA(newValue);
+    
     gl_FragColor = encodeFloatRGBA(newValue);
+
     if (u_out_coordinate == 0) {
+
       if (reach_mode > 0.) {
+
         gl_FragColor = encodeFloatRGBA(newValue);
+
       } else {
+
         gl_FragColor = encodeFloatRGBA(lastReachValue);
       }
+
     } else if (u_out_coordinate == 1) {
+
       if (avoid_mode > 0.) {
+
         gl_FragColor = encodeFloatRGBA(newValue);
+
       } else {
+       
         gl_FragColor = encodeFloatRGBA(lastAvoidValue);
       }
     }

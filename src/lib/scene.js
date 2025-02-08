@@ -7,6 +7,9 @@
  *
  * Adapted to field maps by Andrei Kashcha
  * Copyright (C) 2017
+ * 
+ * Adapted to include additional textures for value grids 
+ * by William Sharpless, 2024
  */
 import util from './gl-utils';
 import makePanzoom from 'panzoom';

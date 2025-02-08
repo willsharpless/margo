@@ -43,15 +43,24 @@ float ball_bc(vec2 state, float bc_cx, float bc_cy, float bc_qx, float bc_qy, fl
   getMainBody() {
     return `
   float updateValue;
+
   if (drawing > 0.) {
+
     if (bc_shape == 1) { // square
+    
       updateValue = box_bc(state, bc_cx, bc_cy, bc_qx, bc_qy, sign);
+
     } else if (bc_shape == 2) { // circle
+
       updateValue = ball_bc(state, bc_cx, bc_cy, bc_qx, bc_qy, sign);
+
     } else { // free draw?
+     
       updateValue = 0.; // TODO WAS: not implemented yet
     }
+
   } else { // read from code
+    
     updateValue = get_boundary_condition(state, sign, time);
   }
 `

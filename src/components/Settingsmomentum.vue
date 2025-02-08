@@ -262,13 +262,13 @@ export default {
       maxX: 0, maxY: 0,
       selectedPresetFilter: 0,
       setControl: false,
-      inputControlMaxes: "1.0, 1.0",
-      selectedControlMaxes: [1., 1.], 
+      inputControlMaxes: "0.1, 0.1",
+      selectedControlMaxes: [0.1, 0.1], 
       selectedControlShape: 1,
       selectedControlGoal: true,
       setDisturbance: false,
-      inputDisturbanceMaxes: "1.0, 1.0",
-      selectedDisturbanceMaxes: [1., 1.], 
+      inputDisturbanceMaxes: "0.1, 0.1",
+      selectedDisturbanceMaxes: [0.1, 0.1], 
       selectedDisturbanceShape: 1,
       selectedDisturbanceGoal: false,
     };
@@ -414,13 +414,13 @@ export default {
        // the following are static (since they are for loading presets)
       this.selectedPresetFilter = 0;
       this.setControl = false; 
-      this.inputControlMaxes = "1.0, 1.0",
-      this.selectedControlMaxes = [1., 1.]; 
+      this.inputControlMaxes = "0.1, 0.1",
+      this.selectedControlMaxes = [0.1, 0.1]; 
       this.selectedControlShape = 1; 
       this.selectedControlGoal = true;
       this.setDisturbance = false; 
-      this.inputDisturbanceMaxes = "1.0, 1.0",
-      this.selectedDisturbanceMaxes = [1., 1.]; 
+      this.inputDisturbanceMaxes = "0.1, 0.1",
+      this.selectedDisturbanceMaxes = [0.1, 0.1]; 
       this.selectedDisturbanceShape = 1; 
       this.selectedDisturbanceGoal = false;
 

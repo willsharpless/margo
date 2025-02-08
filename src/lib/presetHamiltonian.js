@@ -62,7 +62,7 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 `;
     } else if (controlShape == 2) { // Ball
       controlCode = `  // Control
-  mat2 Qc = 0.5 * mat2(${1./controlMaxes[0]}, 0., 0., ${1./controlMaxes[1]});
+  mat2 Qc = 0.5 * mat2(${controlMaxes[0]}, 0., 0., ${controlMaxes[1]});
   float hamC = ${controlGameCode}sqrt(dot(Qc * costate, Qc * costate));
 
 `;
@@ -91,7 +91,7 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 `;
     } else if (disturbanceShape == 2) { // Ball
       disturbanceCode = `  // Disturbance
-  mat2 Qd = 0.5 * mat2(${1./disturbanceMaxes[0]}, 0., 0., ${1./disturbanceMaxes[1]});
+  mat2 Qd = 0.5 * mat2(${disturbanceMaxes[0]}, 0., 0., ${disturbanceMaxes[1]});
   float hamD = ${disturbanceGameCode}sqrt(dot(Qd * costate, Qd * costate));
 
 `;

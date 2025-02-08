@@ -18,7 +18,7 @@ export default function presetHamiltonian(auto=true,
   // WAS TODO: could support any lb/ub for control/disturbance instead of maxs (non-zero centered)
 
   // var hamCode = `  float ham = -dot(costate, get_velocity(state));`;
-  var startCode = `// Given any point, we decide the momentum (hamiltonian),
+  var startCode = `// Given any state, we decide the momentum (hamiltonian),
 // defining how the value evolves.
 
 float get_hamiltonian(vec2 state, vec2 costate, float time) {
@@ -56,14 +56,12 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 
     if (controlShape == 1) { // Box
       controlCode = `  // Control
-  mat2 Qc = mat2(${controlMaxes[0]}, 0., 0., ${controlMaxes[1]});
-  float hamC = ${controlGameCode}dot(abs(Qc * costate), vec2(1.));
+  float hamC = ${controlGameCode}dot(abs(vec2(${controlMaxes[0]}, ${controlMaxes[1]}) * costate), vec2(1.));
 
 `;
     } else if (controlShape == 2) { // Ball
       controlCode = `  // Control
-  mat2 Qc = 0.5 * mat2(${controlMaxes[0]}, 0., 0., ${controlMaxes[1]});
-  float hamC = ${controlGameCode}sqrt(dot(Qc * costate, Qc * costate));
+  float hamC = ${controlGameCode}sqrt(dot(vec2(${0.5 * controlMaxes[0]}, ${0.5 * controlMaxes[1]}) * costate, vec2(${0.5 * controlMaxes[0]}, ${0.5 * controlMaxes[1]}) * costate));
 
 `;
     } else {
@@ -85,14 +83,12 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 
     if (disturbanceShape == 1) { // Box
       disturbanceCode = `  // Disturbance
-  mat2 Qd = mat2(${disturbanceMaxes[0]}, 0., 0., ${disturbanceMaxes[1]});
-  float hamD = ${disturbanceGameCode}dot(abs(Qd * costate), vec2(1.));
+  float hamD = ${disturbanceGameCode}dot(abs(vec2(${disturbanceMaxes[0]}, ${disturbanceMaxes[1]}) * costate), vec2(1.));
 
 `;
     } else if (disturbanceShape == 2) { // Ball
       disturbanceCode = `  // Disturbance
-  mat2 Qd = 0.5 * mat2(${disturbanceMaxes[0]}, 0., 0., ${disturbanceMaxes[1]});
-  float hamD = ${disturbanceGameCode}sqrt(dot(Qd * costate, Qd * costate));
+  float hamD = ${disturbanceGameCode}sqrt(dot(vec2(${0.5 * disturbanceMaxes[0]}, ${0.5 * disturbanceMaxes[1]}) * costate, vec2(${0.5 * disturbanceMaxes[0]}, ${0.5 * disturbanceMaxes[1]}) * costate));
 
 `;
     } else {

@@ -1,7 +1,7 @@
 import bus from '../bus';
 import appState from '../appState';
 import getParsedVectorFieldFunction from './getParsedVectorFieldFunction';
-import wrapHamiltonian from '../wrapHamiltonian';
+import presetHamiltonian from '../presetHamiltonian';
 import presetValueFilter from '../presetValueFilter';
 
 /**
@@ -55,13 +55,20 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     return appState.getCode(texture_type);
   }
 
-  function setPresetHamiltonianCode(hamiltonianKey) {
+  function setPresetHamiltonianCode(auto,  
+                                    control, controlMaxes, controlShape, controlReach,
+                                    disturbance, disturbanceMaxes, disturbanceShape, disturbanceReach) {
     if (texture_type != 2) {
       return
     }
-    return;
-    // FIXME
-    // return setCode(currentVectorFieldCode.replace(/float get_hamiltonian\([\s\S]*?\}\s*\n?/, presetValueFilter(hamiltonianKey, false)));
+    console.log("controlMaxes", typeof(controlMaxes), controlMaxes)
+    console.log("disturbanceMaxes", typeof(disturbanceMaxes), disturbanceMaxes)
+    return setCode(currentVectorFieldCode.replace(/float get_hamiltonian\([\s\S]*?\}\s*\n?/, 
+                                                  presetHamiltonian(auto, 
+                                                                    control, controlMaxes, controlShape, controlReach,
+                                                                    disturbance, disturbanceMaxes, disturbanceShape, disturbanceReach,
+                                                                    false
+    )));
   } 
 
   function setPresetFilterCode(filterKey) {

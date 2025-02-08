@@ -9,34 +9,92 @@
       <Inputs :vm='inputsModel'></Inputs>
     </div> -->
     <form class='block' @submit.prevent='onSubmit'>
-      <!-- <div class='title'>Hamiltonian & Control Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      <div class='title'>Starter Code<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+
       <div class='row'>
-        <div class='col'>Preset Value Filters</div>
+        <div class='col'>Control (Ego)</div>
         <div class='col'> 
-          <select v-model='selectedPresetFilter' @change='changePresetFilter'>
-              <option value='0'>Custom</option>
-              <option value='1'>BRS</option>
-              <option value='2'>BAS</option>
-              <option value='3'>BRT</option>
-              <option value='4'>BAT</option>
-              <option value='5'>BRAT</option>
-              <option value='6'>CLVF</option>
-              <option value='7'>CBVF</option>
-	        </select>
+          <input type="checkbox" v-model="setControl">
         </div>
-        <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
+        <div class='col'></div>
+        <div class='col'></div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
       </div>
-      <div class='row help' v-if='selectedColorHelp'>
-        <div>
-          <p>Set a preset value filter to match popular HJ alterations or variational inequalities.</p>
-          <p>These include the Backwards Reachable Set, the Backwards Reachable Tube, Backwards Reach-Avoid Tube and the Control Lyapunov Value Function.</p>
-          <p>Default value is "Custom" (which may be anything).</p>
+      
+      <div class='row' v-if='setControl'>
+        <div class='colr'>objective</div>
+        <div class='colr'> 
+          <select v-model='selectedControlGoal' @change='changeControlGoal'> 
+            <option :value="true">reach (min)</option>
+            <option :value="false">avoid (max)</option>
+	        </select>
         </div>
-      </div> -->
-      <div><p></p></div>
-      <div class='title'>Value Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
+      <div class='row' v-if='setControl'>
+        <div class='colr'>constraint</div>
+        <div class='colr'> 
+          <select v-model='selectedControlShape' @change='changeControlShape'>
+              <option value='1'>box</option>
+              <option value='2'>ball</option>
+          </select>
+        </div>
+          <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
+      <div class='row' v-if='setControl'>
+        <div class='colr'>max values</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputControlMaxes" @input="changeControlMaxes"> 
+        </div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
       <div class='row'>
-        <div class='col'>Preset Value Filters</div>
+        <div class='col'>Disturbance (Antagonist)</div>
+        <div class='col'> 
+          <input type="checkbox" v-model="setDisturbance">
+        </div>
+        <div class='col'></div>
+        <div class='col'></div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+      
+      <div class='row' v-if='setDisturbance'>
+        <div class='colr'>objective</div>
+        <div class='colr'> 
+          <select v-model='selectedDisturbanceGoal' @change='changeDisturbanceGoal'>
+              <option :value="true">reach (min)</option>
+              <option :value="false">avoid (max)</option>
+	        </select>
+        </div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
+      <div class='row' v-if='setDisturbance'>
+        <div class='colr'>constraint</div>
+        <div class='colr'> 
+          <select v-model='selectedDisturbanceShape' @change='changeDisturbanceShape'>
+              <option value='1'>box</option>
+              <option value='2'>ball</option>
+          </select>
+        </div>
+          <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
+      <div class='row' v-if='setDisturbance'>
+        <div class='colr'>max values</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputDisturbanceMaxes" @input="changeDisturbanceMaxes"> 
+        </div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
+      <!-- <div><p></p></div> -->
+      <!-- <div class='title'>Value Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div> -->
+      <div class='row'>
+        <div class='col'>Filters</div>
         <div class='col'> 
           <select v-model='selectedPresetFilter' @change='changePresetFilter'>
               <option value='0'>Custom</option>
@@ -49,6 +107,8 @@
               <option value='7'>CBVF</option>
 	        </select>
         </div>
+        <div class='col'></div>
+        <div class='col'></div>
         <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
       </div>
       <div class='row help' v-if='selectedColorHelp'>
@@ -178,7 +238,7 @@ export default {
     bus.off('vfcode-updated', this.handleCodeUpdate);
     // bus.off('bbox-change', this.updateBBox, this);
   },
-  data() {
+  data() { // initialization
     return {
       soundCloudLink: 'https://soundcloud.com/mrfijiwiji/yours-truly',
       vectorField: null,
@@ -201,6 +261,16 @@ export default {
       minX: 0, minY: 0,
       maxX: 0, maxY: 0,
       selectedPresetFilter: 0,
+      setControl: false,
+      inputControlMaxes: "1.0, 1.0",
+      selectedControlMaxes: [1., 1.], 
+      selectedControlShape: 1,
+      selectedControlGoal: true,
+      setDisturbance: false,
+      inputDisturbanceMaxes: "1.0, 1.0",
+      selectedDisturbanceMaxes: [1., 1.], 
+      selectedDisturbanceShape: 1,
+      selectedDisturbanceGoal: false,
     };
   },
   watch: {
@@ -208,8 +278,13 @@ export default {
       bus.fire('settingsmomentum-collapsed', newValue);
     },
     selectedPresetFilter(newValue) {
-      console.log("updating filter preset")
       this.vectorField.setPresetFilterCode(newValue);
+    },
+    setControl() {
+      this.changeHamiltonian();
+    },
+    setDisturbance() {
+      this.changeHamiltonian();
     },
     // particlesCount(newValue, oldValue) {
     //   this.scene.setParticlesCount(parseInt(newValue, 10));
@@ -258,6 +333,16 @@ export default {
       console.log("updating hidden vectorField code (in momentum box)")
       this.vectorField.setCode(this.vectorField.code);
     },
+    changeHamiltonian() {
+      console.log("changing hamiltonian code")
+      if (!this.setControl && !this.setDisturbance) {
+        this.vectorField.setPresetHamiltonianCode()
+      } else {
+        this.vectorField.setPresetHamiltonianCode(false, 
+                                            this.setControl, this.selectedControlMaxes, this.selectedControlShape, this.selectedControlGoal,
+                                            this.setDisturbance, this.selectedDisturbanceMaxes, this.selectedDisturbanceShape, this.selectedDisturbanceGoal);
+      }
+    },
     // moveBoundingBox(key, value) {
     //   if (this.ignoreBbox) {
     //     return;
@@ -277,22 +362,68 @@ export default {
     // goToOrigin() {
     //   this.scene.resetBoundingBox();
     // },  
-    // onSubmit() {
-    //   if (isSmallScreen()) {
-    //     appState.settingsmomentumPanel.collapsed = true;
-    //   }
-    // },
+    onSubmit() {
+      if (isSmallScreen()) {
+        appState.settingsmomentumPanel.collapsed = true;
+      }
+    },
     changePresetFilter(e) {
       this.selectedPresetFilter = e.target.value;
     },
+
+    changeControlMaxes() {
+      this.selectedControlMaxes = this.inputControlMaxes
+        .split(',')
+        .map(num => parseFloat(num.trim())) // Convert string to float
+        .filter(num => !isNaN(num)); // Ensure valid numbers
+      this.changeHamiltonian();
+    },
+    changeControlShape(e) {
+      this.selectedControlShape = e.target.value;
+      this.changeHamiltonian();
+    },
+    changeControlGoal(e) {
+      this.selectedControlGoal = e.target.value == "true";
+      this.changeHamiltonian();
+    },
+
+    changeDisturbanceMaxes() {
+      this.selectedDisturbanceMaxes = this.inputDisturbanceMaxes
+        .split(',')
+        .map(num => parseFloat(num.trim())) // Convert string to float
+        .filter(num => !isNaN(num)); // Ensure valid numbers
+      this.changeHamiltonian();
+    },
+    changeDisturbanceShape(e) {
+      this.selectedDisturbanceShape = e.target.value;
+      this.changeHamiltonian();
+    },
+    changeDisturbanceGoal(e) {
+      this.selectedDisturbanceGoal = e.target.value == "true";
+      this.changeHamiltonian();
+    },
+
 
     // updateBackground(rgba) {
     //   this.scene.setBackgroundColor(rgba);
     // },
 
-    onSceneReady(scene) {// called on refresh
+    onSceneReady(scene) { // refreshed
       this.vectorField = scene.valueEditorState;
-      this.selectedPresetFilter = 0; // always declares custom
+
+       // the following are static (since they are for loading presets)
+      this.selectedPresetFilter = 0;
+      this.setControl = false; 
+      this.inputControlMaxes = "1.0, 1.0",
+      this.selectedControlMaxes = [1., 1.]; 
+      this.selectedControlShape = 1; 
+      this.selectedControlGoal = true;
+      this.setDisturbance = false; 
+      this.inputDisturbanceMaxes = "1.0, 1.0",
+      this.selectedDisturbanceMaxes = [1., 1.]; 
+      this.selectedDisturbanceShape = 1; 
+      this.selectedDisturbanceGoal = false;
+
       this.particlesCount = scene.getParticlesCount();
       this.fadeOutSpeed = scene.getFadeOutSpeed();
       this.dropProbability = scene.getDropProbability();
@@ -322,7 +453,7 @@ export default {
 
 // function exponentialStep(value) {
 //   var dt = Math.pow(10, Math.floor(Math.log10(value)));
-//   if (value - dt === 0) {
+//   if (valuedt === 0) {
 //     // This is odd case when you are increasing number, but otherwise it's a good adjustment.
 //     return dt/10;
 //   }
@@ -451,7 +582,7 @@ form.block {
     margin-top: 14px;
     padding: 0;
     padding-left: 14px;
-    width: settingsmomentum-width - 14px;
+    width: settingsmomentum-width14px;
     font-size: 14px;
     border: 1px solid transparent;
     &:focus {
@@ -477,6 +608,10 @@ audio {
 
 .col {
   flex: 1;
+}
+.colr {
+  flex: 1;
+  text-align: right;
 }
 a {
   text-decoration: none;

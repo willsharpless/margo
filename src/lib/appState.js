@@ -4,7 +4,7 @@ import ColorModes from './programs/colorModes';
 import wrapVectorField from './wrapVectorField';
 import wrapBoundaryCondition from './wrapBoundaryCondition';
 import isSmallScreen from './isSmallScreen';
-import wrapHamiltonian from './wrapHamiltonian';
+import presetHamiltonian from './presetHamiltonian';
 import presetValueFilter from './presetValueFilter';
 
 /**
@@ -36,8 +36,8 @@ var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
 var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = max(abs(s.x), abs(s.y)) - 0.5; // box
   // float bc_val = length(s) - 0.5; // ball`);
 
-// var defaultValueCode = wrapHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + wrapValueFilter(`float filterVal = min(newVal, oldVal);`);
-var defaultValueCode = wrapHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + presetValueFilter(3, true);
+// var defaultValueCode = presetHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + wrapValueFilter(`float filterVal = min(newVal, oldVal);`);
+var defaultValueCode = presetHamiltonian() + presetValueFilter(3, true);
 
 var texture_type;
 

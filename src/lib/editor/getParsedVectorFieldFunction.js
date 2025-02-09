@@ -36,7 +36,7 @@ import {
   float frame;
   vec4 cursor;
   vec2 rotate(vec2 p,float a);
-  vec2 get_velocity(vec2 s);
+  vec2 get_vel(vec2 s);
   float audio(float index);
   float rand(const vec2 co);
   sampler2D input0;

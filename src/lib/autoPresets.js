@@ -11,7 +11,7 @@ export default [
     "h": 7.4611,
     "code": `// s.x and s.y are current coordinates
   // v.x and v.y is a velocity at point s
-  vec2 get_velocity(vec2 s) {
+  vec2 get_vel(vec2 s) {
     vec2 v = vec2(0., 0.);
 
     // change this to get a new vector field
@@ -35,7 +35,7 @@ export default [
     "i0": "https://gist.githubusercontent.com/anvaka/ebc18e3ffe05b0709a7ae933261fa2e9/raw/bafb63d01e0ab37c1f9b51522a5ec4fbc19bc4f1/edges.png",
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -62,7 +62,7 @@ vec2 get_velocity(vec2 s) {
     "i0": "https://gist.githubusercontent.com/anvaka/ebc18e3ffe05b0709a7ae933261fa2e9/raw/cd7d82c5a235f50f5655ac94aa9077709731adde/binary_tree.png",
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -90,7 +90,7 @@ vec2 get_velocity(vec2 s) {
 }
 // s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -131,7 +131,7 @@ float df(float x) {
   return (f(x+h)-f(x-h))/(2.*h);
 }
 
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   float fx = f(s.x);
@@ -164,7 +164,7 @@ return vec2(q-s.y/2.,r-s.y/8.);
 
 // s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
   float f = frame/1000.;
   float z = (3.-s.y)/(6.+cursor.zw.y*2.);
@@ -221,7 +221,7 @@ vec2 circleV(vec2 s) {
 
 // s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   v = isCircle(s) ? circleV(s) :
@@ -245,7 +245,7 @@ vec2 get_velocity(vec2 s) {
     "particleCount": 1000000,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -298,7 +298,7 @@ v.y = n > 2.0 ? -s.y/10.0 : s.y/10.0;
 }
 // s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = circle(s, vec2(0., 0.));
 
   float r = 7.;
@@ -329,7 +329,7 @@ vec2 get_velocity(vec2 s) {
               abcd[0] * c + abcd[1] * ss);
 }
 
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
   v = tensor(s, vec2(0., 0.), vec4(-2., 0., 0., 1.), 2.);
   return v;
@@ -347,7 +347,7 @@ vec2 get_velocity(vec2 s) {
     "h": 8.5442,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   float ax = (cursor.zw.x - s.x);
@@ -378,7 +378,7 @@ vec2 get_velocity(vec2 s) {
     "h": 8.5397,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -422,7 +422,7 @@ v.y = d1*fy+d2*dy2;
     "h": 37.0984,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -516,7 +516,7 @@ v = v / (1. + 0.1 * (borderrange - 10.) * smoothstep(11.5, 12.5, borderrange));
     "h": 8.5398,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -542,7 +542,7 @@ v = vec2(-p1.y, p1.x)/(l1 * l1) + vec2(-p2.y, p2.x)/(l2 * l2);
     "h": 46.508700000000005,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -565,7 +565,7 @@ vec2 get_velocity(vec2 s) {
     "h": 9.0455,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -589,7 +589,7 @@ vec2 get_velocity(vec2 s) {
     "h": 8.5397,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -614,7 +614,7 @@ vec2 get_velocity(vec2 s) {
     "h": 24.7317,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -643,7 +643,7 @@ vec2 get_velocity(vec2 s) {
     "h": 22.5709,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -684,7 +684,7 @@ vec2 get_velocity(vec2 s) {
     "h": 30.2937,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -707,7 +707,7 @@ v.y = cos((s.y+s.y));
     "h": 30.2937,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -730,7 +730,7 @@ v.y = cos(s.x);
     "h": 55.970200000000006,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -753,7 +753,7 @@ v.y = sin(s.x);
     "h": 11.4385,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -776,7 +776,7 @@ v.y = sin(min(length(s),log((s.y+s.x))*s.x));
     "h": 8.5398,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -802,7 +802,7 @@ v.y = y*y - x*x;
     "h": 11.434999999999999,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -834,7 +834,7 @@ v.y = sinth*ur+costh*uth;
     "h": 96.8415,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -865,7 +865,7 @@ v += s * .2;
     "h": 8.5397,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -888,7 +888,7 @@ v = vec2(s.y, -s.x) / r2 - a * s;
     "h": 5.0845,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -917,7 +917,7 @@ v = c;
     "h": 4.9902,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -949,7 +949,7 @@ v.y = s.x/length(s) * (0.5 - mask);
     "h": 8.5398,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -971,7 +971,7 @@ v.y = cos(5.0*s.x - s.y);
     "h": 8.539734222673566,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field
@@ -1000,7 +1000,7 @@ v.y = c*vy1 + (1.0-c)*vy2;
     "h": 24.7317,
     "code": `// s.x and s.y are current coordinates
 // v.x and v.y is a velocity at point s
-vec2 get_velocity(vec2 s) {
+vec2 get_vel(vec2 s) {
   vec2 v = vec2(0., 0.);
 
   // change this to get a new vector field

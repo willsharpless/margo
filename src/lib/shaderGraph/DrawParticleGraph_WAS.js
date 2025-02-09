@@ -149,7 +149,7 @@ ${main.join('\n')}
 
     } else { // bc from code box definition
      
-      val = get_boundary_condition(state, sign, time);
+      val = get_bc(state, sign, time);
     }
     
     // for testing/observing bc encoding

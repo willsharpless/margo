@@ -60,8 +60,13 @@ float ball_bc(vec2 state, float bc_cx, float bc_cy, float bc_qx, float bc_qy, fl
     }
 
   } else { // read from code
-    
-    updateValue = get_boundary_condition(state, sign, time);
+
+    if (u_out_coordinate == 0) { // reach
+      updateValue = get_bc(state, sign, time);
+
+    } else { // avoid FIXME to proper 
+      updateValue = get_bc(state, sign, time);
+    }
   }
 `
   }

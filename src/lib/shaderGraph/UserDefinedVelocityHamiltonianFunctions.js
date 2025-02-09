@@ -103,25 +103,25 @@ mat2 disturbance_jacobian(vec2 x, float time) {
 
 ${this.updateCode ? this.updateCode : `
 
-vec2 get_velocity(vec2 x) { return vec2(0.1); }
+vec2 get_vel(vec2 x) { return vec2(0.1); }
 
 // // WAS FIXME: user-defined in advanced cases
 // vec2 max_partial_hamiltonian_costate(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
-//   vec2 vel = get_velocity(state); // WAS FIXME: works for auto systems only!
+//   vec2 vel = get_vel(state); // WAS FIXME: works for auto systems only!
 //   return vec2(abs(vel.x), abs(vel.y));
 // }
 
 // // WAS FIXME: only auto for now
-float get_hamiltonian(vec2 state, vec2 costate, float time) {
-  vec2 vel = get_velocity(state); // WAS FIXME: works for auto systems only!
+float get_ham(vec2 state, vec2 costate, float time) {
+  vec2 vel = get_vel(state); // WAS FIXME: works for auto systems only!
   return -dot(costate, vel); // WAS FIXME: minus for backwards reach, could be user-defined
 }
 
 // Momentum ie Hamiltonian
 
-// float get_hamiltonian(vec2 x, vec2 p, float t) { 
+// float get_ham(vec2 x, vec2 p, float t) { 
 //   // float h = 0.1 * cos(t); // debugging
-//   float h = dot(p, get_velocity(x) + get_control(x, p, t) + get_disturbance(x, p, t));
+//   float h = dot(p, get_vel(x) + get_control(x, p, t) + get_disturbance(x, p, t));
 //   return h;
 // }
 
@@ -141,8 +141,8 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 vec2 max_partial_hamiltonian_costate(vec2 x, vec2 p_L, vec2 p_R, float t, float val) {
   mat2 control_jac = control_jacobian(x, t);
   mat2 disturbance_jac = disturbance_jacobian(x, t);
-  // return abs(get_velocity(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
-  return abs(get_velocity(x));
+  // return abs(get_vel(x)) + mat2(abs(control_jac[0]), abs(control_jac[1])) * control_max_mag + mat2(abs(disturbance_jac[0]), abs(disturbance_jac[1])) * disturbance_max_mag;
+  return abs(get_vel(x));
 }
 
 `

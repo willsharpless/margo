@@ -9,32 +9,163 @@
       <Inputs :vm='inputsModel'></Inputs>
     </div> -->
     <form class='block' @submit.prevent='onSubmit'>
-      <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
-      <!-- <div class='row'>
-        <div class='col'>Particle color</div>
+      <div class='title'>Starter Code<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      
+      <div class='row'>
+        <div class='col'>Shape</div>
         <div class='col'> 
-          <select v-model='selectedColorMode' @change='changeColor'>
-              <option value='1'>Uniform</option>
-              <option value='2'>Velocity</option>
-              <option value='3'>Angle</option>
-              <option value='4'>Dual</option>
+          <select v-model='selectedPresetShape' @change='changePresetShape'>
+              <option value='0'>custom</option>
+              <option value='1'>box</option>
+              <option value='2'>ball</option>
+              <option value='3'>fig8</option>
 	        </select>
         </div>
-        <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
+        <div class='col'></div>
+        <div class='col'></div>
+        <!-- <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
       </div>
-      <div class='row help' v-if='selectedColorHelp'>
+
+      <div class='row'>
+        <div class='col'>Body</div>
+        <div class='col'> 
+          <select v-model='selectedBody' @change='changeBody'>
+            <option :value="false">in</option>
+            <option :value="true">out</option>
+          </select>
+        </div>
+        <div class='col'></div>
+        <div class='col'></div>
+      </div>
+      <!-- <div class='row help' v-if='selectedColorHelp'>
         <div>
-          <p>Defines background color for a vector field zone. Each particle entering into this zone wll be colored accordingly</p>
-          <ul>
-            <li><i>Uniform color</i> gives all particles the same color</li>
-            <li><i>Velocity color</i>  makes particles "hotter" if they move faster, and "colder" if they move slower. Notable exception is when you have singularities in field. Then all colors are the same.</li>
-            <li><i>Angle color</i> highlights zones based on velocity vector angle.</li>
-            <li><i>Dual color</i> adds a second color to distinguish the particles.</li>
-          </ul>
-          <p>Default value is "Uniform"</p>
+          <p>Select a preset shape for</p>
+        </div>
+      </div> -->
+
+      <div class='row'>
+        <div class='col'>Center</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputCenter" @input="changeCenter"> 
+        </div>
+        <div class='col'>Radius</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputRadius" @input="changeRadius"> 
+        </div>
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div>
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div>
+      </div>
+
+      <div class='row'>
+        <div class='col'>Dual (Reach-Avoid)</div>
+        <div class='col'> 
+          <input type="checkbox" v-model="setDual">
+        </div>
+        <div class='col'></div>
+        <div class='col'></div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+
+      <div class='row' v-if='setDual'>
+        <div class='col'></div>
+        <div class='colr'>Reach/Target BC</div>
+        <div class='col'></div>
+        <div class='col'></div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+      
+      <div class='row' v-if='setDual'>
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+
+        <div class='colr'>shape</div>
+        <div class='colr'> 
+          <select v-model='selectedPresetShapeReach' @change='changePresetShapeReach'>
+              <option value='0'>custom</option>
+              <option value='1'>box</option>
+              <option value='2'>ball</option>
+	        </select>
+        </div>
+        <div class='colr'>body</div>
+        <div class='colr'> 
+          <select v-model='selectedBodyReach' @change='changeBodyReach'>
+            <option :value="false">in</option>
+            <option :value="true">out</option>
+          </select>
         </div>
       </div>
-      <div class='row' v-if='soundAvailable'>
+
+      <div class='row' v-if='setDual'>
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div>
+        <div class='colr'>center</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputCenterReach" @input="changeCenterReach"> 
+        </div>
+        <div class='colr'>radius</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputRadiusReach" @input="changeRadiusReach"> 
+        </div>
+      </div>
+
+      <div class='row' v-if='setDual'>
+        <div class='col'></div>
+        <div class='colr'>Avoid/Obstacle BC</div>
+        <div class='col'></div>
+        <div class='col'></div>
+        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
+      </div>
+      
+      <div class='row' v-if='setDual'>
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div>
+        <div class='colr'>shape</div>
+        <div class='colr'> 
+          <select v-model='selectedPresetShapeAvoid' @change='changePresetShapeAvoid'>
+              <option value='0'>custom</option>
+              <option value='1'>box</option>
+              <option value='2'>ball</option>
+	        </select>
+        </div>
+        <div class='colr'>body</div>
+        <div class='colr'> 
+          <select v-model='selectedBodyAvoid' @change='changeBodyAvoid'>
+            <option :value="false">in</option>
+            <option :value="true">out</option>
+          </select>
+        </div>
+      </div>
+
+      <div class='row' v-if='setDual'>
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div> 
+        <div class='colr'></div>
+        <div class='colr'>center</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputCenterAvoid" @input="changeCenterAvoid"> 
+        </div>
+        <div class='colr'>radius</div>
+        <div class='colr'> 
+          <input type="text" v-model="inputRadiusAvoid" @input="changeRadiusAvoid"> 
+        </div>
+      </div>
+
+      <!-- <div><p></p></div> -->
+      <!-- <div class='title'>Value Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div> -->
+      <!-- <div class='row' v-if='soundAvailable'>
         <div class='col'>SoundCloud track</div>
         <div class='col'>
           <input type='text' v-model='soundCloudLink'>
@@ -144,14 +275,14 @@ export default {
   },
   mounted() {
     bus.on('scene-ready', this.onSceneReady, this);
-    // bus.on('vfcode-updated', this.handleCodeUpdate);
+    bus.on('vfcode-updated', this.handleCodeUpdate);
     // bus.on('bbox-change', this.updateBBox, this);
 
     // if (soundAvailable) this.soundLoader = new SoundLoader(this.$refs.player);
   },
   beforeDestroy() {
     bus.off('scene-ready', this.onSceneReady, this);
-    // bus.off('vfcode-updated', this.handleCodeUpdate);
+    bus.off('vfcode-updated', this.handleCodeUpdate);
     // bus.off('bbox-change', this.updateBBox, this);
   },
   data() {
@@ -175,12 +306,36 @@ export default {
       resetProbabilityHelp: false,
       integrationStepHelp: false,
       minX: 0, minY: 0,
-      maxX: 0, maxY: 0
+      maxX: 0, maxY: 0,
+      
+      selectedPresetShape: 1,
+      selectedBody: false,
+      inputCenter: "0., 0.",
+      selectedCenter: [0., 0.],
+      inputRadius: "0.5",
+      selectedRadius: 0.5,
+
+      setDual: false,
+      selectedPresetShapeReach: 1,
+      selectedPresetShapeAvoid: 1,
+      selectedBodyReach: false,
+      selectedBodyAvoid: true,
+      inputCenterReach: "0., 0.",
+      selectedCenterReach: [0., 0.], 
+      inputCenterAvoid: "0., 0.",
+      selectedCenterAvoid: [0., 0.],
+      inputRadiusReach: "0.5",
+      selectedRadiusReach: 0.5, 
+      inputRadiusAvoid: "1.0",
+      selectedRadiusAvoid: 1.0, 
     };
   },
   watch: {
     'settingsshapePanel.collapsed': function(newValue) {
       bus.fire('settingsshape-collapsed', newValue);
+    },
+    setDual() {
+      this.changeBoundaryCondition();
     },
     // particlesCount(newValue, oldValue) {
     //   this.scene.setParticlesCount(parseInt(newValue, 10));
@@ -225,10 +380,33 @@ export default {
     // }
   },
   methods: {
-    // handleCodeUpdate() {
-    //   console.log("HANDLING CODE UPDATE")
-    //   this.vectorField.setCode(this.vectorField.code);
-    // },
+    handleCodeUpdate() {
+      console.log("updating hidden vectorField code (in shape box)")
+      this.vectorField.setCode(this.vectorField.code);
+    },
+    changeBoundaryCondition() {
+      console.log("changing bc code")
+      if (!this.setDual) {
+        this.vectorField.setDefaultCode(); // reset code for safety
+        this.vectorField.setPresetBoundaryCondition(this.selectedPresetShape, this.selectedBody, 
+                                                    this.selectedCenter, this.selectedRadius);
+      } else {
+        this.vectorField.setDefaultCode(); // reset code for safety
+        this.vectorField.setPresetBoundaryConditionDual(this.selectedPresetShapeReach, this.selectedBodyReach,
+                                                    this.selectedCenterReach, this.selectedRadiusReach,
+                                                    this.selectedPresetShapeAvoid, this.selectedBodyAvoid,
+                                                    this.selectedCenterAvoid, this.selectedRadiusAvoid, 
+                                                    true);
+      };
+    },
+    changeBoundaryConditionDual() {
+      console.log("changing bc code DUAL");
+      this.vectorField.setPresetBoundaryConditionDual(this.selectedPresetShapeReach, this.selectedBodyReach,
+                                                  this.selectedCenterReach, this.selectedRadiusReach,
+                                                  this.selectedPresetShapeAvoid, this.selectedBodyAvoid,
+                                                  this.selectedCenterAvoid, this.selectedRadiusAvoid, 
+                                                  false);
+    },
     // moveBoundingBox(key, value) {
     //   if (this.ignoreBbox) {
     //     return;
@@ -248,23 +426,112 @@ export default {
     // goToOrigin() {
     //   this.scene.resetBoundingBox();
     // },  
-    // onSubmit() {
-    //   if (isSmallScreen()) {
-    //     appState.settingsshapePanel.collapsed = true;
-    //   }
-    // },
-    // changeColor(e) {
-    //   this.selectedColorMode = e.target.value;
-    // },
+    onSubmit() {
+      if (isSmallScreen()) {
+        appState.settingsmomentumPanel.collapsed = true;
+      }
+    },
+
+    changePresetShape(e) {
+      this.selectedPresetShape = e.target.value;
+      this.changeBoundaryCondition();
+    },
+    changeBody(e) {
+      this.selectedBody = e.target.value == "true";
+      this.changeBoundaryCondition();
+    },
+    changeCenter() {
+      this.selectedCenter = this.inputCenter
+        .split(',')
+        .map(num => {
+          let parsed = parseFloat(num.trim());
+          return isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
+        })
+        .filter(num => !isNaN(num)); // Ensure valid numbers
+      this.changeBoundaryCondition();
+    },
+    changeRadius() {
+      let parsed = parseFloat(this.inputRadius.trim());
+      this.selectedRadius = isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
+      this.changeBoundaryCondition();
+    },
+
+    changePresetShapeReach(e) {
+      this.selectedPresetShapeReach = e.target.value;
+      this.changeBoundaryConditionDual();
+    },
+    changeBodyReach(e) {
+      this.selectedBodyReach = e.target.value == "true";
+      this.changeBoundaryConditionDual();
+    },
+    changeCenterReach() {
+      this.selectedCenterReach = this.inputCenterReach
+        .split(',')
+        .map(num => {
+          let parsed = parseFloat(num.trim());
+          return isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
+        })
+        .filter(num => !isNaN(num)); // Ensure valid numbers
+      this.changeBoundaryConditionDual();
+    },
+    changeRadiusReach() {
+      let parsed = parseFloat(this.inputRadiusReach.trim());
+      this.selectedRadiusReach = isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
+      this.changeBoundaryConditionDual();
+    },
+
+    changePresetShapeAvoid(e) {
+      this.selectedPresetShapeAvoid = e.target.value;
+      this.changeBoundaryConditionDual();
+    },
+    changeBodyAvoid(e) {
+      this.selectedBodyAvoid = e.target.value == "true";
+      this.changeBoundaryConditionDual();
+    },
+    changeCenterAvoid() {
+      this.selectedCenterAvoid = this.inputCenterAvoid
+        .split(',')
+        .map(num => {
+          let parsed = parseFloat(num.trim());
+          return isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
+        })
+        .filter(num => !isNaN(num)); // Ensure valid numbers
+      this.changeBoundaryConditionDual();
+    },
+    changeRadiusAvoid() {
+      let parsed = parseFloat(this.inputRadiusAvoid.trim());
+      this.selectedRadiusAvoid = isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
+      this.changeBoundaryConditionDual();
+    },
 
     // updateBackground(rgba) {
     //   this.scene.setBackgroundColor(rgba);
     // },
 
-    onSceneReady(scene) {
-      // this.vectorField = scene.vectorFieldEditorState;
+    onSceneReady(scene) { // refreshed
       this.vectorField = scene.bcEditorState;
-      // this.vectorField = scene.valueEditorState;
+      
+      // the following are static (since they are for loading presets)
+      this.selectedPresetShape = 1;
+      this.selectedBody = false;
+      this.inputCenter = "0., 0.";
+      this.selectedCenter = [0., 0.];
+      this.inputRadius = "0.5";
+      this.selectedRadius = 0.5;
+      this.setDual = false;
+      this.selectedPresetShapeReach = 1;
+      this.selectedPresetShapeAvoid = 1;
+      this.selectedBodyReach = false;
+      this.selectedBodyAvoid = true;
+      this.inputCenterReach = "0., 0.";
+      this.selectedCenterReach = [0., 0.]; 
+      this.inputCenterAvoid = "0., 0.";
+      this.selectedCenterAvoid = [0., 0.];
+      this.inputRadiusReach = "0.5";
+      this.selectedRadiusReach = 0.5; 
+      this.inputRadiusAvoid = "1.0";
+      this.selectedRadiusAvoid = 1.0;
+
       this.particlesCount = scene.getParticlesCount();
       this.fadeOutSpeed = scene.getFadeOutSpeed();
       this.dropProbability = scene.getDropProbability();
@@ -449,6 +716,10 @@ audio {
 
 .col {
   flex: 1;
+}
+.colr {
+  flex: 1;
+  text-align: right;
 }
 a {
   text-decoration: none;

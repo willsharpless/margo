@@ -1,13 +1,7 @@
 /**
  * Wraps a simple boundary condition string into our default shader code.
- * @param {Boolean} custom 
- * @param {Boolean} brs 
- * @param {Boolean} bas 
- * @param {Boolean} brt 
- * @param {Boolean} bat 
- * @param {Boolean} brat 
- * @param {Boolean} clvf 
- * @param {Boolean} cbvf 
+ * @param {Integer} filterKey 
+ * @param {Boolean} wrap 
  */
 export default function presetValueFilter(filterKey=0, wrap=true) {
   
@@ -25,51 +19,51 @@ export default function presetValueFilter(filterKey=0, wrap=true) {
   }
 
   if (filterKey==0) { // custom
-    return startCode + `float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVal) {
+    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  float filterVal = newVal; // change me!
+  float filterVal = valNext; // change me!
 
   return filterVal;
 }
 ` + endCode;
 
   } else if (filterKey==1 || filterKey==2) { // brs || bas
-    return startCode + `float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVal) {
+    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return newVal; // BRS/BAS (no filter)
+  return valNext; // BRS/BAS (no filter)
 }
 ` + endCode;
 
   } else if (filterKey==3) { // brt
-    return startCode + `float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVal) {
+    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return min(newVal, reachBCVal); // BRT
+  return min(valNext, valR); // BRT
 }
 ` + endCode;
 
   } else if (filterKey==4) { // bat
-    return startCode + `float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVal) {
+    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return max(newVal, -avoidBCVal); // BAT
+  return max(valNext, -valA); // BAT
 }
 ` + endCode;
 
   } else if (filterKey==5) { // brat
-    return startCode + `float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVal) {
+    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return max(min(newVal, reachBCVal), -avoidBCVal); // BRAT
+  return max(min(valNext, valR), -valA); // BRAT (must define both)
 }
 ` + endCode;
 
   } else if (filterKey==6 || filterKey==7) { // clvf || cbvf
-    return startCode + `float filter_value(float newVal, float oldVal, float reachBCVal, float avoidBCVal) {
+    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
     
-  return newVal + 0.5 * oldVal; // CLVF/CBVF
+  return valNext + 0.5 * val; // CLVF/CBVF
 }
 ` + endCode;
 
   }
 }
 
-// float filterVal = min(newVal, oldVal); // BRT
-// float filterVal = max(-avoidBCVal, min(oldVal, newVal)); // BRAT
+// float filterVal = min(valNext, val); // BRT
+// float filterVal = max(-valA, min(val, valNext)); // BRAT

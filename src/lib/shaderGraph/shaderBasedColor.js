@@ -48,7 +48,7 @@ vec4 get_color(vec2 p) {
     if (colorMode === ColorModes.VELOCITY) {
       return `
 vec4 get_color(vec2 p) {
-  vec2 velocity = get_velocity(p);
+  vec2 velocity = get_vel(p);
   float speed = (length(velocity) - u_velocity_range[0])/(u_velocity_range[1] - u_velocity_range[0]);
   return vec4(hsv2rgb(vec3(0.05 + (1. - speed) * 0.5, 0.9, 1.)), 1.0);
 }
@@ -63,7 +63,7 @@ vec4 get_color(vec2 p) {
 
     return ` 
 vec4 get_color(vec2 p) {
-  vec2 velocity = get_velocity(p);
+  vec2 velocity = get_vel(p);
   float speed = (atan(velocity.y, velocity.x) + PI)/(2.0 * PI);
   return vec4(hsv2rgb(vec3(speed, 0.9, 1.)), 1.0);
 }

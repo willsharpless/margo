@@ -3,10 +3,10 @@
  * @param {String} bcCode 
  */
 export default function wrapBoundaryCondition(bcCode) {
-  return `// Given any state, we decide the initial value,
-// defining a shape (where the value is zero).
+  return `// Given any state, we decide the initial value (boundary condition),
+// defining a shape where the value is zero.
 
-float get_boundary_condition(vec2 s, float sign, float time) {
+float get_bc(vec2 s, float sign, float time) {
 
   ${bcCode}
 

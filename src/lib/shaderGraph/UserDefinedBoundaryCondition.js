@@ -57,9 +57,9 @@ float audio(float index) {
 
 ${this.updateCode ? this.updateCode : `
 
-vec2 get_velocity(vec2 x) { return vec2(0.1); }
+vec2 get_vel(vec2 x) { return vec2(0.1); }
 
-float get_boundary_condition(vec2 s, float sign, float time) {
+float get_bc(vec2 s, float sign, float time) {
 
   float bc_val = 0.5 * (max(abs(s.x), abs(s.y)) - 1.); // unit box
   // float bc_val = 0.5 * (length(s) - 1.); // unit ball

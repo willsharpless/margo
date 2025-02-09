@@ -8,6 +8,7 @@
  * @param {Boolean} disturbance 
  * @param {Array} disturbanceMaxes 
  * @param {Int} disturbanceShape 
+ * @param {Boolean} wrap 
  */
 export default function presetHamiltonian(auto=true,
                                         control=false, controlMaxes=[1., 1.], controlShape=1, controlReach=true,
@@ -17,22 +18,22 @@ export default function presetHamiltonian(auto=true,
 
   // WAS TODO: could support any lb/ub for control/disturbance instead of maxs (non-zero centered)
 
-  // var hamCode = `  float ham = -dot(costate, get_velocity(state));`;
+  // var hamCode = `  float ham = -dot(costate, get_vel(state));`;
   var startCode = `// Given any state, we decide the momentum (hamiltonian),
 // defining how the value evolves.
 
-float get_hamiltonian(vec2 state, vec2 costate, float time) {
+float get_ham(vec2 state, vec2 costate, float time) {
 
 `;
-  var endCode = `  return -dot(costate, get_velocity(state));
+  var endCode = `  return -dot(costate, get_vel(state));
 }
 `;
 
   if (!wrap) {
-    startCode = `float get_hamiltonian(vec2 state, vec2 costate, float time) {
+    startCode = `float get_ham(vec2 state, vec2 costate, float time) {
 
 `;
-    endCode = `  return -dot(costate, get_velocity(state));
+    endCode = `  return -dot(costate, get_vel(state));
 }
   
 `;
@@ -42,7 +43,6 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
   var disturbanceCode = ``;
 
   if (auto) {
-    console.log("returning AUTO HAM")
     return startCode + endCode;
   }
   
@@ -56,18 +56,18 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 
     if (controlShape == 1) { // Box
       controlCode = `  // Control
-  float hamC = ${controlGameCode}dot(abs(vec2(${controlMaxes[0]}, ${controlMaxes[1]}) * costate), vec2(1.));
+  float hamC = ${controlGameCode}dot(abs(vec2(${controlMaxes.map(num => Number.isInteger(num) ? num.toFixed(1) : num).join(', ')}) * costate), vec2(1.));
 
 `;
     } else if (controlShape == 2) { // Ball
       controlCode = `  // Control
-  float hamC = ${controlGameCode}sqrt(dot(vec2(${0.5 * controlMaxes[0]}, ${0.5 * controlMaxes[1]}) * costate, vec2(${0.5 * controlMaxes[0]}, ${0.5 * controlMaxes[1]}) * costate));
+  float hamC = ${controlGameCode}sqrt(dot(0.5 * vec2(${controlMaxes.map(num => Number.isInteger(num) ? num.toFixed(1) : num).join(', ')}) * costate, 0.5 * vec2(${controlMaxes.map(num => Number.isInteger(num) ? num.toFixed(1) : num).join(', ')}) * costate));
 
 `;
     } else {
       controlCode = `// NOT IMPLEMENTED`;
     }
-    var endCode = `  return -dot(costate, get_velocity(state)) + hamC;
+    var endCode = `  return -dot(costate, get_vel(state)) + hamC;
 }
 
 `;
@@ -83,25 +83,25 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
 
     if (disturbanceShape == 1) { // Box
       disturbanceCode = `  // Disturbance
-  float hamD = ${disturbanceGameCode}dot(abs(vec2(${disturbanceMaxes[0]}, ${disturbanceMaxes[1]}) * costate), vec2(1.));
+  float hamD = ${disturbanceGameCode}dot(abs(vec2(${disturbanceMaxes.map(num => Number.isInteger(num) ? num.toFixed(1) : num).join(', ')}) * costate), vec2(1.));
 
 `;
     } else if (disturbanceShape == 2) { // Ball
       disturbanceCode = `  // Disturbance
-  float hamD = ${disturbanceGameCode}sqrt(dot(vec2(${0.5 * disturbanceMaxes[0]}, ${0.5 * disturbanceMaxes[1]}) * costate, vec2(${0.5 * disturbanceMaxes[0]}, ${0.5 * disturbanceMaxes[1]}) * costate));
+  float hamD = ${disturbanceGameCode}sqrt(dot(vec2(0.5 * ${disturbanceMaxes.map(num => Number.isInteger(num) ? num.toFixed(1) : num).join(', ')}) * costate, 0.5 * vec2(${disturbanceMaxes.map(num => Number.isInteger(num) ? num.toFixed(1) : num).join(', ')}) * costate));
 
 `;
     } else {
       disturbanceCode = `// NOT IMPLEMENTED`;
     }
-    var endCode = `  return -dot(costate, get_velocity(state)) + hamD;
+    var endCode = `  return -dot(costate, get_vel(state)) + hamD;
 }
 
 `;
   }
 
   if (control && disturbance) {
-    var endCode = `  return -dot(costate, get_velocity(state)) + hamC + hamD;
+    var endCode = `  return -dot(costate, get_vel(state)) + hamC + hamD;
 }
 
 `;
@@ -110,7 +110,7 @@ float get_hamiltonian(vec2 state, vec2 costate, float time) {
   return startCode + controlCode + disturbanceCode + endCode;
 }
 
-// float ham = -dot(p, get_velocity(s));
+// float ham = -dot(p, get_vel(s));
 
 // function convertCursor2bcParams() {
 //   var cursor = ctx.cursor;

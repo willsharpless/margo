@@ -40,7 +40,7 @@ export default {
         bcShowing: true,
         field: true,
         drawFill: false,
-        drawLevels: true,
+        drawLevels: false,
         settingsPanel: appState.settingsPanel,
         settingsmomentumPanel: appState.settingsmomentumPanel,
         settingsshapePanel: appState.settingsshapePanel,

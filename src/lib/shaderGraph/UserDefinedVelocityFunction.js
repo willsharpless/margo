@@ -55,7 +55,7 @@ float audio(float index) {
   return rgba[3];
 }
 
-${this.updateCode ? this.updateCode : 'vec2 get_velocity(vec2 p) { return vec2(0.); }'}
+${this.updateCode ? this.updateCode : 'vec2 get_vel(vec2 p) { return vec2(0.); }'}
   `
   }
 }

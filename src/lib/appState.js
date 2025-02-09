@@ -6,6 +6,7 @@ import wrapBoundaryCondition from './wrapBoundaryCondition';
 import isSmallScreen from './isSmallScreen';
 import presetHamiltonian from './presetHamiltonian';
 import presetValueFilter from './presetValueFilter';
+import presetBoundaryCondition from './presetBoundaryCondition';
 
 /**
  * The state of the fieldplay is stored in the query string. This is the
@@ -24,19 +25,25 @@ var qs = queryState({}, {
 
 var currentState = qs.get();
 
+// Some good ones, TODO WAS make presets
+
+// var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
+//   v.y = s.y * s.y - s.x * s.x;`);
+
+// var defaultVectorFieldCode = wrapVectorField(`v.x = length(s);
+//   v.y = sin(cos(s.y)) - sin(sin(s.x));`);
+
 // var defaultVectorFieldCode = wrapVectorField(`v.x = -0.2 * s.x + 0.1 * s.y;
 //   v.y = -0.1 * s.x - 0.2 * s.y;`);
+
+// var defaultVectorFieldCode = wrapVectorField(`v.x = cos((s.y+min(s.y,length(s))));
+//   v.y = (length(s)+(min(s.y,s.x)+length(s)));`);
 
 var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
   v.y = s.y * s.y - s.x * s.x;`);
 
-  // var defaultVectorFieldCode = wrapVectorField(`v.x = length(s);
-//   v.y = sin(cos(s.y)) - sin(sin(s.x));`);
+var defaultBoundaryConditionCode = presetBoundaryCondition();
 
-var defaultBoundaryConditionCode = wrapBoundaryCondition(`float bc_val = max(abs(s.x), abs(s.y)) - 0.5; // box
-  // float bc_val = length(s) - 0.5; // ball`);
-
-// var defaultValueCode = presetHamiltonian(`  float ham = -dot(costate, get_velocity(state));`) + wrapValueFilter(`float filterVal = min(newVal, oldVal);`);
 var defaultValueCode = presetHamiltonian() + presetValueFilter(3, true);
 
 var texture_type;

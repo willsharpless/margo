@@ -53,8 +53,8 @@ varying vec2 v_tex_pos; // index
     return `
     // if (u_out_coordinate == 0) gl_FragColor = encodeFloatRGBA(newPos.x);
     // else if (u_out_coordinate == 1) gl_FragColor = encodeFloatRGBA(newPos.y);
-    // else if (u_out_coordinate == 6) gl_FragColor = encodeFloatRGBA(get_velocity(pos).x);
-    // else if (u_out_coordinate == 7) gl_FragColor = encodeFloatRGBA(get_velocity(pos).y);
+    // else if (u_out_coordinate == 6) gl_FragColor = encodeFloatRGBA(get_vel(pos).x);
+    // else if (u_out_coordinate == 7) gl_FragColor = encodeFloatRGBA(get_vel(pos).y);
 
     if (minmaxix == 1) {
       gl_FragColor = encodeFloatRGBA(Math.min(decodeFloatRGBA(texture2D(u_bc, v_tex_pos), decodeFloatRGBA(texture2D(u_value, v_tex_pos)));

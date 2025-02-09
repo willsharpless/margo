@@ -1,7 +1,7 @@
 <template>
-  <div class='settingsmomentum' :class='{collapsed: settingsmomentumPanel.collapsed}'>
+  <div class='settingsshape' :class='{collapsed: settingsshapePanel.collapsed}'>
     <div class='block vector-field'  v-if='vectorField'>
-      <div class='title'>Momentum Definition<a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
+      <div class='title'>Shape Definition<a class='reset-all' :class='{"syntax-visible": syntaxHelpVisible}' href='#' @click.prevent='syntaxHelpVisible = !syntaxHelpVisible' title='click to learn more about syntax'>syntax help</a></div>
       <syntax v-if='syntaxHelpVisible' @close='syntaxHelpVisible = false'></syntax>
       <code-editor :model='vectorField'></code-editor>
     </div>
@@ -10,9 +10,31 @@
     </div> -->
     <form class='block' @submit.prevent='onSubmit'>
       <div class='title'>Starter Code<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+      
+      <div class='row'>
+        <div class='col'>Shape</div>
+        <div class='col'> 
+          <select v-model='selectedPresetFilter' @change='changePresetFilter'>
+              <option value='0'>custom</option>
+              <option value='1'>box</option>
+              <option value='2'>ball</option>
+              <option value='3'>fig8</option>
+	        </select>
+        </div>
+        <div class='col'></div>
+        <div class='col'></div>
+        <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
+      </div>
+      <div class='row help' v-if='selectedColorHelp'>
+        <div>
+          <p>Set a preset value filter to match popular HJ alterations or variational inequalities.</p>
+          <p>These include the Backwards Reachable Set, the Backwards Reachable Tube, Backwards Reach-Avoid Tube and the Control Lyapunov Value Function.</p>
+          <p>Default value is "Custom" (which may be anything).</p>
+        </div>
+      </div>
 
       <div class='row'>
-        <div class='col'>Control (Ego)</div>
+        <div class='col'>Dual (Reach-Avoid)</div>
         <div class='col'> 
           <input type="checkbox" v-model="setControl">
         </div>
@@ -51,17 +73,7 @@
         <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
       </div>
 
-      <div class='row'>
-        <div class='col'>Disturbance (Antagonist)</div>
-        <div class='col'> 
-          <input type="checkbox" v-model="setDisturbance">
-        </div>
-        <div class='col'></div>
-        <div class='col'></div>
-        <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
-      </div>
-      
-      <div class='row' v-if='setDisturbance'>
+      <div class='row' v-if='setControl'>
         <div class='colr'>objective</div>
         <div class='colr'> 
           <select v-model='selectedDisturbanceGoal' @change='changeDisturbanceGoal'>
@@ -72,7 +84,7 @@
         <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
       </div>
 
-      <div class='row' v-if='setDisturbance'>
+      <div class='row' v-if='setControl'>
         <div class='colr'>constraint</div>
         <div class='colr'> 
           <select v-model='selectedDisturbanceShape' @change='changeDisturbanceShape'>
@@ -83,7 +95,7 @@
           <!-- FIXME <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon> -->
       </div>
 
-      <div class='row' v-if='setDisturbance'>
+      <div class='row' v-if='setControl'>
         <div class='colr'>max values</div>
         <div class='colr'> 
           <input type="text" v-model="inputDisturbanceMaxes" @input="changeDisturbanceMaxes"> 
@@ -93,31 +105,6 @@
 
       <!-- <div><p></p></div> -->
       <!-- <div class='title'>Value Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div> -->
-      <div class='row'>
-        <div class='col'>Filters</div>
-        <div class='col'> 
-          <select v-model='selectedPresetFilter' @change='changePresetFilter'>
-              <option value='0'>custom</option>
-              <option value='1'>BRS</option>
-              <option value='2'>BAS</option>
-              <option value='3'>BRT</option>
-              <option value='4'>BAT</option>
-              <option value='5'>BRAT</option>
-              <option value='6'>CLVF</option>
-              <option value='7'>CBVF</option>
-	        </select>
-        </div>
-        <div class='col'></div>
-        <div class='col'></div>
-        <help-icon @show='selectedColorHelp = !selectedColorHelp' :class='{open: selectedColorHelp}'></help-icon>
-      </div>
-      <div class='row help' v-if='selectedColorHelp'>
-        <div>
-          <p>Set a preset value filter to match popular HJ alterations or variational inequalities.</p>
-          <p>These include the Backwards Reachable Set, the Backwards Reachable Tube, Backwards Reach-Avoid Tube and the Control Lyapunov Value Function.</p>
-          <p>Default value is "Custom" (which may be anything).</p>
-        </div>
-      </div>
       <!-- <div class='row' v-if='soundAvailable'>
         <div class='col'>SoundCloud track</div>
         <div class='col'>
@@ -218,7 +205,7 @@ import Inputs from './Inputs';
 const soundAvailable = config.isAudioEnabled;
 
 export default {
-  name: 'Settingsmomentum',
+  name: 'Settingsshape',
   props: ['scene'],
   components: {
     Syntax,
@@ -238,11 +225,11 @@ export default {
     bus.off('vfcode-updated', this.handleCodeUpdate);
     // bus.off('bbox-change', this.updateBBox, this);
   },
-  data() { // initialization
+  data() {
     return {
       soundCloudLink: 'https://soundcloud.com/mrfijiwiji/yours-truly',
       vectorField: null,
-      settingsmomentumPanel: appState.settingsmomentumPanel,
+      settingsshapePanel: appState.settingsshapePanel,
       inputsModel: scene.inputsModel,
       showBindings: config.showBindings,
       particlesCount: 0,
@@ -278,13 +265,13 @@ export default {
       bus.fire('settingsmomentum-collapsed', newValue);
     },
     selectedPresetFilter(newValue) {
-      this.vectorField.setPresetFilterCode(newValue);
+      // this.vectorField.setPresetFilterCode(newValue);
     },
     setControl() {
-      this.changeHamiltonian();
+      // this.changeHamiltonian();
     },
     setDisturbance() {
-      this.changeHamiltonian();
+      // this.changeHamiltonian();
     },
     // particlesCount(newValue, oldValue) {
     //   this.scene.setParticlesCount(parseInt(newValue, 10));
@@ -330,18 +317,18 @@ export default {
   },
   methods: {
     handleCodeUpdate() {
-      console.log("updating hidden vectorField code (in momentum box)")
-      this.vectorField.setCode(this.vectorField.code);
+      console.log("updating hidden vectorField code (in shape box)")
+      // this.vectorField.setCode(this.vectorField.code);
     },
     changeHamiltonian() {
       console.log("changing hamiltonian code")
-      if (!this.setControl && !this.setDisturbance) {
-        this.vectorField.setPresetHamiltonianCode()
-      } else {
-        this.vectorField.setPresetHamiltonianCode(false, 
-                                            this.setControl, this.selectedControlMaxes, this.selectedControlShape, this.selectedControlGoal,
-                                            this.setDisturbance, this.selectedDisturbanceMaxes, this.selectedDisturbanceShape, this.selectedDisturbanceGoal);
-      }
+      // if (!this.setControl && !this.setDisturbance) {
+      //   this.vectorField.setPresetHamiltonianCode()
+      // } else {
+      //   this.vectorField.setPresetHamiltonianCode(false, 
+      //                                       this.setControl, this.selectedControlMaxes, this.selectedControlShape, this.selectedControlGoal,
+      //                                       this.setDisturbance, this.selectedDisturbanceMaxes, this.selectedDisturbanceShape, this.selectedDisturbanceGoal);
+      // }
     },
     // moveBoundingBox(key, value) {
     //   if (this.ignoreBbox) {
@@ -374,10 +361,7 @@ export default {
     changeControlMaxes() {
       this.selectedControlMaxes = this.inputControlMaxes
         .split(',')
-        .map(num => {
-          let parsed = parseFloat(num.trim());
-          return isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
-        })
+        .map(num => parseFloat(num.trim())) // Convert string to float
         .filter(num => !isNaN(num)); // Ensure valid numbers
       this.changeHamiltonian();
     },
@@ -393,10 +377,7 @@ export default {
     changeDisturbanceMaxes() {
       this.selectedDisturbanceMaxes = this.inputDisturbanceMaxes
         .split(',')
-        .map(num => {
-          let parsed = parseFloat(num.trim());
-          return isNaN(parsed) ? null : (Number.isInteger(parsed) ? parsed + 0.0 : parsed);
-        })
+        .map(num => parseFloat(num.trim())) // Convert string to float
         .filter(num => !isNaN(num)); // Ensure valid numbers
       this.changeHamiltonian();
     },
@@ -415,9 +396,9 @@ export default {
     // },
 
     onSceneReady(scene) { // refreshed
-      this.vectorField = scene.valueEditorState;
-
-       // the following are static (since they are for loading presets)
+      this.vectorField = scene.bcEditorState;
+      
+      // the following are static (since they are for loading presets)
       this.selectedPresetFilter = 0;
       this.setControl = false; 
       this.inputControlMaxes = "0.1, 0.1",
@@ -486,7 +467,7 @@ export default {
 
 help-background = rgb(7, 12, 23);
 
-.settingsmomentum {
+.settingsshape {
   color: secondary-text;
   left: 0;
   overflow-y: auto;
@@ -495,7 +476,7 @@ help-background = rgb(7, 12, 23);
   width: 100%;
   padding: 7px 7px 7px 7px;
 }
-.settingsmomentum.collapsed {
+.settingsshape.collapsed {
   display: none;
 }
 
@@ -588,7 +569,7 @@ form.block {
     margin-top: 14px;
     padding: 0;
     padding-left: 14px;
-    width: settingsmomentum-width14px;
+    width: settingsshape-width - 14px;
     font-size: 14px;
     border: 1px solid transparent;
     &:focus {
@@ -684,7 +665,7 @@ a.help-icon {
 }
 
 @media (max-width: small-screen) {
-  .settingsmomentum {
+  .settingsshape {
     .title {
       font-size: 14px;
       text-align: left;

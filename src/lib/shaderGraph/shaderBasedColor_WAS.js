@@ -34,7 +34,7 @@ ${integrate.getDefines()}
     
     if (texture_type != 1) { // bc fn must be defined in all (dummy here)
       udffunctions = udffunctions + `
-float get_boundary_condition(vec2 s, float sign, float time) {
+float get_bc(vec2 s, float sign, float time) {
   return max(abs(s.x), abs(s.y)) - 0.5;
 }
 `
@@ -86,7 +86,7 @@ vec4 get_color(vec2 p) {
     if (colorMode === ColorModes.VELOCITY) {
       return `
 vec4 get_color(vec2 p) {
-  vec2 velocity = get_velocity(p);
+  vec2 velocity = get_vel(p);
   float speed = (length(velocity) - u_velocity_range[0])/(u_velocity_range[1] - u_velocity_range[0]);
   return vec4(hsv2rgb(vec3(0.05 + (1. - speed) * 0.5, 0.9, 1.)), 1.0);
 }
@@ -101,7 +101,7 @@ vec4 get_color(vec2 p) {
 
     return ` 
 vec4 get_color(vec2 p) {
-  vec2 velocity = get_velocity(p);
+  vec2 velocity = get_vel(p);
   float speed = (atan(velocity.y, velocity.x) + PI)/(2.0 * PI);
   return vec4(hsv2rgb(vec3(speed, 0.9, 1.)), 1.0);
 }

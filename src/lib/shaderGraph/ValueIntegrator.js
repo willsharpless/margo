@@ -157,7 +157,7 @@ vec2 locallocalLF(vec2 state, vec2 costate_L, vec2 costate_R, float time, float 
 
 float dissipated_hamiltonian(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {
   vec2 diff_coeffs = locallocalLF(state, costate_L, costate_R, time, value);
-  return get_hamiltonian(state, (costate_L + costate_R)/2., time) - dot(diff_coeffs, 0.5 * (costate_R - costate_L));
+  return get_ham(state, (costate_L + costate_R)/2., time) - dot(diff_coeffs, 0.5 * (costate_R - costate_L));
 }
 
 // STEP FUNCTION
@@ -224,10 +224,10 @@ vec2 tvd_rk_3o(sampler2D values, vec2 state, vec2 v_tex_pos, vec2 spacings, floa
 
 vec2 rk4(const vec2 state) {
 
-  vec2 k1 = get_velocity( state );
-  vec2 k2 = get_velocity( state + k1 * time_step * 0.5);
-  vec2 k3 = get_velocity( state + k2 * time_step * 0.5);
-  vec2 k4 = get_velocity( state + k3 * time_step);
+  vec2 k1 = get_vel( state );
+  vec2 k2 = get_vel( state + k1 * time_step * 0.5);
+  vec2 k3 = get_vel( state + k2 * time_step * 0.5);
+  vec2 k4 = get_vel( state + k3 * time_step);
 
   return k1 * time_step / 6. + k2 * time_step/3. + k3 * time_step/3. + k4 * time_step/6.;
 }
@@ -244,7 +244,7 @@ vec2 rk4(const vec2 state) {
 
   // vec2 costate = state;
   // float time = frame * time_step;
-  // float valVelocity = get_hamiltonian(state, costate, time);
+  // float valVelocity = get_ham(state, costate, time);
   
   // float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
   // float target_time_step = time_step;

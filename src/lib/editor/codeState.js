@@ -3,6 +3,7 @@ import appState from '../appState';
 import getParsedVectorFieldFunction from './getParsedVectorFieldFunction';
 import presetHamiltonian from '../presetHamiltonian';
 import presetValueFilter from '../presetValueFilter';
+import presetBoundaryCondition from '../presetBoundaryCondition';
 
 /**
  * A text editor state for the vector field equation. Manages vector field
@@ -19,7 +20,7 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
   var currentVectorFieldCode = appState.getCode(texture_type);
   // console.log("PROGRAM", texture_type, "INIT currentVectorFieldCode\n\n", currentVectorFieldCode)
   
-  // Need get_velocity for hamiltonian (FIXME names are backward due to artifact)
+  // Need get_vel for hamiltonian (FIXME names are backward due to artifact)
   if (texture_type > 0) {
     var currentVectorFieldCodeForValueCode = appState.getCode(0);
     // console.log("PROGRAM", texture_type, "INIT combined\n\n", currentVectorFieldCodeForValueCode + "\n\n" + currentVectorFieldCode)
@@ -35,8 +36,11 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     getCode,
     setCode,
     dispose,
+    setPresetBoundaryCondition,
+    setPresetBoundaryConditionDual,
     setPresetHamiltonianCode,
     setPresetFilterCode,
+    setDefaultCode,
 
     // These properties are for UI only
     code: currentVectorFieldCode,
@@ -55,15 +59,83 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     return appState.getCode(texture_type);
   }
 
+  // if (!this.setDual) {
+  //   this.vectorField.setPresetBoundaryCondition(this.selectedPresetShape, this.selectedBody, 
+  //                                               this.selectedCenter, this.selectedRadius)
+  // } else {
+  //   this.vectorField.setPresetBoundaryConditionDual(this.selectedPresetShapeReach, this.selectedBodyReach,
+  //                                               this.selectedCenterReach, this.selectedRadiusReach,
+  //                                               this.selectedPresetShapeAvoid, this.selectedBodyAvoid,
+  //                                               this.selectedCenterAvoid, this.selectedRadiusAvoid, 
+  //                                               true);
+  // }
+
+  function setPresetBoundaryCondition(boundaryKey, flip, center, radius) {
+    if (texture_type != 1) {
+      return
+    }      
+    // console.log("center", typeof(center), center.map(num => num.toFixed(1)));
+    // console.log("radius", typeof(radius), radius.toFixed(1));
+    // console.log("flip", flip)
+    var bcCode = presetBoundaryCondition(boundaryKey, false, false, false,
+                                          center, radius, flip,
+                                          false);
+    console.log("bcCode", bcCode);                                        
+    return setCode(currentVectorFieldCode.replace(/float get_bc\([\s\S]*?\}\s*\n?/, 
+                                          presetBoundaryCondition(boundaryKey, false, false, false,
+                                                            center, radius, flip,
+                                                            false)));
+  } 
+
+  function setPresetBoundaryConditionDual(boundaryKeyReach, flipReach,
+                                          centerReach, radiusReach,
+                                          boundaryKeyAvoid, flipAvoid,
+                                          centerAvoid, radiusAvoid, firstpass) {
+    if (texture_type != 1) {
+      return
+    }
+
+    var reachCode = presetBoundaryCondition(boundaryKeyReach, true, false, false,
+                                            centerReach, radiusReach, flipReach,
+                                            false);
+
+    var avoidCode = presetBoundaryCondition(boundaryKeyAvoid, false, true, false,
+                                            centerAvoid, radiusAvoid, flipAvoid,
+                                            false);
+                                            
+    var bcCode    = presetBoundaryCondition(0, false, false, true,
+                                            centerReach, radiusReach, flipReach,
+                                            false);  
+                                            
+    // console.log("reachCode", reachCode);                                        
+    // console.log("avoidCode", avoidCode);                                        
+    // console.log("bcCode", bcCode);                                        
+    // console.log("firstpass", firstpass);
+
+    if (!firstpass) {
+
+      // console.log("replaced reachCode", currentVectorFieldCode.replace(/float get_bc_reach\([\s\S]*?\}\s*\n?/, reachCode));                                        
+      // console.log("replaced avoidCode", currentVectorFieldCode.replace(/float get_bc_reach\([\s\S]*?\}\s*\n?/, reachCode)
+      // .replace(/float get_bc_avoid\([\s\S]*?\}\s*\n?/, avoidCode));                                        
+      // console.log("replaced bcCode", bcCode);                                        
+      // console.log("firstpass", firstpass);
+
+      return setCode(currentVectorFieldCode.replace(/float get_bc_reach\([\s\S]*?\}\s*\n?/, reachCode)
+                                           .replace(/float get_bc_avoid\([\s\S]*?\}\s*\n?/, avoidCode)
+                                           .replace(/float get_bc\([\s\S]*?\}\s*\n?/, bcCode));  
+    } else {
+      return setCode(currentVectorFieldCode.replace(/float get_bc\([\s\S]*?\}\s*\n?/, reachCode + avoidCode + bcCode));
+    }                                            
+  } 
+
   function setPresetHamiltonianCode(auto,  
                                     control, controlMaxes, controlShape, controlReach,
                                     disturbance, disturbanceMaxes, disturbanceShape, disturbanceReach) {
     if (texture_type != 2) {
       return
     }
-    console.log("controlMaxes", typeof(controlMaxes), controlMaxes)
-    console.log("disturbanceMaxes", typeof(disturbanceMaxes), disturbanceMaxes)
-    return setCode(currentVectorFieldCode.replace(/float get_hamiltonian\([\s\S]*?\}\s*\n?/, 
+    console.log("center", typeof(controlMaxes), controlMaxes.map(num => num.toFixed(1)));
+    return setCode(currentVectorFieldCode.replace(/float get_ham\([\s\S]*?\}\s*\n?/, 
                                                   presetHamiltonian(auto, 
                                                                     control, controlMaxes, controlShape, controlReach,
                                                                     disturbance, disturbanceMaxes, disturbanceShape, disturbanceReach,
@@ -75,7 +147,7 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     if (texture_type != 2) {
       return
     }
-    var modifiedCode = currentVectorFieldCode.replace(/float filter_value\([\s\S]*?\}\s*\n?/, presetValueFilter(filterKey, false));
+    var modifiedCode = currentVectorFieldCode.replace(/float filter_val\([\s\S]*?\}\s*\n?/, presetValueFilter(filterKey, false));
     return setCode(modifiedCode);
   } 
 
@@ -107,6 +179,16 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
       api.code = vectorFieldCode;
       appState.saveCode(vectorFieldCode, texture_type);
     });
+  }
+
+  function setDefaultCode() {
+
+    var defaultCode = appState.getDefaultCode(texture_type);
+    trySetNewCode(defaultCode);
+
+    currentVectorFieldCode = defaultCode;
+    api.code = defaultCode;
+    appState.saveCode(defaultCode, texture_type);
   }
 
   function updateErrorInfo(parserResult) {
@@ -149,7 +231,7 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
 
   function trySetNewCode(vectorFieldCode) {
 
-    // WAS: Value program also needs get_velocity
+    // WAS: Value program also needs get_vel
     if (texture_type > 0) {
       vectorFieldCode = appState.getCode(0) + "\n\n" + vectorFieldCode
       // console.log("PROGRAM", texture_type, "CODE IN trySetNewCode\n", vectorFieldCode)

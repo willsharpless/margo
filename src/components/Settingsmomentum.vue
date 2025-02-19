@@ -330,7 +330,7 @@ export default {
   },
   methods: {
     handleCodeUpdate() {
-      console.log("updating hidden vectorField code (in momentum box)")
+      console.log("updating hidden code (in momentum box)")
       this.vectorField.setCode(this.vectorField.code);
     },
     changeHamiltonian() {

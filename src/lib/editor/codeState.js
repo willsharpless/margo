@@ -59,28 +59,10 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     return appState.getCode(texture_type);
   }
 
-  // if (!this.setDual) {
-  //   this.vectorField.setPresetBoundaryCondition(this.selectedPresetShape, this.selectedBody, 
-  //                                               this.selectedCenter, this.selectedRadius)
-  // } else {
-  //   this.vectorField.setPresetBoundaryConditionDual(this.selectedPresetShapeReach, this.selectedBodyReach,
-  //                                               this.selectedCenterReach, this.selectedRadiusReach,
-  //                                               this.selectedPresetShapeAvoid, this.selectedBodyAvoid,
-  //                                               this.selectedCenterAvoid, this.selectedRadiusAvoid, 
-  //                                               true);
-  // }
-
   function setPresetBoundaryCondition(boundaryKey, flip, center, radius) {
     if (texture_type != 1) {
       return
     }      
-    // console.log("center", typeof(center), center.map(num => num.toFixed(1)));
-    // console.log("radius", typeof(radius), radius.toFixed(1));
-    // console.log("flip", flip)
-    var bcCode = presetBoundaryCondition(boundaryKey, false, false, false,
-                                          center, radius, flip,
-                                          false);
-    console.log("bcCode", bcCode);                                        
     return setCode(currentVectorFieldCode.replace(/float get_bc\([\s\S]*?\}\s*\n?/, 
                                           presetBoundaryCondition(boundaryKey, false, false, false,
                                                             center, radius, flip,
@@ -106,23 +88,13 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     var bcCode    = presetBoundaryCondition(0, false, false, true,
                                             centerReach, radiusReach, flipReach,
                                             false);  
-                                            
-    // console.log("reachCode", reachCode);                                        
-    // console.log("avoidCode", avoidCode);                                        
-    // console.log("bcCode", bcCode);                                        
-    // console.log("firstpass", firstpass);
 
     if (!firstpass) {
 
-      // console.log("replaced reachCode", currentVectorFieldCode.replace(/float get_bc_reach\([\s\S]*?\}\s*\n?/, reachCode));                                        
-      // console.log("replaced avoidCode", currentVectorFieldCode.replace(/float get_bc_reach\([\s\S]*?\}\s*\n?/, reachCode)
-      // .replace(/float get_bc_avoid\([\s\S]*?\}\s*\n?/, avoidCode));                                        
-      // console.log("replaced bcCode", bcCode);                                        
-      // console.log("firstpass", firstpass);
-
       return setCode(currentVectorFieldCode.replace(/float get_bc_reach\([\s\S]*?\}\s*\n?/, reachCode)
                                            .replace(/float get_bc_avoid\([\s\S]*?\}\s*\n?/, avoidCode)
-                                           .replace(/float get_bc\([\s\S]*?\}\s*\n?/, bcCode));  
+                                           .replace(/float get_bc\([\s\S]*?\}\s*\n?/, bcCode)); 
+
     } else {
       return setCode(currentVectorFieldCode.replace(/float get_bc\([\s\S]*?\}\s*\n?/, reachCode + avoidCode + bcCode));
     }                                            
@@ -134,7 +106,6 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
     if (texture_type != 2) {
       return
     }
-    console.log("center", typeof(controlMaxes), controlMaxes.map(num => num.toFixed(1)));
     return setCode(currentVectorFieldCode.replace(/float get_ham\([\s\S]*?\}\s*\n?/, 
                                                   presetHamiltonian(auto, 
                                                                     control, controlMaxes, controlShape, controlReach,
@@ -153,10 +124,10 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
 
   function setCode(vectorFieldCode) {
 
-    console.log("PROGRAM", texture_type, "- CODE SET:\n", vectorFieldCode)
+    // console.log("PROGRAM", texture_type, "- CODE SET:\n", vectorFieldCode)
 
     // WAS: when is this useful? trySetNewCode always parses?
-    if (vectorFieldCode === currentVectorFieldCode && texture_type != 2) {
+    if (vectorFieldCode === currentVectorFieldCode && texture_type == 0) {
       // If field hasn't changed, let's make sure that there was no previous
       // error
       if (parserResult && parserResult.error) {
@@ -231,11 +202,19 @@ export default function createGeneralEditorState(drawProgram, texture_type) {
 
   function trySetNewCode(vectorFieldCode) {
 
-    // WAS: Value program also needs get_vel
-    if (texture_type > 0) {
-      vectorFieldCode = appState.getCode(0) + "\n\n" + vectorFieldCode
-      // console.log("PROGRAM", texture_type, "CODE IN trySetNewCode\n", vectorFieldCode)
+    // Give each program all the user-defined code
+    if (texture_type == 0) {
+      vectorFieldCode = vectorFieldCode + "\n\n" + appState.getCode(1) + "\n\n" + appState.getCode(2);
+      
+    } 
+    else if (texture_type == 1) {
+      vectorFieldCode = appState.getCode(0) + "\n\n" + vectorFieldCode + "\n\n" + appState.getCode(2);
+    
+    } else if (texture_type == 2) {
+      vectorFieldCode = appState.getCode(0) + "\n\n" + appState.getCode(1) + "\n\n" + vectorFieldCode;
     }
+
+    // console.log("PROGRAM", texture_type, "- TRY CODE SET:\n", vectorFieldCode)
 
     currentVectorFieldVersion += 1;
     var capturedVersion = currentVectorFieldVersion;

@@ -23,6 +23,7 @@ export default function shaderBasedColor_WAS(colorMode, vfCode, colorCode, color
     return `
 uniform vec2 u_velocity_range;
 varying vec4 v_particle_color;
+varying vec4 v_particle_color2;
 
 ${udf.getDefines()}
 ${integrate.getDefines()}
@@ -32,13 +33,23 @@ ${integrate.getDefines()}
   function getMethods() {
     var udffunctions = udf.getFunctions();
     
-    if (texture_type != 1) { // bc fn must be defined in all (dummy here)
-      udffunctions = udffunctions + `
-float get_bc(vec2 s, float sign, float time) {
-  return max(abs(s.x), abs(s.y)) - 0.5;
-}
-`
+//     if (texture_type != 1) { // bc fn must be defined in all (dummy here)
+//       udffunctions = udffunctions + `
+// float get_bc(vec2 s, float sign, float time) {
+//   return max(abs(s.x), abs(s.y)) - 0.5;
+// }
+// `
+//     }
+    const containsReachAvoidCode = str => /get_bc_reach[\s\S]*get_bc_avoid|get_bc_avoid[\s\S]*get_bc_reach/.test(str);
+
+    if (!containsReachAvoidCode(udffunctions)) { // dummy fns for defn
+      var addedCode = `
+    float get_bc_reach(vec2 s, float sign, float time) { return 3.4028234663852886e+38; }
+    float get_bc_avoid(vec2 s, float sign, float time) { return 3.4028234663852886e+38; }
+    `;
+      udffunctions = udffunctions + addedCode;
     }
+
     return `
 // https://github.com/hughsk/glsl-hsv2rgb
 vec3 hsv2rgb(vec3 c) {
@@ -58,6 +69,10 @@ ${getColorFunctionBody()}
       return `
 vec4 get_color(vec2 p) {
   return vec4(${r}, ${g}, ${b}, ${a});
+}
+
+vec4 get_color2(vec2 p) {
+  return vec4(${r2}, ${g2}, ${b2}, ${a2});
 }
 `
     }
@@ -109,6 +124,12 @@ vec4 get_color(vec2 p) {
   }
 
   function getMain() {
-    return `  v_particle_color = get_color(v_particle_pos);`
+  if (texture_type != 1) {
+    return `  v_particle_color = get_color(v_particle_pos);`;
+  } else {
+    return `  v_particle_color = get_color(v_particle_pos);
+  v_particle_color2 = get_color2(v_particle_pos);
+`;
+  }
   }
 }

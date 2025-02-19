@@ -9,6 +9,34 @@
       <Inputs :vm='inputsModel'></Inputs>
     </div> -->
     <form class='block' @submit.prevent='onSubmit'>
+
+      <div class='title'>Settings<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
+
+      <div class='row'>
+        <div class='col'>Boundary Condition Type</div>
+        <div class='col'> 
+          <select v-model='selectedBoundaryConditionMode' @change='changeBoundaryConditionMode'>
+              <option :value='1'>target (reach)</option>
+              <option :value='2'>obstacle (avoid)</option>
+              <option :value='3'>dual (reach-avoid)</option>
+	        </select>
+        </div>
+        <div class='col'></div>
+        <div class='col'></div>
+        <help-icon @show='selectedBCHelp = !selectedBCHelp' :class='{open: selectedBCHelp}'></help-icon>
+      </div>
+      <div class='row help' v-if='selectedBCHelp'>
+        <div>
+          <p>Set the boundary condition type.</p>
+          <p>By default objectives, a "target" (blue) is a shape the control (ego player) is trying to reach and the disturbance (opponent) trying to avoid. An "obstacle" (red) is the opposite.</p>
+          <p>"Dual" allows both concurrently, but one must define "get_bc_reach" and "get_bc_avoid" functions and set the BRAT filter. See the "Dual" starter code for example.</p>
+        </div>
+      </div>
+
+      <div class='row'></div>
+      <div class='row'></div>
+      <div class='row'></div>
+
       <div class='title'>Starter Code<a class='reset-all' href='?' title='set default settings'>reset all</a> </div>
       
       <div class='row'>
@@ -307,6 +335,9 @@ export default {
       integrationStepHelp: false,
       minX: 0, minY: 0,
       maxX: 0, maxY: 0,
+
+      selectedBoundaryConditionMode: 1,
+      selectedBCHelp: false,
       
       selectedPresetShape: 1,
       selectedBody: false,
@@ -335,7 +366,14 @@ export default {
       bus.fire('settingsshape-collapsed', newValue);
     },
     setDual() {
-      this.changeBoundaryCondition();
+      this.changeBoundaryCondition(); // set code
+      if (this.setDual) {
+        this.selectedBoundaryConditionMode = 3; // REACH-AVOID
+      } else {
+        this.selectedBoundaryConditionMode = 1; // REACH
+      }
+      appState.setBoundaryConditionMode(this.selectedBoundaryConditionMode);
+      scene.setBoundaryConditionMode(this.selectedBoundaryConditionMode);
     },
     // particlesCount(newValue, oldValue) {
     //   this.scene.setParticlesCount(parseInt(newValue, 10));
@@ -381,7 +419,8 @@ export default {
   },
   methods: {
     handleCodeUpdate() {
-      console.log("updating hidden vectorField code (in shape box)")
+      console.log("updating hidden code (in shape box)")
+      // console.log("shape code update", this.vectorField.code)
       this.vectorField.setCode(this.vectorField.code);
     },
     changeBoundaryCondition() {
@@ -407,6 +446,7 @@ export default {
                                                   this.selectedCenterAvoid, this.selectedRadiusAvoid, 
                                                   false);
     },
+    
     // moveBoundingBox(key, value) {
     //   if (this.ignoreBbox) {
     //     return;
@@ -430,6 +470,12 @@ export default {
       if (isSmallScreen()) {
         appState.settingsmomentumPanel.collapsed = true;
       }
+    },
+
+    changeBoundaryConditionMode(e) {
+      this.selectedBoundaryConditionMode = e.target.value;
+      appState.setBoundaryConditionMode(this.selectedBoundaryConditionMode);
+      scene.setBoundaryConditionMode(this.selectedBoundaryConditionMode);
     },
 
     changePresetShape(e) {
@@ -510,7 +556,9 @@ export default {
 
     onSceneReady(scene) { // refreshed
       this.vectorField = scene.bcEditorState;
-      
+
+      this.selectedBoundaryConditionMode = scene.getBoundaryConditionMode();
+
       // the following are static (since they are for loading presets)
       this.selectedPresetShape = 1;
       this.selectedBody = false;
@@ -540,6 +588,11 @@ export default {
       // this.updateBBox();
     },
 
+    containsReachAvoidCode(str) {
+      console.log("containsReachAvoidCode - str", str);
+      console.log(" and ?", /get_bc_reach[\s\S]*get_bc_avoid|get_bc_avoid[\s\S]*get_bc_reach/.test(str));
+      return /get_bc_reach[\s\S]*get_bc_avoid|get_bc_avoid[\s\S]*get_bc_reach/.test(str);
+    }
     // updateBBox() {
     //   this.ignoreBbox = true;
     //   var bbox = scene.getBoundingBox();

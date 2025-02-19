@@ -39,6 +39,9 @@ var currentState = qs.get();
 // var defaultVectorFieldCode = wrapVectorField(`v.x = cos((s.y+min(s.y,length(s))));
 //   v.y = (length(s)+(min(s.y,s.x)+length(s)));`);
 
+// v.x = sin(2. * s.y);
+// v.y = cos(2. * (s.x - 3.141592/4.));
+
 var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
   v.y = s.y * s.y - s.x * s.x;`);
 
@@ -54,7 +57,9 @@ var defaults = {
   dropProbability: 0.000125,
   particleCount: 1000000, // FIXME WAS: Separate particle count for value textures
   fadeout: .999,
-  colorMode: ColorModes.UNIFORM
+  colorMode: ColorModes.UNIFORM,
+  bcMode: 1,
+  // 
 }
 // TODO: slowly populate the particles into the screen (instead of all at once)
 // idea: random percentage (if state) based on frame var in vertex shader
@@ -65,12 +70,10 @@ let settingsPanel = {
 };
 
 let settingsmomentumPanel = {
-  // collapsed: isSmallScreen(),
   collapsed: true,
 };
 
 let settingsshapePanel = {
-  // collapsed: isSmallScreen(),
   collapsed: true,
 };
 
@@ -105,7 +108,10 @@ export default {
   setColorMode,
 
   getColorFunction,
-  setColorFunction
+  setColorFunction,
+
+  getBoundaryConditionMode,
+  setBoundaryConditionMode,
 }
 
 qs.onChange(function() {
@@ -175,6 +181,16 @@ function setDropProbability(dropProbability) {
   if (!defined(dropProbability)) return;
   clamp(dropProbability, 0, 1);
   qs.set({dp: dropProbability})
+}
+
+function getBoundaryConditionMode() {
+  let bcMode = qs.get('bcmode');
+  return defined(bcMode) ? bcMode : defaults.bcMode;
+}
+
+function setBoundaryConditionMode(bcMode) {
+  qs.set({bcmode: bcMode});
+  let bcModeOut = qs.get('bcmode');
 }
 
 function getBC() {
@@ -290,7 +306,7 @@ function getCode(texture_type=0) {
       // side effect - let's clean the old URL
       delete(currentState.code);
       qs.set('vf', anyCode);
-      console.log("PROGRAM", texture_type, "qs-set:", anyCode);
+      // console.log("PROGRAM", texture_type, "qs-set:", anyCode);
       return anyCode;
     }
   } else if (texture_type == 1) {
@@ -300,7 +316,7 @@ function getCode(texture_type=0) {
       // side effect - let's clean the old URL
       delete(currentState.bcCode);
       qs.set('bc', anyCode);
-      console.log("PROGRAM", texture_type, "qs-set:", anyCode);
+      // console.log("PROGRAM", texture_type, "qs-set:", anyCode);
       return anyCode;
     }
   } else if (texture_type == 2) {
@@ -310,7 +326,7 @@ function getCode(texture_type=0) {
       // side effect - let's clean the old URL
       delete(currentState.valcode);
       qs.set('val', anyCode);
-      console.log("PROGRAM", texture_type, "qs-set:", anyCode);
+      // console.log("PROGRAM", texture_type, "qs-set:", anyCode);
       return anyCode;
     }
   }

@@ -9,7 +9,6 @@ export default class DrawParticleGraph_WAS {
     } else {
       this.colorMode = 3;
     }
-    console.log("PROGRAM", texture_type, "colorMode", this.colorMode)
     this.colorFunction = ctx.colorFunction || '';
     this.texture_type = texture_type;
   }
@@ -17,6 +16,7 @@ export default class DrawParticleGraph_WAS {
   getFragmentShader() {
     return `precision highp float;
 varying vec4 v_particle_color;
+varying vec4 v_particle_color2;
 varying float filler;
 void main() {
   if (filler == 1.) {
@@ -85,6 +85,10 @@ void main() {
   vec2 v_particle_pos_c;
   vec2 vals;
   float val;
+  float valR;
+  float valA;
+  float valDecoded;
+
   vec2 state_mag;
   float time = frame * time_step;
   
@@ -114,11 +118,6 @@ void main() {
     gl_PointSize = 2.0;
     
   } else if (texture_type == 2) {
-
-    // v_particle_pos_c = vec2( // @mourner's method: RGBA texture data is position
-    //       decodeFloatRGBA(texture2D(u_particles_x, state)),
-    //       decodeFloatRGBA(texture2D(u_particles_y, state))
-    // );
     
     v_particle_pos_c = state;
     gl_PointSize = 2.0;
@@ -151,40 +150,10 @@ ${main.join('\n')}
      
       val = get_bc(state, sign, time);
     }
-    
-    // for testing/observing bc encoding
-    // if (mod(drawing_click_sum, 3.) == 2.) {
-    //   if (reach_mode) {
-    //     val = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
-    //   } else {
-    //     val = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
-    //   }
-    // }
 
-    // if (!no_bc_encoded) {
-    //   float valDecoded;
-    //   if (reach_mode) {
-    //     valDecoded = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
-    //   } else {
-    //     valDecoded = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
-    //   }
-    //   val = min(val, valDecoded);
-
-    //   // WAS TODO: make this better (diff colors for new level vs encoded)
-    //   // if (val == valDecoded) {
-    //   //   // encoded level keep color
-    //   // } else {
-    //   //   v_particle_color = 1.5 * v_particle_color; // new level 
-    //   // }
-    // }
-
-    float valDecoded = val;
-    if (reach_mode && !no_reach_bc_encoded) {
-      valDecoded = decodeFloatRGBA(texture2D(u_particles_x, state_mag));
-    } else if (!reach_mode && !no_avoid_bc_encoded) {
-      valDecoded = decodeFloatRGBA(texture2D(u_particles_y, state_mag));
-    }
-    val = min(val, valDecoded);
+    valR = get_bc_reach(state, sign, time);
+    valA = get_bc_avoid(state, sign, time);
+    valDecoded = get_bc(state, sign, time);
 
     // WAS TODO: make this better (diff colors for new level vs encoded)
     // if (val == valDecoded) {
@@ -193,15 +162,11 @@ ${main.join('\n')}
     //   v_particle_color = 1.5 * v_particle_color; // new level 
     // }
 
-    // // display bc simultaneously to drawing (after init)
-    // bool avoid_mode = false;
-    // bool valueReachEncoded = true;
-    // bool valueAvoidEncoded = true;
-    // if (reach_mode && valueReachEncoded) {
-    //   val = min(val, decodeFloatRGBA(texture2D(u_particles_x, state_mag)));
-    // } else if (avoid_mode && valueAvoidEncoded) {
-    //   val = min(val, decodeFloatRGBA(texture2D(u_particles_y, state_mag)));
-    // }
+    val = min(val, valDecoded); // WAS FIXME: if drawing, min with appropriate bc
+
+    if ((no_reach_bc_encoded || no_avoid_bc_encoded) && !reach_mode) {
+      v_particle_color = v_particle_color2; 
+    }
 
   } else if (texture_type == 2) { // Value Texture
 
@@ -216,20 +181,54 @@ ${main.join('\n')}
   //   thresh_mag = 1.; // doesn't work right bc doubles existing squares... TODO std grad
   // }
 
+  // Determine if Level
+  bool draw_fill_cond;
+  if (!no_reach_bc_encoded && !no_avoid_bc_encoded && texture_type == 1) {
+
+    // draw_level_cond = false; // FIXME
+    // draw_fill_cond = draw_fill;
+    // draw_fill_cond = val < - thresh;
+
+    // draw_fill_cond = (valR < - thresh) || (valA < - thresh);
+    draw_fill_cond = min(min(val, valR), valA) < - thresh;
+
+  } else {
+
+    draw_fill_cond = val < - thresh;
+  }
+
+  // Determine if Fill
   bool draw_level_cond;
   if (draw_levels) {
+
     draw_level_cond = (val/level_step - floor(val/level_step) > thresh/level_step) && (val > thresh);
     // float(draw_fill) * floor(val/level_step) // colors border color rather than black
+
+    // Also allow avoid value if reach-avoid
+    if (!no_reach_bc_encoded && !no_avoid_bc_encoded && texture_type == 1) {
+      if (valA <= thresh) {
+
+        draw_level_cond = false;
+        v_particle_color = v_particle_color2;
+      }
+    }
+
   } else {
+    
     draw_level_cond = val > thresh;
+
+    // Also allow avoid value if reach-avoid
+    if (!no_reach_bc_encoded && !no_avoid_bc_encoded && texture_type == 1) {
+      if (valA <= thresh) {
+
+        draw_level_cond = false;
+        v_particle_color = v_particle_color2;
+      }
+    }
   }
 
   // Draw
-  if (draw_level_cond && texture_type != 0) {
-
-    // draw nothing
-  
-  } else if (val < - thresh && texture_type != 0) { // Interior
+  if (draw_fill_cond && texture_type != 0) { // Interior
 
     if (draw_fill) {
       filler = 1.;
@@ -237,7 +236,11 @@ ${main.join('\n')}
     }
 
     // draw nothing
- 
+
+  } else if (draw_level_cond && texture_type != 0) {
+  
+    // draw nothing
+
   } else { // Boundary
    
     filler = 0.;

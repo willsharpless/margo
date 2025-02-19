@@ -146,17 +146,21 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
     gl.uniform1f(program.avoid_mode, !ctx.bc_reach_mode)
     gl.uniform1f(program.first_pass_reach, ctx.no_reach_bc_encoded)
     gl.uniform1f(program.first_pass_avoid, ctx.no_avoid_bc_encoded)
+    
     if (texture_type == 1 && ctx.bc_reach_mode) ctx.no_reach_bc_encoded = false;
     if (texture_type == 1 && !ctx.bc_reach_mode) ctx.no_avoid_bc_encoded = false;
 
     // Value Program
+
+    // if (texture_type != 0) {console.log("PROGRAM",texture_type,"(uPP): no_reach_bc_encoded", ctx.no_reach_bc_encoded, "no_avoid_bc_encoded", ctx.no_avoid_bc_encoded, )}
+
     gl.uniform1i(program.texture_type, texture_type);
     gl.uniform1f(program.value_transfer, ctx.value_transfer);
     gl.uniform1f(program.no_reach_bc_encoded, ctx.no_reach_bc_encoded)
     gl.uniform1f(program.no_avoid_bc_encoded, ctx.no_avoid_bc_encoded)
-    if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "reach_mode", ctx.bc_reach_mode);
-    if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "no_reach_bc_encoded", ctx.no_reach_bc_encoded);
-    if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "no_avoid_bc_encoded", ctx.no_avoid_bc_encoded);
+    // if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "reach_mode", ctx.bc_reach_mode);
+    // if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "no_reach_bc_encoded", ctx.no_reach_bc_encoded);
+    // if (texture_type == 2 && ctx.frame < 2) console.log("PROGRAM", texture_type, "no_avoid_bc_encoded", ctx.no_avoid_bc_encoded);
     gl.uniform1f(program.spacing_std, 1/(ctx.particleStateResolution-1.)); //
     gl.uniform1f(program.pSR, ctx.particleStateResolution); //
     gl.uniform1f(program.spacing_x, Math.abs(bbox_enc.maxX - bbox_enc.minX)/(ctx.particleStateResolution-1.)); // TODO WAS: diff size for diff dims

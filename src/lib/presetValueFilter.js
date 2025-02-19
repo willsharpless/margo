@@ -34,24 +34,24 @@ export default function presetValueFilter(filterKey=0, wrap=true) {
 }
 ` + endCode;
 
-  } else if (filterKey==3) { // brt
+  } else if (filterKey==3 || filterKey==4) { // brt
     return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return min(valNext, valR); // BRT
+  return min(valNext, val); // BRT/BAT
 }
 ` + endCode;
 
-  } else if (filterKey==4) { // bat
-    return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
+//   } else if (filterKey==4) { // bat
+//     return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return max(valNext, -valA); // BAT
-}
-` + endCode;
+//   return max(valNext, -valA); // BAT
+// }
+// ` + endCode;
 
   } else if (filterKey==5) { // brat
     return startCode + `float filter_val(float valNext, float val, float valR, float valA) {
 
-  return max(min(valNext, valR), -valA); // BRAT (must define both)
+  return max(min(valNext, valR), -valA); // BRAT (set Dual in Shape...)
 }
 ` + endCode;
 

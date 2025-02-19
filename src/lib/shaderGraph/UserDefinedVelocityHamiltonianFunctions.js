@@ -11,16 +11,22 @@ export default class UserDefinedVelocityHamiltonianFunctions extends BaseShaderN
   }
 
   setNewUpdateCode(newUpdateCode) {
+
+    const containsReachAvoidCode = str => /get_bc_reach[\s\S]*get_bc_avoid|get_bc_avoid[\s\S]*get_bc_reach/.test(str);
+
+    if (!containsReachAvoidCode(newUpdateCode)) { // dummy fns for defn
+      var addedCode = `
+      
+float get_bc_reach(vec2 s, float sign, float time) { return 3.4028234663852886e+38; }
+float get_bc_avoid(vec2 s, float sign, float time) { return 3.4028234663852886e+38; }
+`;
+      newUpdateCode = newUpdateCode + addedCode;
+    }
+
+    console.log("inside UDF HAM", newUpdateCode)
+
     this.updateCode = newUpdateCode;
   }
-
-  // setNewUpdateHamiltonianCode(newUpdateHamiltonianCode) {
-  //   this.updateHamiltonianCode = newUpdateHamiltonianCode;
-  // }
-
-  // setNewUpdateInputCode(newUpdateInputCode) {
-  //   this.updateInputCode = newUpdateInputCode;
-  // }
 
   getDefines() {
     return `
@@ -104,6 +110,10 @@ mat2 disturbance_jacobian(vec2 x, float time) {
 ${this.updateCode ? this.updateCode : `
 
 vec2 get_vel(vec2 x) { return vec2(0.1); }
+
+float get_bc(vec2 s, float sign, float time) { return 0.5 * (max(abs(s.x), abs(s.y)) - 0.5); }
+float get_bc_reach(vec2 s, float sign, float time) { return 3.4028234663852886e+38; }
+float get_bc_avoid(vec2 s, float sign, float time) { return 3.4028234663852886e+38; }
 
 // // WAS FIXME: user-defined in advanced cases
 // vec2 max_partial_hamiltonian_costate(vec2 state, vec2 costate_L, vec2 costate_R, float time, float value) {

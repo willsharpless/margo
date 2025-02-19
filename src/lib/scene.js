@@ -75,6 +75,7 @@ export default function initScene(gl) {
   var bc_default_mode = false;
   var draw_fill = false;
   var bc_reach_mode = true; // if false, then avoid
+  var bcMode = 1; // REACH = 1, AVOID = 2, REACHAVOID = 3
   // var bbox_at_bc_enc = appState.getBBox() || {};
   var bbox_at_bc_enc = JSON.parse(JSON.stringify(bbox));
   var draw_thresh = 0.015; // TODO: make all this editabdle
@@ -97,6 +98,7 @@ export default function initScene(gl) {
   // Context variable is a way to share rendering state between multiple programs. It has a lot of stuff on it.
   // I found that it's the easiest way to work in state-full world of WebGL.
   // Until I discover a better way to write WebGL code.
+
   var ctx = {
     gl,
     bbox,
@@ -110,6 +112,8 @@ export default function initScene(gl) {
     no_bc_encoded,
     no_reach_bc_encoded,
     no_avoid_bc_encoded,
+    bcMode,
+
     value_mode,
     value_transfer,
     bc_reach_mode,
@@ -176,6 +180,8 @@ export default function initScene(gl) {
     audioTexture: null
   };
 
+  setBoundaryConditionMode(getBoundaryConditionMode())
+
   // Frame management
   var lastAnimationFrame;
   var isPaused = false;
@@ -220,8 +226,6 @@ export default function initScene(gl) {
     applyBoundingBox,
 
     setPaused,
-    setBCDrawingMode,
-    setBCShowingMode,
     setDrawFill,
     setDrawLevels,
     setFieldMode,
@@ -240,6 +244,12 @@ export default function initScene(gl) {
 
     setColorMode,
     getColorMode,
+
+    setBCDrawingMode,
+    setBCShowingMode,
+
+    getBoundaryConditionMode,
+    setBoundaryConditionMode,
 
     vectorFieldEditorState,
     // vectorField2EditorState,
@@ -344,6 +354,38 @@ export default function initScene(gl) {
   function setPaused(shouldPause) {
     isPaused = shouldPause;
     nextFrame();
+  }
+
+  function setBoundaryConditionMode(bcmode) {
+
+    // TODO WAS: delete this archaic system and just use bcMode
+    if (bcmode == 1) { // REACH
+
+      ctx.bc_reach_mode = true;
+      ctx.no_reach_bc_encoded = false;
+      ctx.no_avoid_bc_encoded = true; 
+      console.log("REACH MODE")
+
+    } else if (bcmode == 2) { // AVOID
+
+      ctx.bc_reach_mode = false;
+      ctx.no_reach_bc_encoded = true;
+      ctx.no_avoid_bc_encoded = false; 
+      console.log("AVOID MODE")
+
+    } else if (bcmode == 3) { // REACH-AVOID
+
+      ctx.no_reach_bc_encoded = false; 
+      ctx.no_avoid_bc_encoded = false;
+      console.log("REACH-AVOID MODE")
+
+    }
+
+    bcMode = bcmode;
+  }
+
+  function getBoundaryConditionMode() {
+    return appState.getBoundaryConditionMode();
   }
 
   function setBCDrawingMode(shouldBCDrawingMode) {

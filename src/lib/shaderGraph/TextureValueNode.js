@@ -63,11 +63,7 @@ uniform float u_particles_res;
   getMainBody() {
   if (this.isDecode) {
     return `
-  
-  float reach_value = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, interesting
-  float avoid_value = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
-  float last_value = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
-  float last_value_ = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
+
   vec2 spacings = vec2(spacing_x, spacing_y);
   // vec2 spacings = vec2(spacing_std);
   
@@ -75,6 +71,31 @@ uniform float u_particles_res;
   vec2 state = vec2(
       roundToPrecision(abs(u_max.x - u_min.x) * aligned_tex_pos.x + u_min.x, 1e-6),
       roundToPrecision(abs(u_max.y - u_min.y) * aligned_tex_pos.y + u_max.y, 1e-6));
+
+  float time = frame * time_step;
+
+  float reach_value;
+  float avoid_value;
+  if (no_reach_bc_encoded < 1. && no_avoid_bc_encoded < 1.) {
+    reach_value = get_bc_reach(state, 1., time);
+    avoid_value = get_bc_avoid(state, 1., time);
+  } else {
+    if (reach_mode > 0. && no_avoid_bc_encoded > 0.) {
+      reach_value = get_bc(state, 1., time);  
+      avoid_value = get_bc_avoid(state, 1., time);  
+    } else if (reach_mode < 1. && no_reach_bc_encoded > 0.) { // should be equal to just if (avoid_mode)
+      reach_value = get_bc_reach(state, 1., time);  
+      avoid_value = get_bc(state, 1., time);  
+    } else {
+      reach_value = get_bc(state, 1., time);   
+      avoid_value = get_bc(state, 1., time);   
+    }
+  }
+  
+  // float reach_value = decodeFloatRGBA(texture2D(u_particles_x_bc, 1.-v_tex_pos)); // works when flipped, interesting
+  // float avoid_value = decodeFloatRGBA(texture2D(u_particles_y_bc, 1.-v_tex_pos));
+  float last_value = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
+  float last_value_ = decodeFloatRGBA(texture2D(u_particles_x, 1.-v_tex_pos));
 
   // this will move to main body?
   float value;
@@ -88,7 +109,6 @@ uniform float u_particles_res;
     } else {
       value = max(reach_value, -avoid_value);
     }
-    // value = reach_value;
   } else {
     value = last_value;
     value_ = last_value_;
@@ -145,7 +165,6 @@ uniform float u_particles_res;
   // vec2 costate_L = 1. * costate_L_WEN05;
   // vec2 costate_R = 1. * costate_R_WEN05;
 
-  float time = frame * time_step;
   // float ts_fxd_or_adp = 0.; // fixed time-step for now (will need to split frame from time...)
   // float target_time_step = time_step;
 

@@ -472,6 +472,8 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
     gl.uniform1f(program.drawing_click_sum, ctx.drawing_click_sum);
     gl.uniform1i(program.bc_drawing_mode, ctx.bc_drawing_mode);
     gl.uniform1i(program.no_bc_encoded, ctx.no_bc_encoded);
+    // if (texture_type == 1 && ctx.frame == 1) {console.log("TEX 1 (dPP): no_reach_bc_encoded", ctx.no_reach_bc_encoded, "no_avoid_bc_encoded", ctx.no_avoid_bc_encoded, )}
+    // if (texture_type == 1 && ctx.frame == 1) {console.log("TEX 1 (dPP): (!reach_mode && !no_avoid_bc_encoded)", !ctx.reach_mode && !ctx.no_avoid_bc_encoded)}
     gl.uniform1i(program.no_reach_bc_encoded, ctx.no_reach_bc_encoded);
     gl.uniform1i(program.no_avoid_bc_encoded, ctx.no_avoid_bc_encoded);
     gl.uniform1i(program.reach_mode, ctx.bc_reach_mode);
@@ -590,7 +592,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       if (e.which === 65 && e.target === document.body) { // a for avoid drawing
         ctx.bc_reach_mode = false;
         // color = [223/255, 28/255, 28/255, 0.85];  // red
-        color = color_start2;
+        // color = color_start2;
         initDrawProgram();
         console.log("You are avoid drawing (reach mode false)")
         e.preventDefault();

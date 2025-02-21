@@ -13,6 +13,7 @@ float get_bc(vec2 s, float sign, float time) {
   return sign * bc_val;
 }
 
-// or, to draw it,
+// to see it,
+// [click screen, 'w']`;
 // [click screen, 'd', click around, 'enter']`
 }

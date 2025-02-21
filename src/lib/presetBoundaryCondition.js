@@ -26,7 +26,8 @@ float get_bc(vec2 state, float sign, float time) {
   var endCode = `  return ${flipCode}val;
 }
 
-// or, to draw it,
+// to see it,
+// [click screen, 'w']`;
 // [click screen, 'd', click around, 'enter']`;
 
   if (!wrap) {

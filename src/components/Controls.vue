@@ -53,10 +53,11 @@ export default {
         this.togglePaused();
         e.preventDefault();
       }
-      if (e.which === 68 && e.target === document.body) { // d for bc drawing
-        this.toggleBCDrawing();
-        e.preventDefault();
-      }
+      // if (e.which === 68 && e.target === document.body) { // d for bc drawing
+      //   this.toggleBCDrawing();
+      //   e.preventDefault();
+      // }
+      // WAS TODO: broke drawing after reworked BC encoding, needs to dynamically script cursor params
       if (e.which === 87 && e.target === document.body) { // w for bc showing
         this.toggleBCShowing();
         e.preventDefault();

@@ -10,7 +10,7 @@ export default function presetValueFilter(filterKey=0, wrap=true) {
 `;
   var endCode = `
 // to see it,
-// [click screen, 'shift' + 'enter']`;
+// [click screen, 'enter']`;
 
   if (!wrap) {
     startCode = ``;

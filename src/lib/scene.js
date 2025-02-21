@@ -721,12 +721,12 @@ export default function initScene(gl) {
 
   function onKeyDown(e) {
     keysPressed[e.key] = true;
-    if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
-      drawProgramBC.updateParticlesPositions()
-      drawProgramBC.updateParticlesPositions()
-      e.preventDefault(); // do I need this?
-      console.log("bc encoded")
-    }
+    // if (e.which === 13 && e.target === document.body) { // ENTER for BC Drawing Transfer
+    //   drawProgramBC.updateParticlesPositions()
+    //   drawProgramBC.updateParticlesPositions()
+    //   e.preventDefault(); // do I need this?
+    //   console.log("bc encoded")
+    // }
   }
 
   function onKeyUp(e) {

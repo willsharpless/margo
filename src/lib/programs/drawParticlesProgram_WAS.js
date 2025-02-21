@@ -609,16 +609,17 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       }
     }
     if (keysPressed['Backspace']) {
-      if (keysPressed['r']) {
+      if (keysPressed['f']) { // WAS TODO: hackishly repurposed for the flow
         console.log('Reach drawings erased.');
-        eraseBC(true, false); // BUG WAS: if field going, both bc & field die and cant turn on w/o refresh (but only happens w BC erase not val?)
-      } else if (keysPressed['a']) {
-        console.log('Avoid drawings erased.');
-        eraseBC(false, true);
-      } else if (keysPressed['Shift']) {
-        console.log('All drawings erased.');
-        eraseBC(true, true);
-        ctx.value_mode = false;
+        eraseBC(true, false); 
+      // } else if (keysPressed['a']) {
+      //   console.log('Avoid drawings erased.');
+      //   eraseBC(false, true);
+      //   // BUG WAS: if field going, both bc & field die and cant turn on w/o refresh (but only happens w BC erase not val?)
+      // } else if (keysPressed['Shift']) {
+      //   console.log('All drawings erased.');
+      //   eraseBC(true, true);
+      //   ctx.value_mode = false;
       } else if (keysPressed['v']) {
         console.log('Value erased.')
         ctx.value_mode = false;
@@ -628,7 +629,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       // wont work because
       // }
     } 
-    if (keysPressed['Shift'] && (keysPressed['Return'] || keysPressed['Enter'])) {
+    if (keysPressed['Return'] || keysPressed['Enter']) {
       ctx.value_transfer = true;
       ctx.value_mode = true;
       updateCode(currentVectorField) // resets frame and shaders //FIXME: is there a better way? does this cause field bug?

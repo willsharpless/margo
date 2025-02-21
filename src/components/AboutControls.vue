@@ -1,40 +1,41 @@
-
 <template>
   <div class='about-controls'>
     <div class='background absolute' @click.prevent='close'></div>
     <div class='content'>
-      <h3><a class='title'>Keys for Drawing and Evolution</a></h3>
+      <h3><a class='title'>Keys</a></h3>
 
       <p>
         click the screen before applying any of the following,
         <p></p>
         <a class='title'>Flow</a>
         <p></p>
-        'f' - displays flow
+        <span class="code-font">f</span> - displays flow <br>
+        <span class="code-font">delete</span> + <span class="code-font">f</span> - deletes the existing flow <br>
 
         <p></p>
         <a class='title'>Shape ie. Boundary Condition (BC)</a>
         <p></p>
 
-        'w' - displays coded or drawn BC <br>
-        'd' - switches between drawing/coding BC (click to draw) <br>
-        '1'/'2' - switches between drawing box/ball BC <br>
-        <br>
-        'Enter' - saves a coded or drawn BC (combining w/ existing) <br>
-        'delete' + 'r' - deletes the saved bc <br>
-        <br>
-        'i'/'o' - switches defining in/out BC (use 'c' to see) <br>
-        'r'/'a' - switches defining reach/avoid BC<br>
+        <span class="code-font">w</span> - displays coded BC <br>
+        <!-- <span class="code-font">'w'</span> - displays coded or drawn BC <br> -->
+        <!-- <span class="code-font">'d'</span> - switches between drawing/coding BC (click to draw) <br> -->
+        <!-- <span class="code-font">'1'/'2'</span> - switches between drawing box/ball BC <br> -->
+        <!-- <br> -->
+        <!-- <span class="code-font">'Enter'</span> - saves a coded or drawn BC (combining w/ existing) <br> -->
+        <!-- <span class="code-font">'delete' + 'r'</span> - deletes the saved bc <br> -->
+        <!-- <br> -->
+        <span class="code-font">i</span> & <span class="code-font">o</span> - switches defining in/out BC (use <span class="code-font">c</span> to see) <br>
+        <!-- <span class="code-font">r</span> & <span class="code-font">a</span> - switches defining reach/avoid BC<br> -->
 
         <p></p>
         <a class='title'>Momentum & Value</a>
         <p></p>
 
-        'c' - fills BC & value interior <br>
-        'l' - displays BC & value levels <br>
+        <span class="code-font">c</span> - fills BC & value interior <br>
+        <span class="code-font">l</span> - displays BC & value levels <br>
         <br>
-        'Shift' + 'Enter' - begins the value evolution <br>
-        'delete' + 'v' - deletes the value <br>
+        <span class="code-font">enter</span> - begins the value evolution <br>
+        <span class="code-font">delete</span> + <span class="code-font">v</span> - deletes the existing value <br>
 
       </p>
 
@@ -66,6 +67,7 @@ export default {
   }
 }
 </script>
+
 <style lang='stylus'>
 @import "./shared.styl";
 
@@ -106,6 +108,18 @@ export default {
     }
   }
 }
+
+/* New style for code-font */
+.code-font {
+  font-family: monospace;
+  background-color: #1e1e1e; /* Dark background */
+  color: #ff6b6b; /* Soft red/pink text */
+  padding: 2px 5px; /* More padding for spacing */
+  border-radius: 6px; /* Rounded edges */
+  font-size: 1em; /* Slightly smaller font */
+  display: inline-block; /* Keeps formatting clean */
+}
+
 .background {
   position: absolute;
   background-color: hsla(215, 30%, 10%, 0.8);

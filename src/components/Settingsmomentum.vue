@@ -198,6 +198,16 @@
           <div class='col center'><input type='number' v-model.lazy='maxY' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
         </div>
       </div> -->
+      <div class='row'>
+        <div class='col'>get Accuracy</div>
+        <div class='col'>
+          <input type="checkbox" v-model="getAccuracy">
+        </div>
+        <div class='col'>
+          <input type="text" v-model="accuracyTime" style="width: 60px;">
+        </div>
+        <div class='col'></div>
+      </div>
     </form>
   </div>
 </template>
@@ -261,16 +271,18 @@ export default {
       minX: 0, minY: 0,
       maxX: 0, maxY: 0,
       selectedPresetFilter: 0,
-      setControl: false,
+      setControl: true,
       inputControlMaxes: "0.1, 0.1",
       selectedControlMaxes: [0.1, 0.1], 
       selectedControlShape: 1,
       selectedControlGoal: true,
-      setDisturbance: false,
+      setDisturbance: true,
       inputDisturbanceMaxes: "0.1, 0.1",
       selectedDisturbanceMaxes: [0.1, 0.1], 
       selectedDisturbanceShape: 1,
       selectedDisturbanceGoal: false,
+      getAccuracy: true,
+      accuracyTime: "0.1",
     };
   },
   watch: {
@@ -419,12 +431,12 @@ export default {
 
        // the following are static (since they are for loading presets)
       this.selectedPresetFilter = 0;
-      this.setControl = false; 
+      this.setControl = true; 
       this.inputControlMaxes = "0.1, 0.1",
       this.selectedControlMaxes = [0.1, 0.1]; 
       this.selectedControlShape = 1; 
       this.selectedControlGoal = true;
-      this.setDisturbance = false; 
+      this.setDisturbance = true; 
       this.inputDisturbanceMaxes = "0.1, 0.1",
       this.selectedDisturbanceMaxes = [0.1, 0.1]; 
       this.selectedDisturbanceShape = 1; 

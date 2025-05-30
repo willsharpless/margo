@@ -233,7 +233,7 @@ export default function drawParticlesProgram_WAS(ctx, texture_type, color_start,
       // WAS: corrected for upper box bds, ~works (defines upper lim to be slightly less than bBox maxX/Y)
       var flr_ix = Math.floor(i / particleStateResolution);
       var x = width * ((i-flr_ix*particleStateResolution) / (particleStateResolution-1)) + minX;
-      var y = -height * (flr_ix / (particleStateResolution-1)) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)            
+      var y = -height * (flr_ix / (particleStateResolution-1)) + ctx.bbox.maxY; // col major? also maxY/minY bug (not mine!)  
       // if (i < 10 || i % 10 == 0 || x == y) {
       //   console.log("i:(", i, "), x,y:(", x, ",", y, ")")
       // }

@@ -19,7 +19,13 @@ module.exports = merge(baseWebpackConfig, {
   devtool: '#source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': config.dev.env
+      'process.env': {
+        ...config.dev.env,
+        VITE_MY_INT_ARG: JSON.stringify(process.env.VITE_MY_INT_ARG || '1'),
+        VITE_PRESET: JSON.stringify(
+          process.env.VITE_PRESET  || 'default'
+        )
+      }
     }),
     // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
     new webpack.HotModuleReplacementPlugin(),

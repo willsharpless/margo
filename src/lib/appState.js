@@ -24,8 +24,9 @@ var qs = queryState({}, {
 });
 
 var currentState = qs.get();
-
-// Some good ones, TODO WAS make presets
+const preset = process.env.VITE_PRESET
+             || qs.get('preset')
+             || 'default';
 
 // var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
 //   v.y = s.y * s.y - s.x * s.x;`);
@@ -42,10 +43,36 @@ var currentState = qs.get();
 // v.x = sin(2. * s.y);
 // v.y = cos(2. * (s.x - 3.141592/4.));
 
-var defaultVectorFieldCode = wrapVectorField(`v.x = 2. * s.x * s.y;
-  v.y = s.y * s.y - s.x * s.x;`);
+let defaultVectorFieldCode;
+let defaultBoundaryConditionCode;
 
-var defaultBoundaryConditionCode = presetBoundaryCondition();
+switch (preset) {
+  case 'wide':
+    defaultVectorFieldCode = wrapVectorField(`
+      // a “wide” spreading field
+      v.x = -4. * s.x;
+      v.y = -4. * s.y;
+    `);
+    defaultBoundaryConditionCode = presetBoundaryCondition(/* args for wide */);
+    break;
+
+  case 'spiral':
+    defaultVectorFieldCode = wrapVectorField(`
+      // a “spiral” momentum eqn
+      v.x = 4. *-s.y;
+      v.y = 4. * s.x;
+    `);
+    defaultBoundaryConditionCode = presetBoundaryCondition(/* args for spiral */);
+    break;
+
+  default:
+    // fallback to your original defaults
+    defaultVectorFieldCode = wrapVectorField(`
+      v.x = 2. * s.x * s.y;
+      v.y =   s.y * s.y - s.x * s.x;
+    `);
+    defaultBoundaryConditionCode = presetBoundaryCondition();
+}
 
 var defaultValueCode = presetHamiltonian() + presetValueFilter(3, true);
 
@@ -76,6 +103,8 @@ let settingsmomentumPanel = {
 let settingsshapePanel = {
   collapsed: true,
 };
+
+
 
 export default {
   settingsPanel,

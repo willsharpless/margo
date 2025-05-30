@@ -4,12 +4,15 @@
   "description": "an interactive level-set solver for planar systems and differential games",
   "author": "Will Sharpless",
   "private": true,
+
   "scripts": {
-    "dev": "node build/dev-server.js",
-    "start": "node build/dev-server.js",
-    "build": "node build/build.js",
-    "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js",
-    "test": "npm run unit"
+    "dev":       "cross-env VITE_PRESET=default  node build/dev-server.js",
+    "dev:wide":  "cross-env VITE_PRESET=wide     node build/dev-server.js",
+    "dev:spiral":"cross-env VITE_PRESET=spiral  node build/dev-server.js",
+    "start":     "npm run dev",
+    "build":     "node build/build.js",
+    "unit":      "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js",
+    "test":      "npm run unit"
   },
   "dependencies": {
     "autosize": "^4.0.0",

@@ -8,6 +8,11 @@ import {decodeFloatRGBA} from '../utils/floatPacking';
 import bus from '../bus';
 import frame from 'stylus/lib/stack/frame';
 
+
+const intArg = parseInt(process.env.VITE_MY_INT_ARG);
+console.log("Integer passed from shell:", intArg);
+
+
 const particlePositionShaderCodeBuilder = new UpdatePositionGraph_WAS();
 
 export default function updatePositionProgram_WAS(ctx, texture_type) {
@@ -106,6 +111,47 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
     readTextures.bindTextures(gl, program);
   }
+
+  function logValueTextureToCSV(filename = "value_texture_log.csv") {
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, ctx.framebuffer);
+    var pixelData = new Uint8Array(particleStateResolution * particleStateResolution * 4); // Assuming RGBA
+    gl.readPixels(0, 0, particleStateResolution, particleStateResolution, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
+
+    // Convert to CSV format
+    var csvData = "x,y,value\n";
+
+    var width = ctx.bbox.maxX - ctx.bbox.minX;
+    var height = ctx.bbox.maxY - ctx.bbox.minY;
+
+    for (var k = 0; k < particleStateResolution*particleStateResolution; k++) {
+      var rgba = pixelData.slice(k*4, k*4 + 4)
+      
+      // Decode RGBA to float value
+      var value = decodeFloatRGBA(rgba[0], rgba[1], rgba[2], rgba[3]);
+
+      var flr_ix = Math.floor(k / particleStateResolution);
+      var x = width * ((k-flr_ix*particleStateResolution) / (particleStateResolution-1)) + ctx.bbox.minX;
+      var y = -height * (flr_ix / (particleStateResolution-1)) + ctx.bbox.maxY; 
+
+      // Append to CSV data
+      csvData += `${x},${y},${value}\n`;
+    }
+    
+    // Save to file 
+    saveCSVToFile(csvData, filename);
+}
+
+// Utility function to save CSV
+function saveCSVToFile(data, filename) {
+    var blob = new Blob([data], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 
   function updateParticlesPositions(bc_textures=null) {
     
@@ -212,6 +258,7 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
       }
 
     } else if (texture_type == 2) { // value only uses one texture atm
+
       var writeInfo = writeTextures.get(0);
       util.bindFramebuffer(gl, ctx.framebuffer, writeInfo.texture);
       gl.viewport(0, 0, particleStateResolution, particleStateResolution);
@@ -243,6 +290,12 @@ export default function updatePositionProgram_WAS(ctx, texture_type) {
 
       if (ctx.frame < 5) {
         console.log("PROGRAM", texture_type, "FRAME", ctx.frame, " mid i (after uPP draw)", mid_i_val)
+      }
+
+      if (!Number.isNaN(intArg)) {
+        if (ctx.frame == (intArg)) {     // (intArg) Time Step is 0.0005, so frame * 0.0005 * 2 = time of logging
+          logValueTextureToCSV("value_texture_0.csv");
+        }  
       }
 
       // console.log("frame", ctx.frame)

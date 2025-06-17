@@ -54,7 +54,7 @@ Hence, we define additional textures for (1) the user-defined boundary condition
 
 To compute the value integration, the shaders query the texture for neighboring values to compute the finite differences (upwind), and pull in the user defined vector field, and then solve the HJB PDE's local value for dV/dt with these objects.
 
-It's as simple as that, and to my suprise, remarkably fast.
+All in all, its relatively simple since no extra vectorization is needed (beyond GLSLs native ability), and to my surprise, pretty fast.
 
 ## To come
 

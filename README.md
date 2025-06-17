@@ -2,6 +2,8 @@
 
 is an **interactive software for solving level-set evolutions** (of Hamilton-Jacobi partial differential equations). More simply, this code ''flows'' a given shape.
 
+
+
 Margo was built on [Field Play](https://github.com/anvaka/fieldplay), during which things were added (and broken).
 Many thanks to previous developers for the flow visualization – @anvaka, @mourner, @skeeto – and HJ-solver – @ian-mitchell, @schmrlng – without whom this wouldnt exist.
 
@@ -12,7 +14,7 @@ NOTE (6/2025): there is a browser bug --> refresh once to workaround.
 The level set is a shape that matches the zero-level of a function, called the value or energy. 
 This value evolves based on a momentum, called the Hamiltonian. 
 
-The flow, shape and momentum are **your choice**; *draw or define them*.
+The flow, shape and momentum are **your choice**; *define them*.
 
 We often choose the momentum to match a flow (aka vector-field) which models a dynamic system, e.g. jet flight. 
 Thus, the **shape will move with the flow** *by default* (but can be made to do whatever).
